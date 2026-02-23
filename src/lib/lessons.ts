@@ -3,8 +3,8 @@ export interface LessonContent {
   type: "article" | "exercise" | "quiz";
   duration: string;
   xp: number;
-  content: string;   // markdown-like text rendered by the lesson page
-  code: string;      // initial editor code
+  content: string; // markdown-like text rendered by the lesson page
+  code: string; // initial editor code
   language: string;
   filename: string;
   objectives: string[];
@@ -66,39 +66,165 @@ const JS_CURRICULUM: TrackCurriculum = {
     {
       title: "Getting Started",
       lessons: [
-        { slug: "lesson-1", title: "Introduction & Setup",      type: "article",   duration: "8m",  isLocked: false, xp: 30  },
-        { slug: "lesson-2", title: "Variables & Data Types",    type: "exercise",  duration: "14m", isLocked: false, xp: 50  },
-        { slug: "lesson-3", title: "Operators & Expressions",   type: "exercise",  duration: "12m", isLocked: false, xp: 50  },
-        { slug: "lesson-4", title: "Control Flow",              type: "exercise",  duration: "16m", isLocked: false, xp: 60  },
-        { slug: "lesson-5", title: "Functions Deep Dive",       type: "exercise",  duration: "20m", isLocked: false, xp: 80  },
+        {
+          slug: "lesson-1",
+          title: "Introduction & Setup",
+          type: "article",
+          duration: "8m",
+          isLocked: false,
+          xp: 30,
+        },
+        {
+          slug: "lesson-2",
+          title: "Variables & Data Types",
+          type: "exercise",
+          duration: "14m",
+          isLocked: false,
+          xp: 50,
+        },
+        {
+          slug: "lesson-3",
+          title: "Operators & Expressions",
+          type: "exercise",
+          duration: "12m",
+          isLocked: false,
+          xp: 50,
+        },
+        {
+          slug: "lesson-4",
+          title: "Control Flow",
+          type: "exercise",
+          duration: "16m",
+          isLocked: false,
+          xp: 60,
+        },
+        {
+          slug: "lesson-5",
+          title: "Functions Deep Dive",
+          type: "exercise",
+          duration: "20m",
+          isLocked: false,
+          xp: 80,
+        },
       ],
     },
     {
       title: "Core JavaScript",
       lessons: [
-        { slug: "lesson-6",  title: "Arrays & Iterators",       type: "exercise",  duration: "22m", isLocked: true, xp: 80  },
-        { slug: "lesson-7",  title: "Objects & Destructuring",  type: "exercise",  duration: "18m", isLocked: true, xp: 70  },
-        { slug: "lesson-8",  title: "Closures & Scope",         type: "article",   duration: "16m", isLocked: true, xp: 60  },
-        { slug: "lesson-9",  title: "Prototype & Classes",      type: "exercise",  duration: "24m", isLocked: true, xp: 90  },
-        { slug: "lesson-10", title: "Error Handling",           type: "exercise",  duration: "14m", isLocked: true, xp: 60  },
+        {
+          slug: "lesson-6",
+          title: "Arrays & Iterators",
+          type: "exercise",
+          duration: "22m",
+          isLocked: true,
+          xp: 80,
+        },
+        {
+          slug: "lesson-7",
+          title: "Objects & Destructuring",
+          type: "exercise",
+          duration: "18m",
+          isLocked: true,
+          xp: 70,
+        },
+        {
+          slug: "lesson-8",
+          title: "Closures & Scope",
+          type: "article",
+          duration: "16m",
+          isLocked: true,
+          xp: 60,
+        },
+        {
+          slug: "lesson-9",
+          title: "Prototype & Classes",
+          type: "exercise",
+          duration: "24m",
+          isLocked: true,
+          xp: 90,
+        },
+        {
+          slug: "lesson-10",
+          title: "Error Handling",
+          type: "exercise",
+          duration: "14m",
+          isLocked: true,
+          xp: 60,
+        },
       ],
     },
     {
       title: "Async JavaScript",
       lessons: [
-        { slug: "lesson-11", title: "Callbacks & Hell",         type: "article",   duration: "14m", isLocked: true, xp: 50  },
-        { slug: "lesson-12", title: "Promises",                 type: "exercise",  duration: "20m", isLocked: true, xp: 80  },
-        { slug: "lesson-13", title: "async / await",            type: "exercise",  duration: "22m", isLocked: true, xp: 90  },
-        { slug: "lesson-14", title: "Fetch API & REST",         type: "exercise",  duration: "26m", isLocked: true, xp: 100 },
+        {
+          slug: "lesson-11",
+          title: "Callbacks & Hell",
+          type: "article",
+          duration: "14m",
+          isLocked: true,
+          xp: 50,
+        },
+        {
+          slug: "lesson-12",
+          title: "Promises",
+          type: "exercise",
+          duration: "20m",
+          isLocked: true,
+          xp: 80,
+        },
+        {
+          slug: "lesson-13",
+          title: "async / await",
+          type: "exercise",
+          duration: "22m",
+          isLocked: true,
+          xp: 90,
+        },
+        {
+          slug: "lesson-14",
+          title: "Fetch API & REST",
+          type: "exercise",
+          duration: "26m",
+          isLocked: true,
+          xp: 100,
+        },
       ],
     },
     {
       title: "Modern Patterns",
       lessons: [
-        { slug: "lesson-15", title: "ES2024 Features",          type: "article",   duration: "18m", isLocked: true, xp: 70 },
-        { slug: "lesson-16", title: "Functional Programming",   type: "exercise",  duration: "22m", isLocked: true, xp: 90 },
-        { slug: "lesson-17", title: "Design Patterns",          type: "article",   duration: "20m", isLocked: true, xp: 80 },
-        { slug: "lesson-18", title: "Final Project",            type: "exercise",  duration: "45m", isLocked: true, xp: 200 },
+        {
+          slug: "lesson-15",
+          title: "ES2024 Features",
+          type: "article",
+          duration: "18m",
+          isLocked: true,
+          xp: 70,
+        },
+        {
+          slug: "lesson-16",
+          title: "Functional Programming",
+          type: "exercise",
+          duration: "22m",
+          isLocked: true,
+          xp: 90,
+        },
+        {
+          slug: "lesson-17",
+          title: "Design Patterns",
+          type: "article",
+          duration: "20m",
+          isLocked: true,
+          xp: 80,
+        },
+        {
+          slug: "lesson-18",
+          title: "Final Project",
+          type: "exercise",
+          duration: "45m",
+          isLocked: true,
+          xp: 200,
+        },
       ],
     },
   ],
@@ -742,34 +868,61 @@ export const CURRICULA: Record<string, TrackCurriculum> = {
 };
 
 // Default curriculum generator for tracks without custom content
-function defaultCurriculum(title: string, lessonCount: number): TrackCurriculum {
+function defaultCurriculum(
+  _title: string,
+  lessonCount: number,
+): TrackCurriculum {
   const sectionSize = 5;
   const sectionTitles = [
-    "Getting Started", "Core Concepts", "Intermediate Patterns",
-    "Advanced Topics", "Real-World Projects",
+    "Getting Started",
+    "Core Concepts",
+    "Intermediate Patterns",
+    "Advanced Topics",
+    "Real-World Projects",
   ];
 
   const sections: TrackCurriculum["sections"] = [];
   let lessonIdx = 0;
 
   const genericTitles = [
-    "Introduction & Setup", "Core Concepts", "Data Structures",
-    "Functions & Modules", "Control Flow", "Object Orientation",
-    "Error Handling", "Async Patterns", "Testing", "Performance",
-    "Security Basics", "Deployment", "Project Setup", "Building Features",
-    "Authentication", "Database Integration", "API Design", "Final Project",
+    "Introduction & Setup",
+    "Core Concepts",
+    "Data Structures",
+    "Functions & Modules",
+    "Control Flow",
+    "Object Orientation",
+    "Error Handling",
+    "Async Patterns",
+    "Testing",
+    "Performance",
+    "Security Basics",
+    "Deployment",
+    "Project Setup",
+    "Building Features",
+    "Authentication",
+    "Database Integration",
+    "API Design",
+    "Final Project",
   ];
 
   for (let s = 0; s < sectionTitles.length && lessonIdx < lessonCount; s++) {
     const lessons = [];
-    for (let l = 0; l < sectionSize && lessonIdx < lessonCount; l++, lessonIdx++) {
+    for (
+      let l = 0;
+      l < sectionSize && lessonIdx < lessonCount;
+      l++, lessonIdx++
+    ) {
       lessons.push({
-        slug:     `lesson-${lessonIdx + 1}`,
-        title:    genericTitles[lessonIdx % genericTitles.length],
-        type:     (lessonIdx % 4 === 3 ? "exercise" : lessonIdx % 7 === 6 ? "quiz" : "article") as "article" | "exercise" | "quiz",
+        slug: `lesson-${lessonIdx + 1}`,
+        title: genericTitles[lessonIdx % genericTitles.length],
+        type: (lessonIdx % 4 === 3
+          ? "exercise"
+          : lessonIdx % 7 === 6
+            ? "quiz"
+            : "article") as "article" | "exercise" | "quiz",
         duration: `${10 + lessonIdx * 2}m`,
         isLocked: lessonIdx > 4,
-        xp:       50 + lessonIdx * 5,
+        xp: 50 + lessonIdx * 5,
       });
     }
     sections.push({ title: sectionTitles[s], lessons });
@@ -778,7 +931,11 @@ function defaultCurriculum(title: string, lessonCount: number): TrackCurriculum 
   return { sections };
 }
 
-export function getCurriculum(slug: string, title: string, lessonCount: number): TrackCurriculum {
+export function getCurriculum(
+  slug: string,
+  title: string,
+  lessonCount: number,
+): TrackCurriculum {
   return CURRICULA[slug] ?? defaultCurriculum(title, Math.min(lessonCount, 18));
 }
 
@@ -786,15 +943,15 @@ export function getCurriculum(slug: string, title: string, lessonCount: number):
 const TRACK_LESSONS: Record<string, Record<string, LessonContent>> = {
   javascript: JS_LESSONS,
   typescript: TS_LESSONS,
-  react:      REACT_LESSONS,
-  python:     PYTHON_LESSONS,
+  react: REACT_LESSONS,
+  python: PYTHON_LESSONS,
 };
 
 export function getLessonContent(
   trackSlug: string,
   lessonSlug: string,
   trackTitle: string,
-  lessonNum: number
+  lessonNum: number,
 ): LessonContent {
   return (
     TRACK_LESSONS[trackSlug]?.[lessonSlug] ??

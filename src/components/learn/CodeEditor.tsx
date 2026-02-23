@@ -38,8 +38,8 @@ function runCode(code: string): { output: string; error: string | null } {
       .replace(/^import\s+.*$/gm, "") // imports
       .replace(/^export\s+/gm, ""); // exports
 
-    // biome-ignore lint/security/noGlobalEval: intentional editor sandbox
     // eslint-disable-next-line no-eval
+    // biome-ignore lint/security/noGlobalEval: intentional editor sandbox
     eval(js);
 
     const output = logs.length > 0 ? logs.join("\n") : "(no output)";
@@ -88,7 +88,7 @@ export function CodeEditor({
       const result = runCode(currentCode);
       if (result.error) {
         setOutput(
-          `${result.output ? result.output + "\n" : ""}❌ ${result.error}`,
+          `${result.output ? `${result.output}\n` : ""}❌ ${result.error}`,
         );
         setStatus("error");
       } else {
@@ -128,6 +128,7 @@ export function CodeEditor({
         <div className="flex items-center gap-1">
           {/* Copy */}
           <button
+            type="button"
             onClick={handleCopy}
             className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-white/8 hover:text-zinc-300"
             title="Copy code"
@@ -141,6 +142,7 @@ export function CodeEditor({
           </button>
           {/* Reset */}
           <button
+            type="button"
             onClick={handleReset}
             className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-white/8 hover:text-zinc-300"
             title="Reset code"
@@ -201,6 +203,7 @@ export function CodeEditor({
               )}
             </div>
             <button
+              type="button"
               onClick={() => setShowOutput(false)}
               className="text-[10px] text-zinc-600 hover:text-zinc-400 transition-colors"
             >
@@ -221,6 +224,7 @@ export function CodeEditor({
       {/* ── Run button ────────────────────────────────────────────── */}
       <div className="shrink-0 border-t border-white/6 p-3">
         <button
+          type="button"
           onClick={handleRun}
           disabled={status === "running"}
           className={cn(

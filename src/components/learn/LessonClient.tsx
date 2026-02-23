@@ -65,28 +65,24 @@ function LessonTypeIcon({
 function renderMarkdown(text: string) {
   return text.split("\n").map((line, i) => {
     if (line.startsWith("## "))
-      // biome-ignore lint/suspicious/noArrayIndexKey: stable markdown line index
       return (
         <h2 key={i} className="mt-7 mb-3 text-xl font-bold text-white">
           {line.slice(3)}
         </h2>
       );
     if (line.startsWith("### "))
-      // biome-ignore lint/suspicious/noArrayIndexKey: stable markdown line index
       return (
         <h3 key={i} className="mt-5 mb-2 text-base font-semibold text-zinc-200">
           {line.slice(4)}
         </h3>
       );
     if (line.startsWith("- ") || line.startsWith("* "))
-      // biome-ignore lint/suspicious/noArrayIndexKey: stable markdown line index
       return (
         <li key={i} className="ml-5 list-disc text-sm text-zinc-400 leading-7">
           {renderInline(line.slice(2))}
         </li>
       );
     if (line.startsWith("> "))
-      // biome-ignore lint/suspicious/noArrayIndexKey: stable markdown line index
       return (
         <blockquote
           key={i}
@@ -97,9 +93,7 @@ function renderMarkdown(text: string) {
       );
     // inline code block line
     if (line.startsWith("```") || line.trim() === "```") return null;
-    // biome-ignore lint/suspicious/noArrayIndexKey: stable markdown line index
     if (!line.trim()) return <br key={i} />;
-    // biome-ignore lint/suspicious/noArrayIndexKey: stable markdown line index
     return (
       <p key={i} className="text-sm leading-7 text-zinc-400">
         {renderInline(line)}
@@ -113,7 +107,6 @@ function renderInline(text: string): React.ReactNode {
   // Code: `text`
   const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*)/g);
   return parts.map((part, i) => {
-    // biome-ignore lint/suspicious/noArrayIndexKey: stable inline token index
     if (part.startsWith("`") && part.endsWith("`"))
       return (
         <code
@@ -123,7 +116,6 @@ function renderInline(text: string): React.ReactNode {
           {part.slice(1, -1)}
         </code>
       );
-    // biome-ignore lint/suspicious/noArrayIndexKey: stable inline token index
     if (part.startsWith("**") && part.endsWith("**"))
       return (
         <strong key={i} className="font-semibold text-white">

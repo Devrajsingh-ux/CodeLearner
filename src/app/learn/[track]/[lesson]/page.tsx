@@ -1,8 +1,8 @@
-import { notFound } from "next/navigation";
-import { tracks } from "@/data/courses";
-import { getLessonContent, getCurriculum } from "@/lib/lessons";
-import { LessonClient } from "@/components/learn/LessonClient";
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { LessonClient } from "@/components/learn/LessonClient";
+import { tracks } from "@/data/courses";
+import { getCurriculum, getLessonContent } from "@/lib/lessons";
 
 interface Props {
   params: Promise<{ track: string; lesson: string }>;
@@ -23,7 +23,10 @@ export default async function LessonPage({ params }: Props) {
 
   const num = Number(lessonSlug.replace("lesson-", ""));
   const curriculum = getCurriculum(slug, track.title, track.lessonsCount);
-  const totalLessons = curriculum.sections.reduce((a, s) => a + s.lessons.length, 0);
+  const totalLessons = curriculum.sections.reduce(
+    (a, s) => a + s.lessons.length,
+    0,
+  );
   const lessonData = getLessonContent(slug, lessonSlug, track.title, num);
 
   const prevSlug = num > 1 ? `lesson-${num - 1}` : null;

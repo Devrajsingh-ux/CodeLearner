@@ -1,27 +1,36 @@
-import { notFound } from "next/navigation";
-import Link from "next/link";
 import {
-  ArrowLeft, Star, Users, Clock, BookOpen, Lock, Play,
-  CheckCircle2, ChevronRight, Zap, Award, Code2, FileText,
-  HelpCircle,
+  ArrowLeft,
+  Award,
+  BookOpen,
+  CheckCircle2,
+  ChevronRight,
+  Clock,
+  Code2,
+  Lock,
+  Play,
+  Star,
+  Users,
+  Zap,
 } from "lucide-react";
-import { TechIcon, getTechColor } from "@/components/ui/TechIcon";
-import { tracks } from "@/data/courses";
-import { Badge } from "@/components/ui/Badge";
-import { formatNumber } from "@/lib/utils";
-import { getCurriculum } from "@/lib/lessons";
 import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Badge } from "@/components/ui/Badge";
+import { getTechColor, TechIcon } from "@/components/ui/TechIcon";
+import { tracks } from "@/data/courses";
+import { getCurriculum } from "@/lib/lessons";
+import { formatNumber } from "@/lib/utils";
 
-const TYPE_ICON_MAP: Record<string, string> = {
-  article:  "FileText",
+const _TYPE_ICON_MAP: Record<string, string> = {
+  article: "FileText",
   exercise: "Code2",
-  quiz:     "HelpCircle",
+  quiz: "HelpCircle",
 };
 
-const TYPE_COLOR: Record<string, string> = {
-  article:  "text-sky-400",
+const _TYPE_COLOR: Record<string, string> = {
+  article: "text-sky-400",
   exercise: "text-violet-400",
-  quiz:     "text-amber-400",
+  quiz: "text-amber-400",
 };
 
 interface Props {
@@ -43,20 +52,29 @@ export default async function TrackPage({ params }: Props) {
   const track = tracks.find((t) => t.slug === slug);
   if (!track) notFound();
 
-  const techColor  = getTechColor(slug);
+  const techColor = getTechColor(slug);
   const curriculum = getCurriculum(slug, track.title, track.lessonsCount);
-  const totalLessons = curriculum.sections.reduce((acc, s) => acc + s.lessons.length, 0);
-  const totalXP      = curriculum.sections.reduce(
-    (acc, s) => acc + s.lessons.reduce((a, l) => a + l.xp, 0), 0
+  const totalLessons = curriculum.sections.reduce(
+    (acc, s) => acc + s.lessons.length,
+    0,
+  );
+  const totalXP = curriculum.sections.reduce(
+    (acc, s) => acc + s.lessons.reduce((a, l) => a + l.xp, 0),
+    0,
   );
 
   return (
     <div className="min-h-screen bg-zinc-950">
       {/* ── Ambient glow ─────────────────────────────────────────── */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden>
+      <div
+        className="pointer-events-none fixed inset-0 overflow-hidden"
+        aria-hidden
+      >
         <div
           className="absolute -top-32 left-1/3 h-[30rem] w-[30rem] rounded-full opacity-30 blur-3xl"
-          style={{ background: `radial-gradient(circle, ${techColor}30, transparent 70%)` }}
+          style={{
+            background: `radial-gradient(circle, ${techColor}30, transparent 70%)`,
+          }}
         />
       </div>
 
@@ -82,13 +100,16 @@ export default async function TrackPage({ params }: Props) {
                 </div>
                 <Badge
                   variant={
-                    track.difficulty === "Beginner" ? "success" :
-                    track.difficulty === "Advanced"  ? "warning" : "info"
+                    track.difficulty === "Beginner"
+                      ? "success"
+                      : track.difficulty === "Advanced"
+                        ? "warning"
+                        : "info"
                   }
                 >
                   {track.difficulty}
                 </Badge>
-                {track.isNew      && <Badge variant="purple">New</Badge>}
+                {track.isNew && <Badge variant="purple">New</Badge>}
                 {track.isFeatured && (
                   <Badge variant="warning">
                     <Star className="mr-1 h-3 w-3 fill-current" /> Featured
@@ -111,19 +132,27 @@ export default async function TrackPage({ params }: Props) {
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Users className="h-4 w-4" />
-                  <strong className="text-white">{formatNumber(track.enrolledCount)}</strong> enrolled
+                  <strong className="text-white">
+                    {formatNumber(track.enrolledCount)}
+                  </strong>{" "}
+                  enrolled
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Clock className="h-4 w-4" />
-                  <strong className="text-white">{track.duration}</strong> content
+                  <strong className="text-white">{track.duration}</strong>{" "}
+                  content
                 </span>
                 <span className="flex items-center gap-1.5">
                   <BookOpen className="h-4 w-4" />
-                  <strong className="text-white">{track.lessonsCount}</strong> lessons
+                  <strong className="text-white">{track.lessonsCount}</strong>{" "}
+                  lessons
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Zap className="h-4 w-4 text-violet-400" />
-                  <strong className="text-white">{formatNumber(totalXP)}</strong> XP
+                  <strong className="text-white">
+                    {formatNumber(totalXP)}
+                  </strong>{" "}
+                  XP
                 </span>
               </div>
 
@@ -145,7 +174,9 @@ export default async function TrackPage({ params }: Props) {
               <div className="sticky top-24 overflow-hidden rounded-2xl border border-white/8 bg-zinc-900">
                 <div
                   className="h-1 w-full"
-                  style={{ background: `linear-gradient(to right, ${techColor}, transparent)` }}
+                  style={{
+                    background: `linear-gradient(to right, ${techColor}, transparent)`,
+                  }}
                 />
                 <div className="p-6">
                   <div className="mb-1 flex items-end gap-1">
@@ -164,11 +195,14 @@ export default async function TrackPage({ params }: Props) {
 
                   <div className="mt-5 space-y-3 text-sm text-zinc-400">
                     {[
-                      { icon: BookOpen,      text: `${track.lessonsCount} structured lessons` },
-                      { icon: Clock,         text: `${track.duration} of content`             },
-                      { icon: Award,         text: "Certificate on completion"                },
-                      { icon: Code2,         text: "In-browser code exercises"                },
-                      { icon: CheckCircle2,  text: "Lifetime access"                          },
+                      {
+                        icon: BookOpen,
+                        text: `${track.lessonsCount} structured lessons`,
+                      },
+                      { icon: Clock, text: `${track.duration} of content` },
+                      { icon: Award, text: "Certificate on completion" },
+                      { icon: Code2, text: "In-browser code exercises" },
+                      { icon: CheckCircle2, text: "Lifetime access" },
                     ].map(({ icon: Icon, text }) => (
                       <div key={text} className="flex items-center gap-2.5">
                         <Icon className="h-4 w-4 shrink-0 text-emerald-400" />
@@ -188,7 +222,8 @@ export default async function TrackPage({ params }: Props) {
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-white">Course Content</h2>
           <p className="mt-1 text-sm text-zinc-500">
-            {curriculum.sections.length} sections · {totalLessons} lessons · {track.duration} total
+            {curriculum.sections.length} sections · {totalLessons} lessons ·{" "}
+            {track.duration} total
           </p>
         </div>
 
@@ -209,8 +244,12 @@ export default async function TrackPage({ params }: Props) {
                     >
                       {sIdx + 1}
                     </div>
-                    <span className="text-sm font-semibold text-white">{section.title}</span>
-                    <span className="text-xs text-zinc-600">{section.lessons.length} lessons</span>
+                    <span className="text-sm font-semibold text-white">
+                      {section.title}
+                    </span>
+                    <span className="text-xs text-zinc-600">
+                      {section.lessons.length} lessons
+                    </span>
                   </div>
                   <ChevronRight className="h-4 w-4 shrink-0 text-zinc-600 transition-transform group-open:rotate-90" />
                 </summary>
@@ -219,16 +258,21 @@ export default async function TrackPage({ params }: Props) {
                 <div className="overflow-hidden rounded-b-2xl border border-t-0 border-white/6">
                   {section.lessons.map((lesson, lIdx) => {
                     const lessonNum = globalOffset + lIdx + 1;
-                    const isFirst   = sIdx === 0 && lIdx === 0;
+                    const isFirst = sIdx === 0 && lIdx === 0;
 
                     return (
                       <div
                         key={lesson.slug}
                         className={[
                           "flex items-center justify-between gap-4 px-5 py-4 transition-colors",
-                          lIdx < section.lessons.length - 1 && "border-b border-white/5",
-                          lesson.isLocked ? "opacity-50" : "hover:bg-white/[0.03]",
-                        ].filter(Boolean).join(" ")}
+                          lIdx < section.lessons.length - 1 &&
+                            "border-b border-white/5",
+                          lesson.isLocked
+                            ? "opacity-50"
+                            : "hover:bg-white/[0.03]",
+                        ]
+                          .filter(Boolean)
+                          .join(" ")}
                       >
                         <div className="flex items-center gap-4 min-w-0">
                           <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/4 text-[11px] font-bold text-zinc-500">
@@ -239,13 +283,18 @@ export default async function TrackPage({ params }: Props) {
                           <span
                             className={[
                               "h-1.5 w-1.5 shrink-0 rounded-full",
-                              lesson.type === "exercise" ? "bg-violet-400" :
-                              lesson.type === "quiz"     ? "bg-amber-400"  : "bg-sky-400",
+                              lesson.type === "exercise"
+                                ? "bg-violet-400"
+                                : lesson.type === "quiz"
+                                  ? "bg-amber-400"
+                                  : "bg-sky-400",
                             ].join(" ")}
                           />
 
                           <div className="min-w-0">
-                            <p className={`truncate text-sm font-medium ${lesson.isLocked ? "text-zinc-500" : "text-white"}`}>
+                            <p
+                              className={`truncate text-sm font-medium ${lesson.isLocked ? "text-zinc-500" : "text-white"}`}
+                            >
                               {lesson.title}
                             </p>
                             <p className="text-[11px] capitalize text-zinc-600">
