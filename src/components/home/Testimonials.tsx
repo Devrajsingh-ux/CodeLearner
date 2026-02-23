@@ -7,7 +7,7 @@ export function Testimonials() {
   return (
     <section
       id="testimonials"
-      className="relative py-28"
+      className="relative py-16 sm:py-24 lg:py-28"
       aria-label="Student testimonials"
     >
       <div
@@ -18,11 +18,11 @@ export function Testimonials() {
       </div>
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto mb-16 max-w-2xl text-center">
+        <div className="mx-auto mb-10 max-w-2xl text-center sm:mb-16">
           <span className="mb-3 inline-block rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1 text-sm font-medium text-emerald-400">
             Student Stories
           </span>
-          <h2 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
+          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
             Real results,{" "}
             <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
               real developers
@@ -33,7 +33,7 @@ export function Testimonials() {
           </p>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {testimonials.map((t) => (
             <Card key={t.id} hover className="flex flex-col gap-4">
               {/* Stars */}

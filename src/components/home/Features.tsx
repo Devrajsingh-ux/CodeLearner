@@ -81,7 +81,7 @@ export function Features() {
   return (
     <section
       id="features"
-      className="relative py-28"
+      className="relative py-16 sm:py-24 lg:py-28"
       aria-label="Platform features"
     >
       {/* Subtle bg glow */}
@@ -91,29 +91,29 @@ export function Features() {
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section header */}
-        <div className="mx-auto mb-16 max-w-2xl text-center">
+        <div className="mx-auto mb-10 max-w-2xl text-center sm:mb-16">
           <span className="mb-3 inline-block rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-1 text-sm font-medium text-violet-400">
             Why CodeLearn?
           </span>
-          <h2 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
+          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
             Everything you need to go{" "}
             <span className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
               pro, fast
             </span>
           </h2>
-          <p className="mt-4 text-lg text-zinc-400">
+          <p className="mt-3 text-base text-zinc-400 sm:mt-4 sm:text-lg">
             We've built the learning environment we wish existed — interactive, structured, and brutally focused on outcomes.
           </p>
         </div>
 
-        {/* Features grid */}
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Features grid — 1 col mobile → 2 sm → 2 md → 4 lg */}
+        <div className="grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
           {features.map(({ icon: Icon, title, description, color, bg }) => (
             <Card key={title} hover className="group">
-              <div className={`mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl ${bg}`}>
+              <div className={`mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl ${bg} sm:mb-4`}>
                 <Icon className={`h-5 w-5 ${color}`} />
               </div>
-              <h3 className="mb-2 font-semibold text-white">{title}</h3>
+              <h3 className="mb-1.5 font-semibold text-white sm:mb-2">{title}</h3>
               <p className="text-sm leading-relaxed text-zinc-500">{description}</p>
             </Card>
           ))}

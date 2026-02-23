@@ -65,7 +65,7 @@ const DAILY_GOALS = [
   { label: "Practice exercise", done: false },
 ];
 
-const WEEK_DAYS = ["M", "T", "W", "T", "F", "S", "S"];
+const WEEK_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 export default function DashboardPage() {
   const { user, isLoading } = useAuth();

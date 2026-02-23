@@ -42,7 +42,7 @@ export function CoursesSection() {
   const meta = CATEGORY_META[activeTab] ?? CATEGORY_META.Featured;
 
   return (
-    <section className="py-24" aria-label="Course catalog">
+    <section className="py-16 sm:py-24" aria-label="Course catalog">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
         {/* ── Section header ─────────────────────────────────────────── */}
@@ -52,7 +52,7 @@ export function CoursesSection() {
               <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
               Course Catalog
             </span>
-            <h2 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
+            <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
               Pick your{" "}
               <span className="bg-gradient-to-r from-cyan-400 to-violet-400 bg-clip-text text-transparent">
                 learning path
@@ -106,7 +106,7 @@ export function CoursesSection() {
         </div>
 
         {/* ── Active category info bar ───────────────────────────────── */}
-        <div className="mb-8 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/6 bg-zinc-900/40 px-5 py-3">
+        <div className="mb-8 flex flex-col gap-3 rounded-xl border border-white/6 bg-zinc-900/40 px-4 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-5">
           <p className="text-sm text-zinc-400">{meta.description}</p>
           <div className="flex items-center gap-5 text-xs text-zinc-500">
             <span className="flex items-center gap-1.5">
