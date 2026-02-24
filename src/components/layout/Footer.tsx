@@ -1,5 +1,5 @@
+﻿import { Code2, Github, Linkedin, Twitter } from "lucide-react";
 import Link from "next/link";
-import { Code2, Github, Twitter, Linkedin } from "lucide-react";
 
 const footerLinks = {
   Learn: [
@@ -10,21 +10,21 @@ const footerLinks = {
     { label: "Python", href: "/learn/python" },
   ],
   Company: [
-    { label: "About", href: "#" },
-    { label: "Blog", href: "#" },
-    { label: "Careers", href: "#" },
-    { label: "Press", href: "#" },
+    { label: "About", href: "/about" },
+    { label: "Blog", href: "/blog" },
+    { label: "Careers", href: "/careers" },
+    { label: "Press", href: "/press" },
   ],
   Support: [
-    { label: "Help Center", href: "#" },
-    { label: "Community", href: "#" },
-    { label: "Contact", href: "#" },
-    { label: "Status", href: "#" },
+    { label: "Help Center", href: "/help" },
+    { label: "Community", href: "/community" },
+    { label: "Contact", href: "/contact" },
+    { label: "Status", href: "/status" },
   ],
   Legal: [
-    { label: "Privacy Policy", href: "#" },
-    { label: "Terms of Service", href: "#" },
-    { label: "Cookie Policy", href: "#" },
+    { label: "Privacy Policy", href: "/privacy" },
+    { label: "Terms of Service", href: "/terms" },
+    { label: "Cookie Policy", href: "/cookies" },
   ],
 };
 
@@ -43,7 +43,7 @@ export function Footer() {
           {/* Brand */}
           <div className="col-span-2">
             <Link href="/" className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-indigo-700">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-violet-600 to-indigo-700">
                 <Code2 className="h-4 w-4 text-white" />
               </span>
               <span className="text-lg font-bold text-white tracking-tight">
@@ -51,7 +51,8 @@ export function Footer() {
               </span>
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-zinc-500">
-              The fastest way to master modern web development. Learn by building real-world projects with expert-crafted courses.
+              The fastest way to master modern web development. Learn by
+              building real-world projects with expert-crafted courses.
             </p>
             <div className="mt-5 flex gap-3">
               {socials.map(({ href, icon: Icon, label }) => (
@@ -72,8 +73,10 @@ export function Footer() {
           {/* Links */}
           {Object.entries(footerLinks).map(([section, links]) => (
             <div key={section}>
-              <h3 className="mb-3 text-sm font-semibold text-white">{section}</h3>
-              <ul className="space-y-2.5" role="list">
+              <h3 className="mb-3 text-sm font-semibold text-white">
+                {section}
+              </h3>
+              <ul className="space-y-2.5">
                 {links.map(({ label, href }) => (
                   <li key={label}>
                     <Link

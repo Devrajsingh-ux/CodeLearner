@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "@/context/AuthContext";
-import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { Navbar } from "@/components/layout/Navbar";
+import { AuthProvider } from "@/context/AuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -56,9 +56,6 @@ export const viewport: Viewport = {
   themeColor: "#09090b",
   colorScheme: "dark",
 };
-
-// Pages that should NOT show the site-wide Navbar/Footer (they have their own or none)
-const BARE_PATHS_PREFIX = ["/learn/", "/dashboard"];
 
 export default function RootLayout({
   children,

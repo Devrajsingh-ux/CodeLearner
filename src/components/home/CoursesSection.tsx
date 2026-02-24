@@ -1,28 +1,67 @@
-"use client";
+﻿"use client";
 
-import { useState, useRef } from "react";
-import Link from "next/link";
 import { ArrowRight, BookOpen, Clock, Users } from "lucide-react";
-import { tracks, CATEGORIES } from "@/data/courses";
-import { CourseCard } from "./CourseCard";
+import Link from "next/link";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { CATEGORIES, tracks } from "@/data/courses";
 import { cn, formatNumber } from "@/lib/utils";
 import type { TrackCategory } from "@/types";
+import { CourseCard } from "./CourseCard";
 
 type Tab = "Featured" | TrackCategory;
 const TABS: Tab[] = ["Featured", ...CATEGORIES];
 
 const CATEGORY_META: Record<string, { emoji: string; description: string }> = {
-  Featured:          { emoji: "⭐", description: "Hand-picked tracks loved by our community — the best place to start." },
-  Languages:         { emoji: "💻", description: "Master JavaScript, Python, Rust, Go, Elixir, and 13 more languages." },
-  Frontend:          { emoji: "🎨", description: "Build stunning UIs with React, Vue, Angular, Svelte, and Tailwind CSS." },
-  Backend:           { emoji: "⚙️", description: "Design robust APIs with Node.js, NestJS, Django, FastAPI, and GraphQL." },
-  "Data & AI":       { emoji: "📊", description: "From SQL & Pandas to production LLMs, RAG pipelines, and deep learning." },
-  Mobile:            { emoji: "📱", description: "Ship beautiful apps to iOS and Android with Flutter, React Native, and Swift." },
-  "DevOps & Cloud":  { emoji: "☁️", description: "Automate, deploy, and scale with Docker, Kubernetes, AWS, and Linux." },
-  Systems:           { emoji: "🏗️", description: "Ace FAANG interviews with DSA and design million-user distributed systems." },
-  "Web3 & Security": { emoji: "🔐", description: "Smart contracts in Solidity, ethical hacking, and full-stack Web3 dApps." },
-  "Game Dev":        { emoji: "🎮", description: "Build 2D/3D games with Unity, Godot 4, and Unreal Engine." },
+  Featured: {
+    emoji: "⭐",
+    description:
+      "Hand-picked tracks loved by our community — the best place to start.",
+  },
+  Languages: {
+    emoji: "💻",
+    description:
+      "Master JavaScript, Python, Rust, Go, Elixir, and 13 more languages.",
+  },
+  Frontend: {
+    emoji: "🎨",
+    description:
+      "Build stunning UIs with React, Vue, Angular, Svelte, and Tailwind CSS.",
+  },
+  Backend: {
+    emoji: "⚙️",
+    description:
+      "Design robust APIs with Node.js, NestJS, Django, FastAPI, and GraphQL.",
+  },
+  "Data & AI": {
+    emoji: "📊",
+    description:
+      "From SQL & Pandas to production LLMs, RAG pipelines, and deep learning.",
+  },
+  Mobile: {
+    emoji: "📱",
+    description:
+      "Ship beautiful apps to iOS and Android with Flutter, React Native, and Swift.",
+  },
+  "DevOps & Cloud": {
+    emoji: "☁️",
+    description:
+      "Automate, deploy, and scale with Docker, Kubernetes, AWS, and Linux.",
+  },
+  Systems: {
+    emoji: "🏗️",
+    description:
+      "Ace FAANG interviews with DSA and design million-user distributed systems.",
+  },
+  "Web3 & Security": {
+    emoji: "🔐",
+    description:
+      "Smart contracts in Solidity, ethical hacking, and full-stack Web3 dApps.",
+  },
+  "Game Dev": {
+    emoji: "🎮",
+    description: "Build 2D/3D games with Unity, Godot 4, and Unreal Engine.",
+  },
 };
 
 export function CoursesSection() {
@@ -44,7 +83,6 @@ export function CoursesSection() {
   return (
     <section className="py-16 sm:py-24" aria-label="Course catalog">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-
         {/* ── Section header ─────────────────────────────────────────── */}
         <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -54,13 +92,17 @@ export function CoursesSection() {
             </span>
             <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
               Pick your{" "}
-              <span className="bg-gradient-to-r from-cyan-400 to-violet-400 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-cyan-400 to-violet-400 bg-clip-text text-transparent">
                 learning path
               </span>
             </h2>
           </div>
           <Link href="/learn" className="shrink-0">
-            <Button variant="outline" size="sm" rightIcon={<ArrowRight className="h-4 w-4" />}>
+            <Button
+              variant="outline"
+              size="sm"
+              rightIcon={<ArrowRight className="h-4 w-4" />}
+            >
               Browse all {tracks.length} courses
             </Button>
           </Link>
@@ -70,7 +112,12 @@ export function CoursesSection() {
         <div
           ref={tabsRef}
           className="mb-6 flex gap-2 overflow-x-auto pb-2"
-          style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" } as React.CSSProperties}
+          style={
+            {
+              scrollbarWidth: "none",
+              WebkitOverflowScrolling: "touch",
+            } as React.CSSProperties
+          }
         >
           {TABS.map((tab) => {
             const isActive = activeTab === tab;
@@ -81,13 +128,14 @@ export function CoursesSection() {
             const { emoji } = CATEGORY_META[tab] ?? { emoji: "📚" };
             return (
               <button
+                type="button"
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={cn(
                   "flex shrink-0 items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all duration-200",
                   isActive
                     ? "border-violet-500 bg-violet-500/15 text-white shadow-lg shadow-violet-500/10"
-                    : "border-white/8 bg-zinc-900/60 text-zinc-400 hover:border-white/16 hover:bg-zinc-900 hover:text-zinc-200"
+                    : "border-white/8 bg-zinc-900/60 text-zinc-400 hover:border-white/16 hover:bg-zinc-900 hover:text-zinc-200",
                 )}
               >
                 <span className="text-base leading-none">{emoji}</span>
@@ -95,7 +143,9 @@ export function CoursesSection() {
                 <span
                   className={cn(
                     "rounded-full px-1.5 py-0.5 text-[11px] font-semibold",
-                    isActive ? "bg-violet-500/30 text-violet-300" : "bg-zinc-800 text-zinc-500"
+                    isActive
+                      ? "bg-violet-500/30 text-violet-300"
+                      : "bg-zinc-800 text-zinc-500",
                   )}
                 >
                   {count}
@@ -111,15 +161,22 @@ export function CoursesSection() {
           <div className="flex items-center gap-5 text-xs text-zinc-500">
             <span className="flex items-center gap-1.5">
               <BookOpen className="h-3.5 w-3.5 text-violet-400" />
-              <span className="text-zinc-300 font-medium">{visible.length}</span> courses
+              <span className="text-zinc-300 font-medium">
+                {visible.length}
+              </span>{" "}
+              courses
             </span>
             <span className="flex items-center gap-1.5">
               <Clock className="h-3.5 w-3.5 text-cyan-400" />
-              <span className="text-zinc-300 font-medium">{totalHours}h</span> content
+              <span className="text-zinc-300 font-medium">{totalHours}h</span>{" "}
+              content
             </span>
             <span className="flex items-center gap-1.5">
               <Users className="h-3.5 w-3.5 text-emerald-400" />
-              <span className="text-zinc-300 font-medium">{formatNumber(totalEnrolled)}</span> enrolled
+              <span className="text-zinc-300 font-medium">
+                {formatNumber(totalEnrolled)}
+              </span>{" "}
+              enrolled
             </span>
           </div>
         </div>
@@ -135,7 +192,9 @@ export function CoursesSection() {
           <div className="flex flex-col items-center py-20 text-center">
             <span className="mb-3 text-4xl">🚧</span>
             <p className="text-zinc-400 font-medium">Coming soon</p>
-            <p className="mt-1 text-sm text-zinc-600">These courses are in production — check back shortly.</p>
+            <p className="mt-1 text-sm text-zinc-600">
+              These courses are in production — check back shortly.
+            </p>
           </div>
         )}
 

@@ -1,3 +1,4 @@
+﻿import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 interface AvatarProps {
@@ -16,18 +17,30 @@ const sizeClasses = {
   xl: "h-16 w-16 text-xl",
 };
 
-export function Avatar({ initials, src, alt, size = "md", className }: AvatarProps) {
+export function Avatar({
+  initials,
+  src,
+  alt,
+  size = "md",
+  className,
+}: AvatarProps) {
   return (
     <div
       className={cn(
         "relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full",
-        "bg-gradient-to-br from-violet-600 to-indigo-700 font-semibold text-white ring-2 ring-white/10",
+        "bg-linear-to-br from-violet-600 to-indigo-700 font-semibold text-white ring-2 ring-white/10",
         sizeClasses[size],
-        className
+        className,
       )}
     >
       {src ? (
-        <img src={src} alt={alt ?? initials ?? "avatar"} className="h-full w-full object-cover" />
+        <Image
+          src={src}
+          alt={alt ?? initials ?? "avatar"}
+          fill
+          sizes="64px"
+          className="object-cover"
+        />
       ) : (
         <span>{initials ?? "?"}</span>
       )}

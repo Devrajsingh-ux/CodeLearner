@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+﻿import { cn } from "@/lib/utils";
 
 interface ProgressBarProps {
   value: number;
@@ -11,10 +11,10 @@ interface ProgressBarProps {
 }
 
 const colorClasses = {
-  violet: "bg-gradient-to-r from-violet-500 to-indigo-500",
-  cyan: "bg-gradient-to-r from-cyan-500 to-blue-500",
-  emerald: "bg-gradient-to-r from-emerald-500 to-teal-500",
-  amber: "bg-gradient-to-r from-amber-500 to-orange-500",
+  violet: "bg-linear-to-r from-violet-500 to-indigo-500",
+  cyan: "bg-linear-to-r from-cyan-500 to-blue-500",
+  emerald: "bg-linear-to-r from-emerald-500 to-teal-500",
+  amber: "bg-linear-to-r from-amber-500 to-orange-500",
 };
 
 const sizeClasses = {
@@ -45,7 +45,7 @@ export function ProgressBar({
       <div
         className={cn(
           "w-full overflow-hidden rounded-full bg-white/8",
-          sizeClasses[size]
+          sizeClasses[size],
         )}
         role="progressbar"
         aria-valuenow={Math.round(pct)}
@@ -55,7 +55,7 @@ export function ProgressBar({
         <div
           className={cn(
             "h-full rounded-full transition-all duration-500 ease-out",
-            colorClasses[color]
+            colorClasses[color],
           )}
           style={{ width: `${pct}%` }}
         />

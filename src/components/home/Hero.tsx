@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 
-import Link from "next/link";
 import { ArrowRight, Play, Star } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { codeSnippet } from "@/data/courses";
 
@@ -13,9 +13,9 @@ export function Hero() {
     >
       {/* Background glows */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-32 -top-32 h-[400px] w-[400px] rounded-full bg-violet-600/12 blur-3xl sm:-left-64 sm:-top-64 sm:h-[700px] sm:w-[700px]" />
-        <div className="absolute -right-32 top-1/3 h-[400px] w-[400px] rounded-full bg-indigo-600/10 blur-3xl sm:-right-64 sm:h-[600px] sm:w-[600px]" />
-        <div className="absolute bottom-0 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-cyan-600/5 blur-3xl sm:h-[400px] sm:w-[400px]" />
+        <div className="absolute -left-32 -top-32 h-100 w-100 rounded-full bg-violet-600/12 blur-3xl sm:-left-64 sm:-top-64 sm:h-175 sm:w-175" />
+        <div className="absolute -right-32 top-1/3 h-100 w-100 rounded-full bg-indigo-600/10 blur-3xl sm:-right-64 sm:h-150 sm:w-150" />
+        <div className="absolute bottom-0 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-cyan-600/5 blur-3xl sm:h-100 sm:w-100" />
         <div
           className="absolute inset-0 opacity-[0.025]"
           style={{
@@ -28,7 +28,6 @@ export function Hero() {
 
       <div className="relative mx-auto w-full max-w-7xl px-4 pb-16 pt-12 sm:px-6 sm:pb-20 sm:pt-16 lg:px-8">
         <div className="grid items-center gap-10 sm:gap-14 lg:grid-cols-2 lg:gap-16">
-
           {/* ── Text column ── */}
           <div className="text-center lg:text-left">
             {/* Pill badge */}
@@ -40,13 +39,15 @@ export function Hero() {
             <h1 className="text-4xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
               Master Coding.
               <br />
-              <span className="bg-gradient-to-r from-violet-400 via-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-violet-400 via-indigo-400 to-cyan-400 bg-clip-text text-transparent">
                 Build the Future.
               </span>
             </h1>
 
             <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-zinc-400 sm:mt-6 sm:text-lg lg:mx-0">
-              Expert-crafted courses, real-world projects, and an interactive code editor — everything you need to go from beginner to production-ready developer.
+              Expert-crafted courses, real-world projects, and an interactive
+              code editor — everything you need to go from beginner to
+              production-ready developer.
             </p>
 
             {/* Social proof */}
@@ -55,7 +56,7 @@ export function Hero() {
                 {["AC", "BK", "CM", "DW", "EL"].map((init) => (
                   <div
                     key={init}
-                    className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-zinc-950 bg-gradient-to-br from-violet-600 to-indigo-700 text-[10px] font-bold text-white sm:h-8 sm:w-8 sm:text-xs"
+                    className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-zinc-950 bg-linear-to-br from-violet-600 to-indigo-700 text-[10px] font-bold text-white sm:h-8 sm:w-8 sm:text-xs"
                   >
                     {init}
                   </div>
@@ -63,23 +64,37 @@ export function Hero() {
               </div>
               <div className="text-sm text-zinc-400">
                 <div className="flex items-center gap-0.5 text-amber-400">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-3 w-3 fill-current sm:h-3.5 sm:w-3.5" />
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <Star
+                      key={n}
+                      className="h-3 w-3 fill-current sm:h-3.5 sm:w-3.5"
+                    />
                   ))}
                 </div>
-                <span className="text-xs sm:text-sm">485k+ learners trust us</span>
+                <span className="text-xs sm:text-sm">
+                  485k+ learners trust us
+                </span>
               </div>
             </div>
 
             {/* CTA buttons — full width on mobile, auto on lg */}
             <div className="mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-4 lg:justify-start">
               <Link href="/register" className="sm:w-auto">
-                <Button size="lg" rightIcon={<ArrowRight className="h-5 w-5" />} className="w-full sm:w-auto">
+                <Button
+                  size="lg"
+                  rightIcon={<ArrowRight className="h-5 w-5" />}
+                  className="w-full sm:w-auto"
+                >
                   Start learning free
                 </Button>
               </Link>
               <Link href="/learn" className="sm:w-auto">
-                <Button variant="secondary" size="lg" leftIcon={<Play className="h-4 w-4" />} className="w-full sm:w-auto">
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  leftIcon={<Play className="h-4 w-4" />}
+                  className="w-full sm:w-auto"
+                >
                   Browse courses
                 </Button>
               </Link>
@@ -88,7 +103,7 @@ export function Hero() {
 
           {/* ── Code editor window — hidden on xs, shown sm+ ── */}
           <div className="relative hidden sm:block">
-            <div className="absolute -inset-3 rounded-3xl bg-gradient-to-r from-violet-600/20 to-indigo-600/20 blur-2xl sm:-inset-4" />
+            <div className="absolute -inset-3 rounded-3xl bg-linear-to-r from-violet-600/20 to-indigo-600/20 blur-2xl sm:-inset-4" />
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-zinc-900 shadow-2xl shadow-black/60">
               {/* Window chrome */}
               <div className="flex items-center justify-between border-b border-white/8 bg-zinc-950/50 px-3 py-2.5 sm:px-4 sm:py-3">
@@ -97,7 +112,9 @@ export function Hero() {
                   <span className="h-2.5 w-2.5 rounded-full bg-amber-500/80 sm:h-3 sm:w-3" />
                   <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/80 sm:h-3 sm:w-3" />
                 </div>
-                <span className="font-mono text-[11px] text-zinc-500 sm:text-xs">lesson-01.ts</span>
+                <span className="font-mono text-[11px] text-zinc-500 sm:text-xs">
+                  lesson-01.ts
+                </span>
                 <span className="rounded-md bg-violet-500/20 px-1.5 py-0.5 text-[11px] font-medium text-violet-400 sm:px-2 sm:text-xs">
                   TypeScript
                 </span>
@@ -126,11 +143,16 @@ export function Hero() {
             Trusted by developers at
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 opacity-25 grayscale sm:gap-8">
-            {["Google", "Meta", "Amazon", "Microsoft", "Stripe", "Vercel"].map((co) => (
-              <span key={co} className="text-sm font-bold tracking-tight text-zinc-400 sm:text-lg">
-                {co}
-              </span>
-            ))}
+            {["Google", "Meta", "Amazon", "Microsoft", "Stripe", "Vercel"].map(
+              (co) => (
+                <span
+                  key={co}
+                  className="text-sm font-bold tracking-tight text-zinc-400 sm:text-lg"
+                >
+                  {co}
+                </span>
+              ),
+            )}
           </div>
         </div>
       </div>

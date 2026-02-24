@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   ArrowLeft,
@@ -196,23 +196,19 @@ export function LessonClient({
         {/* Right: nav + curriculum toggle */}
         <div className="flex shrink-0 items-center gap-1.5">
           {prevSlug && (
-            <Link href={`/learn/${trackSlug}/${prevSlug}`}>
-              <button
-                type="button"
-                className="flex h-8 items-center gap-1 rounded-lg border border-white/8 px-2.5 text-xs text-zinc-400 transition-colors hover:text-white"
-              >
-                <ArrowLeft className="h-3.5 w-3.5" /> Prev
-              </button>
+            <Link
+              href={`/learn/${trackSlug}/${prevSlug}`}
+              className="flex h-8 items-center gap-1 rounded-lg border border-white/8 px-2.5 text-xs text-zinc-400 transition-colors hover:text-white"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" /> Prev
             </Link>
           )}
           {nextSlug && (
-            <Link href={`/learn/${trackSlug}/${nextSlug}`}>
-              <button
-                type="button"
-                className="flex h-8 items-center gap-1 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 px-2.5 text-xs font-medium text-white shadow-sm shadow-violet-500/30 transition-all hover:from-violet-500 hover:to-indigo-500"
-              >
-                Next <ArrowRight className="h-3.5 w-3.5" />
-              </button>
+            <Link
+              href={`/learn/${trackSlug}/${nextSlug}`}
+              className="flex h-8 items-center gap-1 rounded-lg bg-linear-to-r from-violet-600 to-indigo-600 px-2.5 text-xs font-medium text-white shadow-sm shadow-violet-500/30 transition-all hover:from-violet-500 hover:to-indigo-500"
+            >
+              Next <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           )}
           <button
@@ -233,7 +229,7 @@ export function LessonClient({
       {/* ── Progress bar ─────────────────────────────────────────── */}
       <div className="h-0.5 w-full bg-white/5 shrink-0">
         <div
-          className="h-full bg-gradient-to-r from-violet-600 to-indigo-500 transition-all duration-500"
+          className="h-full bg-linear-to-r from-violet-600 to-indigo-500 transition-all duration-500"
           style={{ width: `${(lessonNum / totalLessons) * 100}%` }}
         />
       </div>
@@ -303,7 +299,7 @@ export function LessonClient({
 
                 {/* CTA: switch to editor */}
                 {lesson.type === "exercise" && (
-                  <div className="mt-10 rounded-2xl border border-white/6 bg-white/[0.02] p-5 text-center">
+                  <div className="mt-10 rounded-2xl border border-white/6 bg-white/2 p-5 text-center">
                     <Code2 className="mx-auto mb-3 h-8 w-8 text-violet-400" />
                     <p className="mb-4 text-sm text-zinc-400">
                       Ready to practice? Switch to the{" "}
@@ -313,7 +309,7 @@ export function LessonClient({
                     <button
                       type="button"
                       onClick={() => setTab("editor")}
-                      className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-violet-500/20 transition-all hover:from-violet-500 hover:to-indigo-500"
+                      className="inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-violet-600 to-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-violet-500/20 transition-all hover:from-violet-500 hover:to-indigo-500"
                     >
                       <Code2 className="h-4 w-4" /> Open Editor
                     </button>
@@ -336,7 +332,7 @@ export function LessonClient({
                       "flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all",
                       completed
                         ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                        : "bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/20 hover:from-violet-500 hover:to-indigo-500",
+                        : "bg-linear-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/20 hover:from-violet-500 hover:to-indigo-500",
                     )}
                   >
                     <CheckCircle2 className="h-4 w-4" />
@@ -344,13 +340,11 @@ export function LessonClient({
                   </button>
 
                   {nextSlug && !completed && (
-                    <Link href={`/learn/${trackSlug}/${nextSlug}`}>
-                      <button
-                        type="button"
-                        className="flex items-center gap-2 rounded-xl border border-white/8 bg-white/4 px-5 py-2.5 text-sm text-zinc-300 transition-colors hover:bg-white/8"
-                      >
-                        Next Lesson <ArrowRight className="h-4 w-4" />
-                      </button>
+                    <Link
+                      href={`/learn/${trackSlug}/${nextSlug}`}
+                      className="flex items-center gap-2 rounded-xl border border-white/8 bg-white/4 px-5 py-2.5 text-sm text-zinc-300 transition-colors hover:bg-white/8"
+                    >
+                      Next Lesson <ArrowRight className="h-4 w-4" />
                     </Link>
                   )}
                 </div>

@@ -28,7 +28,6 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
-import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -37,11 +36,16 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { TechIcon } from "@/components/ui/TechIcon";
 import { useAuth } from "@/context/AuthContext";
 import { tracks } from "@/data/courses";
-import { cn, formatDate, formatNumber, getInitials } from "@/lib/utils";
+import { cn, formatNumber, getInitials } from "@/lib/utils";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const TABS = ["Profile", "Account", "Notifications", "Privacy & Security"] as const;
+const TABS = [
+  "Profile",
+  "Account",
+  "Notifications",
+  "Privacy & Security",
+] as const;
 type Tab = (typeof TABS)[number];
 
 const AVATAR_GRADIENTS = [
@@ -63,12 +67,42 @@ const MOCK_LEVEL = 6;
 const XP_TO_NEXT = MOCK_LEVEL * MOCK_LEVEL * 100 + 100;
 
 const ACHIEVEMENTS = [
-  { id: "a1", icon: Flame, label: "7-Day Streak", color: "#f59e0b", earned: true },
-  { id: "a2", icon: Trophy, label: "First Course", color: "#8b5cf6", earned: true },
+  {
+    id: "a1",
+    icon: Flame,
+    label: "7-Day Streak",
+    color: "#f59e0b",
+    earned: true,
+  },
+  {
+    id: "a2",
+    icon: Trophy,
+    label: "First Course",
+    color: "#8b5cf6",
+    earned: true,
+  },
   { id: "a3", icon: Zap, label: "Speed Coder", color: "#06b6d4", earned: true },
-  { id: "a4", icon: Shield, label: "100 XP Club", color: "#10b981", earned: true },
-  { id: "a5", icon: Globe, label: "Global Learner", color: "#f43f5e", earned: false },
-  { id: "a6", icon: KeyRound, label: "Problem Solver", color: "#f97316", earned: false },
+  {
+    id: "a4",
+    icon: Shield,
+    label: "100 XP Club",
+    color: "#10b981",
+    earned: true,
+  },
+  {
+    id: "a5",
+    icon: Globe,
+    label: "Global Learner",
+    color: "#f43f5e",
+    earned: false,
+  },
+  {
+    id: "a6",
+    icon: KeyRound,
+    label: "Problem Solver",
+    color: "#f97316",
+    earned: false,
+  },
 ];
 
 // ─── Profile form state types ──────────────────────────────────────────────
@@ -89,7 +123,10 @@ type ProfileAction =
   | { type: "SET_FIELD"; field: keyof ProfileFields; value: string }
   | { type: "RESET"; payload: ProfileFields };
 
-function profileReducer(state: ProfileFields, action: ProfileAction): ProfileFields {
+function profileReducer(
+  state: ProfileFields,
+  action: ProfileAction,
+): ProfileFields {
   switch (action.type) {
     case "SET_FIELD":
       return { ...state, [action.field]: action.value };
@@ -122,7 +159,9 @@ function SectionHeading({
   return (
     <div className="mb-6">
       <h2 className="text-lg font-semibold text-white">{title}</h2>
-      {description && <p className="mt-0.5 text-sm text-zinc-400">{description}</p>}
+      {description && (
+        <p className="mt-0.5 text-sm text-zinc-400">{description}</p>
+      )}
     </div>
   );
 }
@@ -143,12 +182,16 @@ function Toggle({
   return (
     <div className="flex items-start justify-between gap-4 py-4 border-b border-white/6 last:border-0">
       <div className="space-y-0.5">
-        <label htmlFor={id} className="text-sm font-medium text-zinc-200 cursor-pointer">
+        <label
+          htmlFor={id}
+          className="text-sm font-medium text-zinc-200 cursor-pointer"
+        >
           {label}
         </label>
         {description && <p className="text-xs text-zinc-500">{description}</p>}
       </div>
       <button
+        type="button"
         id={id}
         role="switch"
         aria-checked={checked}
@@ -156,13 +199,13 @@ function Toggle({
         className={cn(
           "relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950",
-          checked ? "bg-violet-600" : "bg-white/15"
+          checked ? "bg-violet-600" : "bg-white/15",
         )}
       >
         <span
           className={cn(
             "inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200",
-            checked ? "translate-x-6" : "translate-x-1"
+            checked ? "translate-x-6" : "translate-x-1",
           )}
         />
       </button>
@@ -242,18 +285,23 @@ export default function ProfilePage() {
   const setField = useCallback(
     (field: keyof ProfileFields) => (value: string) =>
       dispatch({ type: "SET_FIELD", field, value }),
-    []
+    [],
   );
 
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileSaved, setProfileSaved] = useState(false);
-  const [profileErrors, setProfileErrors] = useState<Partial<Record<keyof ProfileFields, string>>>({});
+  const [profileErrors, setProfileErrors] = useState<
+    Partial<Record<keyof ProfileFields, string>>
+  >({});
 
   function validateProfile(): boolean {
     const errs: typeof profileErrors = {};
     if (!profile.displayName.trim() || profile.displayName.trim().length < 2)
       errs.displayName = "Display name must be at least 2 characters.";
-    if (!profile.username.trim() || !/^[a-z0-9_.-]{3,20}$/.test(profile.username.toLowerCase()))
+    if (
+      !profile.username.trim() ||
+      !/^[a-z0-9_.-]{3,20}$/.test(profile.username.toLowerCase())
+    )
       errs.username = "Username: 3–20 chars, letters, numbers, _, - or . only.";
     if (profile.bio.length > 200)
       errs.bio = "Bio must be 200 characters or fewer.";
@@ -290,7 +338,8 @@ export default function ProfilePage() {
     e.preventDefault();
     const errs: typeof pwErrors = {};
     if (!currentPw) errs.currentPw = "Enter your current password.";
-    if (newPw.length < 8) errs.newPw = "New password must be at least 8 characters.";
+    if (newPw.length < 8)
+      errs.newPw = "New password must be at least 8 characters.";
     if (newPw !== confirmPw) errs.confirmPw = "Passwords do not match.";
     setPwErrors(errs);
     if (Object.keys(errs).length) return;
@@ -368,8 +417,15 @@ export default function ProfilePage() {
     );
   }
 
-  const enrolledTracks = tracks.filter((t) => ENROLLED_TRACK_IDS.includes(t.id));
-  const xpPercent = Math.min(100, Math.round((MOCK_XP % (XP_TO_NEXT === 0 ? 1 : XP_TO_NEXT)) / (XP_TO_NEXT / 100)));
+  const enrolledTracks = tracks.filter((t) =>
+    ENROLLED_TRACK_IDS.includes(t.id),
+  );
+  const xpPercent = Math.min(
+    100,
+    Math.round(
+      (MOCK_XP % (XP_TO_NEXT === 0 ? 1 : XP_TO_NEXT)) / (XP_TO_NEXT / 100),
+    ),
+  );
 
   return (
     <main className="min-h-screen bg-zinc-950 pb-20 pt-28">
@@ -394,10 +450,11 @@ export default function ProfilePage() {
                 {/* Avatar with upload button */}
                 <div className="relative">
                   <div
+                    role="img"
                     className={cn(
                       "flex h-20 w-20 items-center justify-center rounded-full",
                       "bg-linear-to-br ring-4 ring-zinc-950 text-2xl font-bold text-white shadow-xl",
-                      profile.avatarGradient
+                      profile.avatarGradient,
                     )}
                     aria-label={`Avatar for ${user.name}`}
                   >
@@ -417,13 +474,14 @@ export default function ProfilePage() {
                     type="file"
                     accept="image/png,image/jpeg,image/webp,image/avif"
                     className="hidden"
-                    aria-hidden="true"
                   />
                 </div>
 
                 {/* Name + badge */}
                 <div className="mb-1">
-                  <h1 className="text-xl font-bold text-white">{profile.displayName || user.name}</h1>
+                  <h1 className="text-xl font-bold text-white">
+                    {profile.displayName || user.name}
+                  </h1>
                   <p className="text-sm text-zinc-400">@{profile.username}</p>
                 </div>
               </div>
@@ -431,14 +489,39 @@ export default function ProfilePage() {
               {/* Stats strip */}
               <div className="flex flex-wrap gap-3 sm:mb-1">
                 {[
-                  { label: "XP", value: formatNumber(MOCK_XP), icon: Zap, color: "text-violet-400" },
-                  { label: "Level", value: String(MOCK_LEVEL), icon: Trophy, color: "text-amber-400" },
-                  { label: "Streak", value: `${MOCK_STREAK}d`, icon: Flame, color: "text-orange-400" },
-                  { label: "Courses", value: String(enrolledTracks.length), icon: Shield, color: "text-cyan-400" },
+                  {
+                    label: "XP",
+                    value: formatNumber(MOCK_XP),
+                    icon: Zap,
+                    color: "text-violet-400",
+                  },
+                  {
+                    label: "Level",
+                    value: String(MOCK_LEVEL),
+                    icon: Trophy,
+                    color: "text-amber-400",
+                  },
+                  {
+                    label: "Streak",
+                    value: `${MOCK_STREAK}d`,
+                    icon: Flame,
+                    color: "text-orange-400",
+                  },
+                  {
+                    label: "Courses",
+                    value: String(enrolledTracks.length),
+                    icon: Shield,
+                    color: "text-cyan-400",
+                  },
                 ].map(({ label, value, icon: Icon, color }) => (
-                  <div key={label} className="flex items-center gap-1.5 rounded-xl border border-white/8 bg-white/4 px-3 py-1.5">
+                  <div
+                    key={label}
+                    className="flex items-center gap-1.5 rounded-xl border border-white/8 bg-white/4 px-3 py-1.5"
+                  >
                     <Icon className={cn("h-3.5 w-3.5", color)} />
-                    <span className="text-sm font-semibold text-white">{value}</span>
+                    <span className="text-sm font-semibold text-white">
+                      {value}
+                    </span>
                     <span className="text-xs text-zinc-500">{label}</span>
                   </div>
                 ))}
@@ -448,15 +531,21 @@ export default function ProfilePage() {
             {/* XP Progress to next level */}
             <div className="mt-4">
               <div className="mb-1.5 flex items-center justify-between text-xs text-zinc-500">
-                <span>Level {MOCK_LEVEL} → Level {MOCK_LEVEL + 1}</span>
-                <span>{formatNumber(MOCK_XP)} / {formatNumber(XP_TO_NEXT)} XP</span>
+                <span>
+                  Level {MOCK_LEVEL} → Level {MOCK_LEVEL + 1}
+                </span>
+                <span>
+                  {formatNumber(MOCK_XP)} / {formatNumber(XP_TO_NEXT)} XP
+                </span>
               </div>
               <ProgressBar value={xpPercent} size="sm" color="violet" />
             </div>
 
             {/* Bio */}
             {profile.bio && (
-              <p className="mt-3 text-sm text-zinc-400 leading-relaxed max-w-xl">{profile.bio}</p>
+              <p className="mt-3 text-sm text-zinc-400 leading-relaxed max-w-xl">
+                {profile.bio}
+              </p>
             )}
 
             {/* Meta links */}
@@ -473,7 +562,8 @@ export default function ProfilePage() {
                   rel="noopener noreferrer"
                   className="flex items-center gap-1 text-xs text-violet-400 hover:text-violet-300 transition-colors"
                 >
-                  <Globe className="h-3.5 w-3.5" /> {profile.website.replace(/^https?:\/\//, "")}
+                  <Globe className="h-3.5 w-3.5" />{" "}
+                  {profile.website.replace(/^https?:\/\//, "")}
                 </a>
               )}
               {profile.github && (
@@ -505,7 +595,8 @@ export default function ProfilePage() {
           <div className="mb-3 flex items-center justify-between">
             <p className="text-sm font-semibold text-zinc-200">Achievements</p>
             <Badge variant="purple">
-              {ACHIEVEMENTS.filter((a) => a.earned).length} / {ACHIEVEMENTS.length} earned
+              {ACHIEVEMENTS.filter((a) => a.earned).length} /{" "}
+              {ACHIEVEMENTS.length} earned
             </Badge>
           </div>
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
@@ -517,7 +608,7 @@ export default function ProfilePage() {
                   "flex flex-col items-center gap-1.5 rounded-xl px-2 py-3 text-center transition-all",
                   earned
                     ? "bg-white/6 border border-white/10"
-                    : "bg-white/2 border border-white/5 opacity-40 grayscale"
+                    : "bg-white/2 border border-white/5 opacity-40 grayscale",
                 )}
               >
                 <span
@@ -526,7 +617,9 @@ export default function ProfilePage() {
                 >
                   <Icon className="h-4.5 w-4.5" style={{ color }} />
                 </span>
-                <span className="text-xs font-medium leading-tight text-zinc-300">{label}</span>
+                <span className="text-xs font-medium leading-tight text-zinc-300">
+                  {label}
+                </span>
               </div>
             ))}
           </div>
@@ -541,6 +634,7 @@ export default function ProfilePage() {
           >
             {TABS.map((tab) => (
               <button
+                type="button"
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={cn(
@@ -548,7 +642,7 @@ export default function ProfilePage() {
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500",
                   activeTab === tab
                     ? "bg-violet-500/15 text-violet-400"
-                    : "text-zinc-400 hover:bg-white/6 hover:text-white"
+                    : "text-zinc-400 hover:bg-white/6 hover:text-white",
                 )}
                 aria-current={activeTab === tab ? "page" : undefined}
               >
@@ -559,14 +653,15 @@ export default function ProfilePage() {
                   {tab === "Privacy & Security" && <Lock className="h-4 w-4" />}
                   {tab}
                 </span>
-                {activeTab === tab && <ChevronRight className="hidden h-4 w-4 lg:block" />}
+                {activeTab === tab && (
+                  <ChevronRight className="hidden h-4 w-4 lg:block" />
+                )}
               </button>
             ))}
           </nav>
 
           {/* Panel */}
           <div className="min-w-0 flex-1">
-
             {/* ── Profile tab ───────────────────────────────────────────────── */}
             {activeTab === "Profile" && (
               <form onSubmit={saveProfile} noValidate>
@@ -578,17 +673,26 @@ export default function ProfilePage() {
 
                   {/* Avatar color picker */}
                   <div className="mb-6 space-y-2">
-                    <p className="text-sm font-medium text-zinc-300">Avatar Color</p>
+                    <p className="text-sm font-medium text-zinc-300">
+                      Avatar Color
+                    </p>
                     <div className="flex flex-wrap gap-2">
                       {AVATAR_GRADIENTS.map((g) => (
                         <button
                           key={g}
                           type="button"
-                          onClick={() => dispatch({ type: "SET_FIELD", field: "avatarGradient", value: g })}
+                          onClick={() =>
+                            dispatch({
+                              type: "SET_FIELD",
+                              field: "avatarGradient",
+                              value: g,
+                            })
+                          }
                           className={cn(
                             "h-8 w-8 rounded-full bg-linear-to-br transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950",
                             g,
-                            profile.avatarGradient === g && "ring-2 ring-white ring-offset-2 ring-offset-zinc-950 scale-110"
+                            profile.avatarGradient === g &&
+                              "ring-2 ring-white ring-offset-2 ring-offset-zinc-950 scale-110",
                           )}
                           aria-label={`Select gradient ${g}`}
                           aria-pressed={profile.avatarGradient === g}
@@ -610,16 +714,29 @@ export default function ProfilePage() {
                     <Input
                       label="Username"
                       value={profile.username}
-                      onChange={(e) => setField("username")(e.target.value.toLowerCase().replace(/[^a-z0-9_.\-]/g, ""))}
+                      onChange={(e) =>
+                        setField("username")(
+                          e.target.value
+                            .toLowerCase()
+                            .replace(/[^a-z0-9_.-]/g, ""),
+                        )
+                      }
                       error={profileErrors.username}
                       placeholder="alexdev"
                       autoComplete="username"
-                      leftAddon={<span className="text-xs font-medium text-zinc-500">@</span>}
+                      leftAddon={
+                        <span className="text-xs font-medium text-zinc-500">
+                          @
+                        </span>
+                      }
                     />
                   </div>
 
                   <div className="mt-5">
-                    <label htmlFor="bio" className="block text-sm font-medium text-zinc-300 mb-1.5">
+                    <label
+                      htmlFor="bio"
+                      className="block text-sm font-medium text-zinc-300 mb-1.5"
+                    >
                       Bio
                     </label>
                     <div className="relative">
@@ -633,7 +750,9 @@ export default function ProfilePage() {
                         className={cn(
                           "w-full resize-none rounded-xl border bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-zinc-500",
                           "transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent",
-                          profileErrors.bio ? "border-red-500/60" : "border-white/10 hover:border-white/20"
+                          profileErrors.bio
+                            ? "border-red-500/60"
+                            : "border-white/10 hover:border-white/20",
                         )}
                         aria-describedby="bio-count"
                       />
@@ -641,7 +760,9 @@ export default function ProfilePage() {
                         id="bio-count"
                         className={cn(
                           "absolute bottom-2 right-3 text-xs",
-                          profile.bio.length > 180 ? "text-amber-400" : "text-zinc-600"
+                          profile.bio.length > 180
+                            ? "text-amber-400"
+                            : "text-zinc-600",
                         )}
                         aria-live="polite"
                       >
@@ -649,7 +770,9 @@ export default function ProfilePage() {
                       </span>
                     </div>
                     {profileErrors.bio && (
-                      <p className="mt-1 text-xs text-red-400" role="alert">{profileErrors.bio}</p>
+                      <p className="mt-1 text-xs text-red-400" role="alert">
+                        {profileErrors.bio}
+                      </p>
                     )}
                   </div>
 
@@ -674,7 +797,9 @@ export default function ProfilePage() {
 
                   {/* Social links */}
                   <div className="mt-6 space-y-2">
-                    <p className="text-sm font-medium text-zinc-300">Social Links</p>
+                    <p className="text-sm font-medium text-zinc-300">
+                      Social Links
+                    </p>
                     <div className="grid gap-4 sm:grid-cols-3">
                       <Input
                         label="GitHub"
@@ -702,7 +827,9 @@ export default function ProfilePage() {
 
                   {/* Enrolled courses snapshot */}
                   <div className="mt-6 space-y-3">
-                    <p className="text-sm font-medium text-zinc-300">Enrolled Courses</p>
+                    <p className="text-sm font-medium text-zinc-300">
+                      Enrolled Courses
+                    </p>
                     <div className="space-y-2">
                       {enrolledTracks.map((t) => (
                         <div
@@ -713,7 +840,9 @@ export default function ProfilePage() {
                             <TechIcon slug={t.slug} size={28} />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-medium text-zinc-200">{t.title}</p>
+                            <p className="truncate text-sm font-medium text-zinc-200">
+                              {t.title}
+                            </p>
                             <ProgressBar
                               value={MOCK_PROGRESS[t.id] ?? 0}
                               size="sm"
@@ -722,7 +851,13 @@ export default function ProfilePage() {
                               className="mt-1"
                             />
                           </div>
-                          <Badge variant={MOCK_PROGRESS[t.id] === 100 ? "success" : "default"}>
+                          <Badge
+                            variant={
+                              MOCK_PROGRESS[t.id] === 100
+                                ? "success"
+                                : "default"
+                            }
+                          >
                             {MOCK_PROGRESS[t.id] ?? 0}%
                           </Badge>
                         </div>
@@ -733,9 +868,9 @@ export default function ProfilePage() {
                   {/* Save button */}
                   <div className="mt-8 flex items-center justify-end gap-3">
                     {profileSaved && (
-                      <span className="flex items-center gap-1.5 text-sm text-emerald-400" role="status" aria-live="polite">
+                      <output className="flex items-center gap-1.5 text-sm text-emerald-400">
                         <Check className="h-4 w-4" /> Profile saved
-                      </span>
+                      </output>
                     )}
                     <Button
                       type="submit"
@@ -763,16 +898,19 @@ export default function ProfilePage() {
                       label="Email"
                       type="email"
                       value={emailValue}
-                      onChange={(e) => { setEmailValue(e.target.value); setEmailError(""); }}
+                      onChange={(e) => {
+                        setEmailValue(e.target.value);
+                        setEmailError("");
+                      }}
                       error={emailError}
                       autoComplete="email"
                       leftAddon={<Mail className="h-4 w-4" />}
                     />
                     <div className="flex items-center justify-end gap-3">
                       {emailSaved && (
-                        <span className="flex items-center gap-1.5 text-sm text-emerald-400" role="status" aria-live="polite">
+                        <output className="flex items-center gap-1.5 text-sm text-emerald-400">
                           <Check className="h-4 w-4" /> Email updated
-                        </span>
+                        </output>
                       )}
                       <Button type="submit" isLoading={emailSaving} size="sm">
                         {emailSaving ? "Saving…" : "Update email"}
@@ -787,7 +925,11 @@ export default function ProfilePage() {
                     title="Change Password"
                     description="Use a strong password with at least 8 characters, including letters and numbers."
                   />
-                  <form onSubmit={changePassword} noValidate className="space-y-4">
+                  <form
+                    onSubmit={changePassword}
+                    noValidate
+                    className="space-y-4"
+                  >
                     <PasswordField
                       id="current-password"
                       label="Current Password"
@@ -811,16 +953,19 @@ export default function ProfilePage() {
                       error={pwErrors.confirmPw}
                     />
                     {/* Strength indicator */}
-                    {newPw.length > 0 && (
-                      <PasswordStrength password={newPw} />
-                    )}
+                    {newPw.length > 0 && <PasswordStrength password={newPw} />}
                     <div className="flex items-center justify-end gap-3 pt-1">
                       {pwSaved && (
-                        <span className="flex items-center gap-1.5 text-sm text-emerald-400" role="status" aria-live="polite">
+                        <output className="flex items-center gap-1.5 text-sm text-emerald-400">
                           <Check className="h-4 w-4" /> Password updated
-                        </span>
+                        </output>
                       )}
-                      <Button type="submit" isLoading={pwSaving} size="sm" leftIcon={<KeyRound className="h-4 w-4" />}>
+                      <Button
+                        type="submit"
+                        isLoading={pwSaving}
+                        size="sm"
+                        leftIcon={<KeyRound className="h-4 w-4" />}
+                      >
                         {pwSaving ? "Updating…" : "Update password"}
                       </Button>
                     </div>
@@ -835,8 +980,18 @@ export default function ProfilePage() {
                   />
                   <div className="space-y-3">
                     {[
-                      { provider: "GitHub", icon: Github, connected: false, color: "text-zinc-300" },
-                      { provider: "Google", icon: Globe, connected: false, color: "text-zinc-300" },
+                      {
+                        provider: "GitHub",
+                        icon: Github,
+                        connected: false,
+                        color: "text-zinc-300",
+                      },
+                      {
+                        provider: "Google",
+                        icon: Globe,
+                        connected: false,
+                        color: "text-zinc-300",
+                      },
                     ].map(({ provider, icon: Icon, connected }) => (
                       <div
                         key={provider}
@@ -845,8 +1000,12 @@ export default function ProfilePage() {
                         <div className="flex items-center gap-3">
                           <Icon className="h-5 w-5 text-zinc-400" />
                           <div>
-                            <p className="text-sm font-medium text-zinc-200">{provider}</p>
-                            <p className="text-xs text-zinc-500">{connected ? "Connected" : "Not connected"}</p>
+                            <p className="text-sm font-medium text-zinc-200">
+                              {provider}
+                            </p>
+                            <p className="text-xs text-zinc-500">
+                              {connected ? "Connected" : "Not connected"}
+                            </p>
                           </div>
                         </div>
                         <Button
@@ -868,8 +1027,12 @@ export default function ProfilePage() {
                   />
                   <div className="flex items-center justify-between rounded-xl border border-white/8 bg-white/3 px-4 py-3">
                     <div>
-                      <p className="text-sm font-medium text-zinc-200">This device</p>
-                      <p className="text-xs text-zinc-500">Current session — {new Date().toLocaleDateString()}</p>
+                      <p className="text-sm font-medium text-zinc-200">
+                        This device
+                      </p>
+                      <p className="text-xs text-zinc-500">
+                        Current session — {new Date().toLocaleDateString()}
+                      </p>
                     </div>
                     <Badge variant="success">Active</Badge>
                   </div>
@@ -878,7 +1041,10 @@ export default function ProfilePage() {
                       variant="secondary"
                       size="sm"
                       leftIcon={<LogOut className="h-4 w-4" />}
-                      onClick={() => { logout(); router.replace("/login"); }}
+                      onClick={() => {
+                        logout();
+                        router.replace("/login");
+                      }}
                     >
                       Sign out everywhere
                     </Button>
@@ -897,77 +1063,103 @@ export default function ProfilePage() {
                   />
 
                   <div className="mb-4">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Learning</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                      Learning
+                    </p>
                   </div>
                   <Toggle
                     id="notif-course-updates"
                     label="Course updates"
                     description="New lessons, corrections, and content updates in your enrolled courses."
                     checked={notifs.courseUpdates}
-                    onChange={(v) => setNotifs((p) => ({ ...p, courseUpdates: v }))}
+                    onChange={(v) =>
+                      setNotifs((p) => ({ ...p, courseUpdates: v }))
+                    }
                   />
                   <Toggle
                     id="notif-achievements"
                     label="Achievement alerts"
                     description="Get notified when you unlock a new badge or milestone."
                     checked={notifs.achievementAlerts}
-                    onChange={(v) => setNotifs((p) => ({ ...p, achievementAlerts: v }))}
+                    onChange={(v) =>
+                      setNotifs((p) => ({ ...p, achievementAlerts: v }))
+                    }
                   />
                   <Toggle
                     id="notif-streak"
                     label="Streak reminders"
                     description="Daily nudge to keep your learning streak alive."
                     checked={notifs.streakReminders}
-                    onChange={(v) => setNotifs((p) => ({ ...p, streakReminders: v }))}
+                    onChange={(v) =>
+                      setNotifs((p) => ({ ...p, streakReminders: v }))
+                    }
                   />
 
                   <div className="mb-4 mt-6">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Digest & Discovery</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                      Digest & Discovery
+                    </p>
                   </div>
                   <Toggle
                     id="notif-weekly"
                     label="Weekly learning digest"
                     description="A summary of your progress, tips, and recommended lessons every Monday."
                     checked={notifs.weeklyDigest}
-                    onChange={(v) => setNotifs((p) => ({ ...p, weeklyDigest: v }))}
+                    onChange={(v) =>
+                      setNotifs((p) => ({ ...p, weeklyDigest: v }))
+                    }
                   />
                   <Toggle
                     id="notif-new-courses"
                     label="New course announcements"
                     description="Be the first to know when a new track launches."
                     checked={notifs.newCourses}
-                    onChange={(v) => setNotifs((p) => ({ ...p, newCourses: v }))}
+                    onChange={(v) =>
+                      setNotifs((p) => ({ ...p, newCourses: v }))
+                    }
                   />
 
                   <div className="mb-4 mt-6">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Community</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                      Community
+                    </p>
                   </div>
                   <Toggle
                     id="notif-community"
                     label="Community replies"
                     description="Email when someone replies to your forum posts or solutions."
                     checked={notifs.communityReplies}
-                    onChange={(v) => setNotifs((p) => ({ ...p, communityReplies: v }))}
+                    onChange={(v) =>
+                      setNotifs((p) => ({ ...p, communityReplies: v }))
+                    }
                   />
 
                   <div className="mb-4 mt-6">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Optional</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                      Optional
+                    </p>
                   </div>
                   <Toggle
                     id="notif-marketing"
                     label="Product news & offers"
                     description="Occasional emails about promotions, new features, and special events."
                     checked={notifs.marketingEmails}
-                    onChange={(v) => setNotifs((p) => ({ ...p, marketingEmails: v }))}
+                    onChange={(v) =>
+                      setNotifs((p) => ({ ...p, marketingEmails: v }))
+                    }
                   />
 
                   <div className="mt-8 flex items-center justify-end gap-3">
                     {notifsSaved && (
-                      <span className="flex items-center gap-1.5 text-sm text-emerald-400" role="status" aria-live="polite">
+                      <output className="flex items-center gap-1.5 text-sm text-emerald-400">
                         <Check className="h-4 w-4" /> Preferences saved
-                      </span>
+                      </output>
                     )}
-                    <Button type="submit" isLoading={notifsSaving} leftIcon={<Save className="h-4 w-4" />}>
+                    <Button
+                      type="submit"
+                      isLoading={notifsSaving}
+                      leftIcon={<Save className="h-4 w-4" />}
+                    >
                       {notifsSaving ? "Saving…" : "Save preferences"}
                     </Button>
                   </div>
@@ -986,9 +1178,21 @@ export default function ProfilePage() {
                   />
                   <div className="space-y-2">
                     {[
-                      { id: "public", label: "Public", desc: "Anyone can view your profile and progress." },
-                      { id: "learners", label: "Learners only", desc: "Only signed-in CodeLearn members can view your profile." },
-                      { id: "private", label: "Private", desc: "Only you can see your profile." },
+                      {
+                        id: "public",
+                        label: "Public",
+                        desc: "Anyone can view your profile and progress.",
+                      },
+                      {
+                        id: "learners",
+                        label: "Learners only",
+                        desc: "Only signed-in CodeLearn members can view your profile.",
+                      },
+                      {
+                        id: "private",
+                        label: "Private",
+                        desc: "Only you can see your profile.",
+                      },
                     ].map(({ id, label, desc }) => (
                       <label
                         key={id}
@@ -1003,7 +1207,9 @@ export default function ProfilePage() {
                           className="mt-0.5 accent-violet-500"
                         />
                         <div>
-                          <p className="text-sm font-medium text-zinc-200">{label}</p>
+                          <p className="text-sm font-medium text-zinc-200">
+                            {label}
+                          </p>
                           <p className="text-xs text-zinc-500">{desc}</p>
                         </div>
                       </label>
@@ -1023,22 +1229,46 @@ export default function ProfilePage() {
                         <Shield className="h-4.5 w-4.5 text-amber-400" />
                       </span>
                       <div>
-                        <p className="text-sm font-medium text-zinc-200">Authenticator App</p>
-                        <p className="text-xs text-zinc-500">Not enabled — greatly increases account security.</p>
+                        <p className="text-sm font-medium text-zinc-200">
+                          Authenticator App
+                        </p>
+                        <p className="text-xs text-zinc-500">
+                          Not enabled — greatly increases account security.
+                        </p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm">Enable 2FA</Button>
+                    <Button variant="outline" size="sm">
+                      Enable 2FA
+                    </Button>
                   </div>
                 </Card>
 
                 {/* Active sessions */}
                 <Card>
-                  <SectionHeading title="Login History" description="Recent sign-in events on your account." />
+                  <SectionHeading
+                    title="Login History"
+                    description="Recent sign-in events on your account."
+                  />
                   <div className="space-y-2">
                     {[
-                      { device: "Chrome on macOS", location: "San Francisco, US", time: "Just now", current: true },
-                      { device: "Safari on iPhone", location: "San Francisco, US", time: "2 hours ago", current: false },
-                      { device: "Firefox on Windows", location: "New York, US", time: "3 days ago", current: false },
+                      {
+                        device: "Chrome on macOS",
+                        location: "San Francisco, US",
+                        time: "Just now",
+                        current: true,
+                      },
+                      {
+                        device: "Safari on iPhone",
+                        location: "San Francisco, US",
+                        time: "2 hours ago",
+                        current: false,
+                      },
+                      {
+                        device: "Firefox on Windows",
+                        location: "New York, US",
+                        time: "3 days ago",
+                        current: false,
+                      },
                     ].map(({ device, location, time, current }) => (
                       <div
                         key={device + time}
@@ -1046,12 +1276,18 @@ export default function ProfilePage() {
                       >
                         <div>
                           <p className="text-sm text-zinc-200">{device}</p>
-                          <p className="text-xs text-zinc-500">{location} · {time}</p>
+                          <p className="text-xs text-zinc-500">
+                            {location} · {time}
+                          </p>
                         </div>
                         {current ? (
                           <Badge variant="success">Current</Badge>
                         ) : (
-                          <Button variant="ghost" size="sm" className="text-xs text-red-400 hover:bg-red-500/10">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs text-red-400 hover:bg-red-500/10"
+                          >
                             Revoke
                           </Button>
                         )}
@@ -1064,11 +1300,15 @@ export default function ProfilePage() {
                 <Card className="border-red-500/20 bg-red-500/4">
                   <div className="mb-4 flex items-center gap-2">
                     <AlertTriangle className="h-5 w-5 text-red-400" />
-                    <h2 className="text-lg font-semibold text-red-400">Danger Zone</h2>
+                    <h2 className="text-lg font-semibold text-red-400">
+                      Danger Zone
+                    </h2>
                   </div>
                   <p className="mb-4 text-sm text-zinc-400">
-                    Permanently delete your CodeLearn account. This removes all progress, achievements, and data
-                    associated with your account and <strong className="text-zinc-200">cannot be undone</strong>.
+                    Permanently delete your CodeLearn account. This removes all
+                    progress, achievements, and data associated with your
+                    account and{" "}
+                    <strong className="text-zinc-200">cannot be undone</strong>.
                   </p>
 
                   {!showDeletePanel ? (
@@ -1083,7 +1323,11 @@ export default function ProfilePage() {
                   ) : (
                     <div className="space-y-4 rounded-xl border border-red-500/30 bg-red-500/8 p-4">
                       <p className="text-sm text-red-300">
-                        To confirm, type <strong className="font-mono text-red-200">DELETE</strong> below.
+                        To confirm, type{" "}
+                        <strong className="font-mono text-red-200">
+                          DELETE
+                        </strong>{" "}
+                        below.
                       </p>
                       <Input
                         value={deleteConfirm}
@@ -1101,12 +1345,17 @@ export default function ProfilePage() {
                           leftIcon={<Trash2 className="h-4 w-4" />}
                           onClick={deleteAccount}
                         >
-                          {deleting ? "Deleting…" : "Permanently delete account"}
+                          {deleting
+                            ? "Deleting…"
+                            : "Permanently delete account"}
                         </Button>
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => { setShowDeletePanel(false); setDeleteConfirm(""); }}
+                          onClick={() => {
+                            setShowDeletePanel(false);
+                            setDeleteConfirm("");
+                          }}
                         >
                           Cancel
                         </Button>
@@ -1116,7 +1365,6 @@ export default function ProfilePage() {
                 </Card>
               </div>
             )}
-
           </div>
         </div>
       </div>
@@ -1145,21 +1393,36 @@ function PasswordStrength({ password }: { password: string }) {
   const { label, color } = levels[score - 1] ?? levels[0];
 
   return (
-    <div className="space-y-1.5" aria-live="polite" aria-label={`Password strength: ${label}`}>
+    <output
+      className="space-y-1.5"
+      aria-live="polite"
+      aria-label={`Password strength: ${label}`}
+    >
       <div className="flex gap-1">
-        {Array.from({ length: 5 }).map((_, i) => (
+        {[1, 2, 3, 4, 5].map((n) => (
           <div
-            key={i}
+            key={n}
             className={cn(
               "h-1.5 flex-1 rounded-full transition-all duration-300",
-              i < score ? color : "bg-white/10"
+              n <= score ? color : "bg-white/10",
             )}
           />
         ))}
       </div>
-      <p className={cn("text-xs font-medium", score >= 4 ? "text-emerald-400" : score >= 3 ? "text-yellow-400" : score >= 2 ? "text-amber-400" : "text-red-400")}>
+      <p
+        className={cn(
+          "text-xs font-medium",
+          score >= 4
+            ? "text-emerald-400"
+            : score >= 3
+              ? "text-yellow-400"
+              : score >= 2
+                ? "text-amber-400"
+                : "text-red-400",
+        )}
+      >
         {label}
       </p>
-    </div>
+    </output>
   );
 }

@@ -12,7 +12,10 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, hint, leftAddon, rightAddon, className, id, ...props }, ref) => {
+  (
+    { label, error, hint, leftAddon, rightAddon, className, id, ...props },
+    ref,
+  ) => {
     const inputId = id ?? label?.toLowerCase().replace(/\s+/g, "-");
 
     return (
@@ -42,10 +45,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                 : "border-white/10 hover:border-white/20",
               leftAddon && "pl-10",
               rightAddon && "pr-10",
-              className
+              className,
             )}
             aria-invalid={!!error}
-            aria-describedby={error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined}
+            aria-describedby={
+              error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined
+            }
             {...props}
           />
           {rightAddon && (
@@ -53,7 +58,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           )}
         </div>
         {error && (
-          <p id={`${inputId}-error`} className="text-xs text-red-400" role="alert">
+          <p
+            id={`${inputId}-error`}
+            className="text-xs text-red-400"
+            role="alert"
+          >
             {error}
           </p>
         )}
@@ -64,7 +73,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         )}
       </div>
     );
-  }
+  },
 );
 
 Input.displayName = "Input";

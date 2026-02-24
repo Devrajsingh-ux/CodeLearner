@@ -1,12 +1,21 @@
-"use client";
+﻿"use client";
 
-import { useState, useEffect } from "react";
+import {
+  BookOpen,
+  ChevronDown,
+  Code2,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  User,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, X, Code2, ChevronDown, LogOut, LayoutDashboard, BookOpen, User } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
+import { useEffect, useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
+import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -30,7 +39,7 @@ export function Navbar() {
   }, []);
 
   // Close mobile menu on route change
-  useEffect(() => setMobileOpen(false), [pathname]);
+  useEffect(() => setMobileOpen(false), []);
 
   function handleLogout() {
     logout();
@@ -44,7 +53,7 @@ export function Navbar() {
         "fixed top-0 z-50 w-full transition-all duration-300",
         isScrolled
           ? "border-b border-white/8 bg-zinc-950/90 backdrop-blur-xl shadow-xl shadow-black/20"
-          : "bg-transparent"
+          : "bg-transparent",
       )}
     >
       <nav
@@ -53,7 +62,7 @@ export function Navbar() {
       >
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-indigo-700 shadow-lg shadow-violet-500/30 transition-transform group-hover:scale-110">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-violet-600 to-indigo-700 shadow-lg shadow-violet-500/30 transition-transform group-hover:scale-110">
             <Code2 className="h-4 w-4 text-white" />
           </span>
           <span className="text-lg font-bold text-white tracking-tight">
@@ -62,7 +71,7 @@ export function Navbar() {
         </Link>
 
         {/* Desktop nav */}
-        <ul className="hidden items-center gap-1 md:flex" role="list">
+        <ul className="hidden items-center gap-1 md:flex">
           {navLinks.map(({ href, label }) => (
             <li key={href}>
               <Link
@@ -71,7 +80,7 @@ export function Navbar() {
                   "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-200",
                   pathname === href
                     ? "bg-violet-500/15 text-violet-400"
-                    : "text-zinc-400 hover:text-white hover:bg-white/8"
+                    : "text-zinc-400 hover:text-white hover:bg-white/8",
                 )}
               >
                 {label}
@@ -85,14 +94,25 @@ export function Navbar() {
           {user ? (
             <div className="relative">
               <button
+                type="button"
                 onClick={() => setUserMenuOpen((o) => !o)}
                 className="flex items-center gap-2 rounded-xl px-2 py-1.5 text-sm transition-colors hover:bg-white/8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
                 aria-expanded={userMenuOpen}
                 aria-haspopup="true"
               >
-                <Avatar initials={user.avatar ?? user.name.slice(0, 2).toUpperCase()} size="sm" />
-                <span className="font-medium text-zinc-200">{user.name.split(" ")[0]}</span>
-                <ChevronDown className={cn("h-4 w-4 text-zinc-400 transition-transform", userMenuOpen && "rotate-180")} />
+                <Avatar
+                  initials={user.avatar ?? user.name.slice(0, 2).toUpperCase()}
+                  size="sm"
+                />
+                <span className="font-medium text-zinc-200">
+                  {user.name.split(" ")[0]}
+                </span>
+                <ChevronDown
+                  className={cn(
+                    "h-4 w-4 text-zinc-400 transition-transform",
+                    userMenuOpen && "rotate-180",
+                  )}
+                />
               </button>
 
               {userMenuOpen && (
@@ -101,11 +121,19 @@ export function Navbar() {
                   role="menu"
                 >
                   <div className="border-b border-white/8 px-3 py-2 mb-1">
-                    <p className="text-sm font-medium text-white">{user.name}</p>
-                    <p className="text-xs text-zinc-500 truncate">{user.email}</p>
+                    <p className="text-sm font-medium text-white">
+                      {user.name}
+                    </p>
+                    <p className="text-xs text-zinc-500 truncate">
+                      {user.email}
+                    </p>
                   </div>
                   {[
-                    { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+                    {
+                      href: "/dashboard",
+                      icon: LayoutDashboard,
+                      label: "Dashboard",
+                    },
                     { href: "/learn", icon: BookOpen, label: "My Courses" },
                     { href: "/profile", icon: User, label: "Profile" },
                   ].map(({ href, icon: Icon, label }) => (
@@ -122,6 +150,7 @@ export function Navbar() {
                   ))}
                   <div className="border-t border-white/8 mt-1 pt-1">
                     <button
+                      type="button"
                       role="menuitem"
                       onClick={handleLogout}
                       className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
@@ -136,7 +165,9 @@ export function Navbar() {
           ) : (
             <>
               <Link href="/login">
-                <Button variant="ghost" size="sm">Sign in</Button>
+                <Button variant="ghost" size="sm">
+                  Sign in
+                </Button>
               </Link>
               <Link href="/register">
                 <Button size="sm">Get started free</Button>
@@ -147,12 +178,17 @@ export function Navbar() {
 
         {/* Mobile menu button */}
         <button
+          type="button"
           className="flex h-9 w-9 items-center justify-center rounded-lg text-zinc-400 hover:bg-white/8 hover:text-white transition-colors md:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
           onClick={() => setMobileOpen((o) => !o)}
           aria-expanded={mobileOpen}
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
         >
-          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {mobileOpen ? (
+            <X className="h-5 w-5" />
+          ) : (
+            <Menu className="h-5 w-5" />
+          )}
         </button>
       </nav>
 
@@ -173,21 +209,34 @@ export function Navbar() {
               {user ? (
                 <>
                   <Link href="/dashboard">
-                    <Button variant="secondary" size="md" className="w-full justify-start gap-2">
+                    <Button
+                      variant="secondary"
+                      size="md"
+                      className="w-full justify-start gap-2"
+                    >
                       <LayoutDashboard className="h-4 w-4" /> Dashboard
                     </Button>
                   </Link>
-                  <Button variant="danger" size="md" className="w-full justify-start" onClick={handleLogout}>
+                  <Button
+                    variant="danger"
+                    size="md"
+                    className="w-full justify-start"
+                    onClick={handleLogout}
+                  >
                     <LogOut className="mr-2 h-4 w-4" /> Sign out
                   </Button>
                 </>
               ) : (
                 <>
                   <Link href="/login" className="block">
-                    <Button variant="secondary" size="md" className="w-full">Sign in</Button>
+                    <Button variant="secondary" size="md" className="w-full">
+                      Sign in
+                    </Button>
                   </Link>
                   <Link href="/register" className="block">
-                    <Button size="md" className="w-full">Get started free</Button>
+                    <Button size="md" className="w-full">
+                      Get started free
+                    </Button>
                   </Link>
                 </>
               )}

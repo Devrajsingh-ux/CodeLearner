@@ -1,5 +1,5 @@
-import Link from "next/link";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { LoginForm } from "@/components/auth/LoginForm";
 
 export const metadata: Metadata = {
@@ -12,7 +12,9 @@ export default function LoginPage() {
     <div className="rounded-2xl border border-white/8 bg-zinc-900/60 p-7 shadow-2xl shadow-black/50 backdrop-blur-md">
       {/* Header */}
       <div className="mb-7">
-        <h1 className="text-2xl font-bold tracking-tight text-white">Welcome back</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-white">
+          Welcome back
+        </h1>
         <p className="mt-1 text-sm text-zinc-400">
           Sign in to continue your learning journey
         </p>

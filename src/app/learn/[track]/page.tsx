@@ -1,4 +1,4 @@
-import {
+﻿import {
   ArrowLeft,
   Award,
   BookOpen,
@@ -20,18 +20,6 @@ import { getTechColor, TechIcon } from "@/components/ui/TechIcon";
 import { tracks } from "@/data/courses";
 import { getCurriculum } from "@/lib/lessons";
 import { formatNumber } from "@/lib/utils";
-
-const _TYPE_ICON_MAP: Record<string, string> = {
-  article: "FileText",
-  exercise: "Code2",
-  quiz: "HelpCircle",
-};
-
-const _TYPE_COLOR: Record<string, string> = {
-  article: "text-sky-400",
-  exercise: "text-violet-400",
-  quiz: "text-amber-400",
-};
 
 interface Props {
   params: Promise<{ track: string }>;
@@ -71,7 +59,7 @@ export default async function TrackPage({ params }: Props) {
         aria-hidden
       >
         <div
-          className="absolute -top-32 left-1/3 h-[30rem] w-[30rem] rounded-full opacity-30 blur-3xl"
+          className="absolute -top-32 left-1/3 h-120 w-120 rounded-full opacity-30 blur-3xl"
           style={{
             background: `radial-gradient(circle, ${techColor}30, transparent 70%)`,
           }}
@@ -184,13 +172,11 @@ export default async function TrackPage({ params }: Props) {
                     <p className="mb-1 text-sm text-zinc-500">forever</p>
                   </div>
 
-                  <Link href={`/learn/${slug}/lesson-1`} className="mt-4 block">
-                    <button
-                      type="button"
-                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-500/25 transition-all hover:from-violet-500 hover:to-indigo-500"
-                    >
-                      <Play className="h-4 w-4" /> Start Learning
-                    </button>
+                  <Link
+                    href={`/learn/${slug}/lesson-1`}
+                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-violet-600 to-indigo-600 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-500/25 transition-all hover:from-violet-500 hover:to-indigo-500"
+                  >
+                    <Play className="h-4 w-4" /> Start Learning
                   </Link>
 
                   <div className="mt-5 space-y-3 text-sm text-zinc-400">
@@ -236,7 +222,7 @@ export default async function TrackPage({ params }: Props) {
             return (
               <details key={section.title} open={sIdx === 0} className="group">
                 {/* Section header */}
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-2xl border border-white/6 bg-white/[0.02] px-5 py-4 transition-all hover:bg-white/[0.04] group-open:rounded-b-none group-open:border-b-0 group-open:bg-white/[0.04]">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-2xl border border-white/6 bg-white/2 px-5 py-4 transition-all hover:bg-white/4 group-open:rounded-b-none group-open:border-b-0 group-open:bg-white/4">
                   <div className="flex items-center gap-3">
                     <div
                       className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold"
@@ -267,9 +253,7 @@ export default async function TrackPage({ params }: Props) {
                           "flex items-center justify-between gap-4 px-5 py-4 transition-colors",
                           lIdx < section.lessons.length - 1 &&
                             "border-b border-white/5",
-                          lesson.isLocked
-                            ? "opacity-50"
-                            : "hover:bg-white/[0.03]",
+                          lesson.isLocked ? "opacity-50" : "hover:bg-white/3",
                         ]
                           .filter(Boolean)
                           .join(" ")}

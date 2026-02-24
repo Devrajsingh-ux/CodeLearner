@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   BookOpen,
@@ -217,7 +217,7 @@ export default function LearnPage() {
       <div className="relative overflow-hidden border-b border-white/8">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 bg-gradient-to-br from-violet-600/8 via-transparent to-cyan-600/8"
+          className="pointer-events-none absolute inset-0 bg-linear-to-br from-violet-600/8 via-transparent to-cyan-600/8"
         />
         <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -225,7 +225,7 @@ export default function LearnPage() {
             <div>
               <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
                 Browse All{" "}
-                <span className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
+                <span className="bg-linear-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
                   Courses
                 </span>
               </h1>

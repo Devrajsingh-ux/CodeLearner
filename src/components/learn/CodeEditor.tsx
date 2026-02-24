@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Editor from "@monaco-editor/react";
 import { Check, Copy, Loader2, Play, RotateCcw, Terminal } from "lucide-react";
@@ -229,7 +229,7 @@ export function CodeEditor({
           disabled={status === "running"}
           className={cn(
             "flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all duration-200",
-            "bg-gradient-to-r from-violet-600 to-indigo-600 text-white",
+            "bg-linear-to-r from-violet-600 to-indigo-600 text-white",
             "hover:from-violet-500 hover:to-indigo-500 shadow-lg shadow-violet-500/20",
             "disabled:opacity-60 disabled:cursor-not-allowed",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500",

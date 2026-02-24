@@ -1,7 +1,7 @@
-import { Star } from "lucide-react";
-import { testimonials } from "@/data/courses";
-import { Card } from "@/components/ui/Card";
+﻿import { Star } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
+import { Card } from "@/components/ui/Card";
+import { testimonials } from "@/data/courses";
 
 export function Testimonials() {
   return (
@@ -24,12 +24,13 @@ export function Testimonials() {
           </span>
           <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
             Real results,{" "}
-            <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
               real developers
             </span>
           </h2>
           <p className="mt-4 text-zinc-400">
-            Thousands of developers have leveled up their careers with CodeLearn. Here's what they have to say.
+            Thousands of developers have leveled up their careers with
+            CodeLearn. Here's what they have to say.
           </p>
         </div>
 
@@ -37,9 +38,16 @@ export function Testimonials() {
           {testimonials.map((t) => (
             <Card key={t.id} hover className="flex flex-col gap-4">
               {/* Stars */}
-              <div className="flex gap-0.5" aria-label={`${t.rating} out of 5 stars`}>
-                {[...Array(t.rating)].map((_, i) => (
-                  <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
+              <div
+                role="img"
+                className="flex gap-0.5"
+                aria-label={`${t.rating} out of 5 stars`}
+              >
+                {Array.from({ length: t.rating }, (_, i) => i + 1).map((n) => (
+                  <Star
+                    key={n}
+                    className="h-4 w-4 fill-amber-400 text-amber-400"
+                  />
                 ))}
               </div>
 
@@ -55,7 +63,9 @@ export function Testimonials() {
                 </div>
               </div>
 
-              <p className="text-xs text-violet-400/80">Completed: {t.course}</p>
+              <p className="text-xs text-violet-400/80">
+                Completed: {t.course}
+              </p>
             </Card>
           ))}
         </div>

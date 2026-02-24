@@ -1,5 +1,5 @@
-import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 interface CardProps {
   children: ReactNode;
@@ -31,7 +31,7 @@ export function Card({
           "transition-all duration-300 hover:border-violet-500/30 hover:bg-white/6 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-violet-500/5",
         glow && "shadow-lg shadow-violet-500/10",
         paddingClasses[padding],
-        className
+        className,
       )}
     >
       {children}
@@ -46,9 +46,7 @@ export function CardHeader({
   children: ReactNode;
   className?: string;
 }) {
-  return (
-    <div className={cn("mb-4 space-y-1", className)}>{children}</div>
-  );
+  return <div className={cn("mb-4 space-y-1", className)}>{children}</div>;
 }
 
 export function CardTitle({

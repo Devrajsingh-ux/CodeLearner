@@ -2,11 +2,11 @@
 
 import {
   createContext,
+  type ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useState,
-  useCallback,
-  type ReactNode,
 } from "react";
 import type { AuthUser } from "@/types";
 
@@ -17,7 +17,7 @@ interface AuthContextValue {
   register: (
     name: string,
     email: string,
-    password: string
+    password: string,
   ) => Promise<{ error?: string }>;
   logout: () => void;
 }
@@ -64,14 +64,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // TODO: replace with `POST /api/auth/login` server action
       await new Promise((r) => setTimeout(r, 700));
       const found = DEMO_USERS.find(
-        (u) => u.email === email && u.password === password
+        (u) => u.email === email && u.password === password,
       );
       if (!found) return { error: "Invalid email or password." };
       const { password: _pw, ...safe } = found;
       persist(safe);
       return {};
     },
-    [persist]
+    [persist],
   );
 
   const register = useCallback(
@@ -100,7 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       persist(newUser);
       return {};
     },
-    [persist]
+    [persist],
   );
 
   const logout = useCallback(() => persist(null), [persist]);

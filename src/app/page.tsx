@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Hero } from "@/components/home/Hero";
-import { Features } from "@/components/home/Features";
-import { Stats } from "@/components/home/Stats";
 import { CoursesSection } from "@/components/home/CoursesSection";
-import { Testimonials } from "@/components/home/Testimonials";
 import { CTA } from "@/components/home/CTA";
+import { Features } from "@/components/home/Features";
+import { Hero } from "@/components/home/Hero";
+import { Stats } from "@/components/home/Stats";
+import { Testimonials } from "@/components/home/Testimonials";
 
 export const metadata: Metadata = {
   title: "CodeLearn — Master Coding. Build the Future.",

@@ -1,7 +1,7 @@
+import { ArrowRight, BookOpen, Clock, Star, Users } from "lucide-react";
 import Link from "next/link";
-import { Clock, Star, ArrowRight, BookOpen, Users } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
-import { TechIcon, getTechColor } from "@/components/ui/TechIcon";
+import { getTechColor, TechIcon } from "@/components/ui/TechIcon";
 import { formatNumber } from "@/lib/utils";
 import type { Track } from "@/types";
 
@@ -16,15 +16,15 @@ const difficultyVariant = {
 } as const;
 
 const categoryColors: Record<string, string> = {
-  Languages:         "text-yellow-400 bg-yellow-500/10 border-yellow-500/20",
-  Frontend:          "text-cyan-400 bg-cyan-500/10 border-cyan-500/20",
-  Backend:           "text-green-400 bg-green-500/10 border-green-500/20",
-  "Data & AI":       "text-orange-400 bg-orange-500/10 border-orange-500/20",
-  Mobile:            "text-sky-400 bg-sky-500/10 border-sky-500/20",
-  "DevOps & Cloud":  "text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
-  Systems:           "text-purple-400 bg-purple-500/10 border-purple-500/20",
+  Languages: "text-yellow-400 bg-yellow-500/10 border-yellow-500/20",
+  Frontend: "text-cyan-400 bg-cyan-500/10 border-cyan-500/20",
+  Backend: "text-green-400 bg-green-500/10 border-green-500/20",
+  "Data & AI": "text-orange-400 bg-orange-500/10 border-orange-500/20",
+  Mobile: "text-sky-400 bg-sky-500/10 border-sky-500/20",
+  "DevOps & Cloud": "text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
+  Systems: "text-purple-400 bg-purple-500/10 border-purple-500/20",
   "Web3 & Security": "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
-  "Game Dev":        "text-rose-400 bg-rose-500/10 border-rose-500/20",
+  "Game Dev": "text-rose-400 bg-rose-500/10 border-rose-500/20",
 };
 
 export function CourseCard({ track }: CourseCardProps) {
@@ -38,8 +38,10 @@ export function CourseCard({ track }: CourseCardProps) {
       <div className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/8 bg-zinc-900 transition-all duration-300 group-hover:border-white/16 group-hover:shadow-2xl group-hover:-translate-y-0.5">
         {/* Brand-color top accent bar */}
         <div
-          className="h-[3px] w-full shrink-0"
-          style={{ background: `linear-gradient(90deg, ${brandColor}cc, ${brandColor}22)` }}
+          className="h-0.75 w-full shrink-0"
+          style={{
+            background: `linear-gradient(90deg, ${brandColor}cc, ${brandColor}22)`,
+          }}
         />
 
         <div className="flex flex-1 flex-col p-5">
@@ -60,7 +62,8 @@ export function CourseCard({ track }: CourseCardProps) {
           {/* Category chip */}
           <span
             className={`mb-3 inline-flex w-fit items-center rounded-md border px-2 py-0.5 text-[11px] font-semibold ${
-              categoryColors[track.category] ?? "text-zinc-400 bg-zinc-800 border-zinc-700"
+              categoryColors[track.category] ??
+              "text-zinc-400 bg-zinc-800 border-zinc-700"
             }`}
           >
             {track.category}

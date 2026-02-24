@@ -1,12 +1,12 @@
-import {
+﻿import {
+  BarChart2,
+  BookMarked,
   Code2,
+  MessageSquare,
+  ShieldCheck,
   Terminal,
   Trophy,
   Zap,
-  BarChart2,
-  MessageSquare,
-  ShieldCheck,
-  BookMarked,
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 
@@ -85,8 +85,11 @@ export function Features() {
       aria-label="Platform features"
     >
       {/* Subtle bg glow */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute left-1/2 top-0 h-96 w-[800px] -translate-x-1/2 rounded-full bg-violet-600/5 blur-3xl" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 overflow-hidden"
+      >
+        <div className="absolute left-1/2 top-0 h-96 w-200 -translate-x-1/2 rounded-full bg-violet-600/5 blur-3xl" />
       </div>
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -97,12 +100,13 @@ export function Features() {
           </span>
           <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
             Everything you need to go{" "}
-            <span className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
               pro, fast
             </span>
           </h2>
           <p className="mt-3 text-base text-zinc-400 sm:mt-4 sm:text-lg">
-            We've built the learning environment we wish existed — interactive, structured, and brutally focused on outcomes.
+            We've built the learning environment we wish existed — interactive,
+            structured, and brutally focused on outcomes.
           </p>
         </div>
 
@@ -110,11 +114,17 @@ export function Features() {
         <div className="grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
           {features.map(({ icon: Icon, title, description, color, bg }) => (
             <Card key={title} hover className="group">
-              <div className={`mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl ${bg} sm:mb-4`}>
+              <div
+                className={`mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl ${bg} sm:mb-4`}
+              >
                 <Icon className={`h-5 w-5 ${color}`} />
               </div>
-              <h3 className="mb-1.5 font-semibold text-white sm:mb-2">{title}</h3>
-              <p className="text-sm leading-relaxed text-zinc-500">{description}</p>
+              <h3 className="mb-1.5 font-semibold text-white sm:mb-2">
+                {title}
+              </h3>
+              <p className="text-sm leading-relaxed text-zinc-500">
+                {description}
+              </p>
             </Card>
           ))}
         </div>

@@ -1,4 +1,4 @@
-﻿import type { Track, Testimonial, Stat, TrackCategory } from "@/types";
+﻿import type { Stat, Testimonial, Track, TrackCategory } from "@/types";
 
 export const CATEGORIES: TrackCategory[] = [
   "Languages",
@@ -1156,7 +1156,7 @@ actor CourseCache {
 
     func fetch(id: String) async throws -> Course {
         if let cached = store[id] { return cached }
-        let url = URL(string: "/api/courses/\(id)")!
+        let url = URL(string: "/api/courses/(id)")!
         let (data, _) = try await URLSession.shared.data(from: url)
         let course = try JSONDecoder().decode(Course.self, from: data)
         store[id] = course
@@ -1200,7 +1200,7 @@ defmodule CourseCache do
   end
 
   def handle_call({:fetch, id}, _from, cache) do
-    course = Req.get!("/api/courses/\#{id}").body
+    course = Req.get!("/api/courses/#{id}").body
     {:reply, course, Map.put(cache, id, course)}
   end
 end`,
@@ -1208,4 +1208,3 @@ end`,
 ];
 
 export const codeSnippet = LANGUAGE_SNIPPETS[0].code;
-
