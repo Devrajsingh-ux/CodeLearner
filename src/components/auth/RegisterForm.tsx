@@ -18,25 +18,31 @@ import { useAuth } from "@/context/AuthContext";
 
 function PasswordStrength({ password }: { password: string }) {
   const checks = [
-    { label: "At least 8 characters", ok: password.length >= 8 },
-    { label: "Contains a number", ok: /\d/.test(password) },
-    { label: "Contains a letter", ok: /[a-zA-Z]/.test(password) },
+    { label: "At least 12 characters",       ok: password.length >= 12 },
+    { label: "Uppercase letter (A–Z)",        ok: /[A-Z]/.test(password) },
+    { label: "Lowercase letter (a–z)",        ok: /[a-z]/.test(password) },
+    { label: "Number (0–9)",                  ok: /[0-9]/.test(password) },
+    { label: "Special character (!@#$…)",     ok: /[^A-Za-z0-9]/.test(password) },
   ];
 
   if (!password) return null;
 
   const strength = checks.filter((c) => c.ok).length;
   const barColor =
-    strength === 1
+    strength <= 1
       ? "bg-red-500"
       : strength === 2
-        ? "bg-amber-500"
-        : "bg-emerald-500";
+        ? "bg-orange-500"
+        : strength === 3
+          ? "bg-amber-500"
+          : strength === 4
+            ? "bg-lime-500"
+            : "bg-emerald-500";
 
   return (
     <div className="mt-2 space-y-2">
       <div className="flex gap-1">
-        {[1, 2, 3].map((i) => (
+        {[1, 2, 3, 4, 5].map((i) => (
           <div
             key={i}
             className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${
@@ -90,6 +96,13 @@ export function RegisterForm() {
 
     if (result.error) {
       setError(result.error);
+    } else if (result.needsVerification) {
+      setError("");
+      // show a success message instructing the user to check email
+      setIsLoading(false);
+      setTimeout(() => {
+        alert("A verification email was sent. Please check your inbox and verify your email before signing in.");
+      }, 50);
     } else {
       router.push("/dashboard");
     }

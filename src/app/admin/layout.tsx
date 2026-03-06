@@ -6,6 +6,8 @@ import { AdminHeader } from "@/components/admin/AdminHeader";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { useAuth } from "@/context/AuthContext";
 
+const ADMIN_LOGIN_PATH = "/admin/login";
+
 export default function AdminLayout({
   children,
 }: {
@@ -16,17 +18,26 @@ export default function AdminLayout({
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // ── Allow the login page to render without any auth check ─────────────────
+  const isLoginPage = pathname === ADMIN_LOGIN_PATH;
+
   // ── Access guard ─────────────────────────────────────────────────────────
   useEffect(() => {
+    if (isLoginPage) return; // login page is public within /admin
     if (isLoading) return;
     if (!user) {
-      router.replace("/login?redirect=/admin/dashboard");
+      router.replace(ADMIN_LOGIN_PATH);
       return;
     }
     if (user.role !== "admin") {
-      router.replace("/dashboard");
+      router.replace(ADMIN_LOGIN_PATH);
     }
-  }, [user, isLoading, router]);
+  }, [user, isLoading, router, isLoginPage]);
+
+  // ── Render login page as-is (no sidebar / header chrome) ─────────────────
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
 
   // ── Loading / unauthorised states ────────────────────────────────────────
   if (isLoading || !user) {

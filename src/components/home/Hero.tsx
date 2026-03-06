@@ -3,7 +3,6 @@
 import { ArrowRight, Play, Star } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { codeSnippet } from "@/data/courses";
 
 export function Hero() {
   return (
@@ -101,40 +100,7 @@ export function Hero() {
             </div>
           </div>
 
-          {/* ── Code editor window — hidden on xs, shown sm+ ── */}
-          <div className="relative hidden sm:block">
-            <div className="absolute -inset-3 rounded-3xl bg-linear-to-r from-violet-600/20 to-indigo-600/20 blur-2xl sm:-inset-4" />
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-zinc-900 shadow-2xl shadow-black/60">
-              {/* Window chrome */}
-              <div className="flex items-center justify-between border-b border-white/8 bg-zinc-950/50 px-3 py-2.5 sm:px-4 sm:py-3">
-                <div className="flex gap-1.5">
-                  <span className="h-2.5 w-2.5 rounded-full bg-red-500/80 sm:h-3 sm:w-3" />
-                  <span className="h-2.5 w-2.5 rounded-full bg-amber-500/80 sm:h-3 sm:w-3" />
-                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/80 sm:h-3 sm:w-3" />
-                </div>
-                <span className="font-mono text-[11px] text-zinc-500 sm:text-xs">
-                  lesson-01.ts
-                </span>
-                <span className="rounded-md bg-violet-500/20 px-1.5 py-0.5 text-[11px] font-medium text-violet-400 sm:px-2 sm:text-xs">
-                  TypeScript
-                </span>
-              </div>
-              {/* Code */}
-              <div className="overflow-x-auto p-3 sm:p-5">
-                <pre className="font-mono text-[11px] leading-6 text-zinc-300 sm:text-sm sm:leading-7">
-                  <code>{codeSnippet}</code>
-                </pre>
-              </div>
-              {/* Status bar */}
-              <div className="flex items-center justify-between border-t border-white/8 bg-zinc-950/30 px-3 py-1.5 text-[11px] text-zinc-600 sm:px-4 sm:py-2 sm:text-xs">
-                <span>TypeScript</span>
-                <span className="flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                  No errors
-                </span>
-              </div>
-            </div>
-          </div>
+          {/* Preview removed per request */}
         </div>
 
         {/* Trust logos */}
