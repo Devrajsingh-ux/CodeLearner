@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { LoginForm } from "@/components/auth/LoginForm";
 
 export const metadata: Metadata = {
-  title: "Sign in — CodeLearn",
-  description: "Sign in to your CodeLearn account and continue your journey.",
+  title: "Sign in — Zentax",
+  description: "Sign in to your Zentax account and continue your journey.",
 };
 
 export default function LoginPage() {

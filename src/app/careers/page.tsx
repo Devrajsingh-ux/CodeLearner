@@ -15,7 +15,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Careers — CodeLearn",
+  title: "Careers — Zentax",
   description:
     "Join the team building the future of coding education. Remote-first. Mission-driven. Engineer-led.",
 };
@@ -94,7 +94,7 @@ const PERKS = [
   {
     icon: Rocket,
     title: "Equity for all",
-    body: "Every full-time team member receives meaningful equity. We think everyone who builds CodeLearn should share in its success.",
+    body: "Every full-time team member receives meaningful equity. We think everyone who builds Zentax should share in its success.",
   },
   {
     icon: Sparkles,
@@ -117,7 +117,7 @@ const PROCESS = [
   {
     step: "01",
     title: "Applied",
-    body: "Submit your application — CV and a short note on why CodeLearn. That's it. No cover-letter essays.",
+    body: "Submit your application — CV and a short note on why Zentax. That's it. No cover-letter essays.",
   },
   {
     step: "02",
@@ -167,7 +167,7 @@ export default function CareersPage() {
             </span>
           </h1>
           <p className="mt-5 text-lg leading-relaxed text-zinc-400">
-            CodeLearn is a small, remote team that ships fast, cares deeply
+            Zentax is a small, remote team that ships fast, cares deeply
             about craft, and is genuinely changing how the world learns to code.
             Come build it with us.
           </p>
@@ -235,7 +235,7 @@ export default function CareersPage() {
       <section className="mx-auto max-w-7xl px-4 pt-24 sm:px-6 lg:px-8">
         <div className="mb-12 text-center">
           <h2 className="text-3xl font-bold text-white sm:text-4xl">
-            Why CodeLearn?
+            Why Zentax?
           </h2>
           <p className="mt-3 text-zinc-500">
             We mean it when we say people-first.
@@ -291,7 +291,7 @@ export default function CareersPage() {
             — we read every message.
           </p>
           <a
-            href="mailto:careers@codelearn.io"
+            href="mailto:careers@zentax.io"
             className="inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-violet-600 to-indigo-600 px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-500/25 transition-all hover:from-violet-500 hover:to-indigo-500"
           >
             Send a speculative application

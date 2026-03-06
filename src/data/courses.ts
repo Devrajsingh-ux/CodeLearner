@@ -906,7 +906,7 @@ export const testimonials: Testimonial[] = [
     role: "Frontend Engineer @ Stripe",
     avatar: "SC",
     content:
-      "CodeLearn completely changed how I approach learning. The structured tracks and hands-on exercises helped me land my dream job in 6 months. The React course alone is worth it.",
+      "Zentax completely changed how I approach learning. The structured tracks and hands-on exercises helped me land my dream job in 6 months. The React course alone is worth it.",
     rating: 5,
     course: "React & Next.js",
   },
@@ -1099,7 +1099,7 @@ use serde::Deserialize;
 struct Course { title: String, lessons: u32 }
 
 async fn fetch_course(id: &str) -> anyhow::Result<Course> {
-    let url = format!("https://api.codelearn.io/courses/{id}");
+    let url = format!("https://api.zentax.io/courses/{id}");
     let course = reqwest::get(&url).await?.json().await?;
     Ok(course)
 }`,
@@ -1139,7 +1139,7 @@ data class Course(val title: String, val lessons: Int)
 
 suspend fun fetchCourse(id: String): Result<Course> =
     runCatching {
-        val url = "https://api.codelearn.io/courses/$id"
+        val url = "https://api.zentax.io/courses/$id"
         httpClient.get(url).body<Course>()
     }
 

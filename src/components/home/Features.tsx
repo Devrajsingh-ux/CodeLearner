@@ -96,7 +96,7 @@ export function Features() {
         {/* Section header */}
         <div className="mx-auto mb-10 max-w-2xl text-center sm:mb-16">
           <span className="mb-3 inline-block rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-1 text-sm font-medium text-violet-400">
-            Why CodeLearn?
+            Why Zentax?
           </span>
           <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
             Everything you need to go{" "}

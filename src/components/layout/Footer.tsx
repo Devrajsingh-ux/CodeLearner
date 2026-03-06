@@ -47,7 +47,7 @@ export function Footer() {
                 <Code2 className="h-4 w-4 text-white" />
               </span>
               <span className="text-lg font-bold text-white tracking-tight">
-                Code<span className="text-violet-400">Learn</span>
+                Zentax
               </span>
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-zinc-500">
@@ -94,7 +94,7 @@ export function Footer() {
 
         {/* Bottom bar */}
         <div className="flex flex-col items-center justify-between gap-3 border-t border-white/8 py-6 text-xs text-zinc-600 sm:flex-row">
-          <p>© {new Date().getFullYear()} CodeLearn. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Zentax. All rights reserved.</p>
           <p>Built with Next.js, React 19 &amp; Tailwind CSS</p>
         </div>
       </div>

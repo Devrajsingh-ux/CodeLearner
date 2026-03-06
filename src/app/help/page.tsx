@@ -15,9 +15,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Help Center — CodeLearn",
+  title: "Help Center — Zentax",
   description:
-    "Find answers to common questions, troubleshoot issues, and learn how to get the most out of CodeLearn.",
+    "Find answers to common questions, troubleshoot issues, and learn how to get the most out of Zentax.",
 };
 
 const CATEGORIES = [
@@ -73,7 +73,7 @@ const CATEGORIES = [
 
 const FAQS: Array<{ q: string; a: string }> = [
   {
-    q: "Is CodeLearn really free?",
+    q: "Is Zentax really free?",
     a: "Yes. The fundamentals track — JavaScript, Python, HTML/CSS, Git, and Command Line — is free forever with no credit card required. Pro features like advanced tracks, certificates, and AI code review are available on our paid plan.",
   },
   {
@@ -93,7 +93,7 @@ const FAQS: Array<{ q: string; a: string }> = [
     a: "The test runner shows exactly which assertions failed with clear error messages. You can also ask for a hint (free, up to 3 per lesson) or request an AI code review that explains what's wrong and why.",
   },
   {
-    q: "Does CodeLearn work on mobile?",
+    q: "Does Zentax work on mobile?",
     a: "Our course pages and lesson content are fully responsive. The code editor works on tablets (iPad and larger) but we recommend a keyboard for the best experience. A dedicated mobile app is on our 2026 roadmap.",
   },
   {
@@ -102,7 +102,7 @@ const FAQS: Array<{ q: string; a: string }> = [
   },
   {
     q: "I found a bug. How do I report it?",
-    a: "Use the 'Report an issue' button inside any lesson (bottom-right corner) or email bugs@codelearn.io. Include your browser, OS, and steps to reproduce. We aim to triage within 24 hours.",
+    a: "Use the 'Report an issue' button inside any lesson (bottom-right corner) or email bugs@zentax.io. Include your browser, OS, and steps to reproduce. We aim to triage within 24 hours.",
   },
 ];
 

@@ -30,7 +30,7 @@ export function Testimonials() {
           </h2>
           <p className="mt-4 text-zinc-400">
             Thousands of developers have leveled up their careers with
-            CodeLearn. Here's what they have to say.
+            Zentax. Here's what they have to say.
           </p>
         </div>
 

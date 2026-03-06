@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import {
   LegalLayout,
   LegalLi,
@@ -9,9 +9,9 @@ import {
 } from "@/components/layout/LegalLayout";
 
 export const metadata: Metadata = {
-  title: "Cookie Policy — CodeLearn",
+  title: "Cookie Policy — Zentax",
   description:
-    "What cookies CodeLearn sets, why we use them, and how to control them.",
+    "What cookies Zentax sets, why we use them, and how to control them.",
 };
 
 const SECTIONS = [
@@ -91,7 +91,7 @@ export default function CookiesPage() {
   return (
     <LegalLayout
       title="Cookie Policy"
-      subtitle="This policy explains exactly what cookies and similar technologies CodeLearn sets, why, and how you can control them."
+      subtitle="This policy explains exactly what cookies and similar technologies Zentax sets, why, and how you can control them."
       lastUpdated="February 1, 2026"
       sections={SECTIONS}
     >
@@ -109,7 +109,7 @@ export default function CookiesPage() {
           technologies collectively.
         </LegalP>
         <LegalP>
-          Cookies set by CodeLearn.io are &quot;first-party&quot; cookies.
+          Cookies set by Zentax.io are &quot;first-party&quot; cookies.
           Cookies set by our partners and service providers are
           &quot;third-party&quot; cookies.
         </LegalP>
@@ -308,7 +308,7 @@ export default function CookiesPage() {
         <LegalP>
           For questions about our use of cookies, contact us at{" "}
           <strong className="font-medium text-violet-400">
-            privacy@codelearn.io
+            privacy@zentax.io
           </strong>
           .
         </LegalP>

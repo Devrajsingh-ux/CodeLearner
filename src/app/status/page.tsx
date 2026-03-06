@@ -10,8 +10,8 @@ import type { Metadata } from "next";
 import { SubscribeForm } from "@/components/status/SubscribeForm";
 
 export const metadata: Metadata = {
-  title: "System Status — CodeLearn",
-  description: "Live operational status for all CodeLearn services.",
+  title: "System Status — Zentax",
+  description: "Live operational status for all Zentax services.",
 };
 
 type ServiceStatus = "operational" | "degraded" | "partial" | "outage";
@@ -34,7 +34,7 @@ interface Incident {
 const SERVICES: Service[] = [
   {
     name: "Web application",
-    description: "codelearn.io — main learner interface",
+    description: "zentax.io — main learner interface",
     status: "operational",
   },
   {

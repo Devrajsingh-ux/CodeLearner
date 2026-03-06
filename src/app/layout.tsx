@@ -1,8 +1,7 @@
-import type { Metadata, Viewport } from "next";
+﻿import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Footer } from "@/components/layout/Footer";
-import { Navbar } from "@/components/layout/Navbar";
+import { AppShell } from "@/components/layout/AppShell";
 import { AuthProvider } from "@/context/AuthContext";
 
 const geistSans = Geist({
@@ -17,8 +16,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "CodeLearn — Master Coding. Build the Future.",
-    template: "%s — CodeLearn",
+    default: "Zentax — Master Coding. Build the Future.",
+    template: "%s — Zentax",
   },
   description:
     "Expert-crafted coding courses with an in-browser editor, project-based learning, and a community of 285k+ developers. Free forever plan.",
@@ -32,19 +31,19 @@ export const metadata: Metadata = {
     "Next.js",
     "Python",
   ],
-  authors: [{ name: "CodeLearn" }],
+  authors: [{ name: "Zentax" }],
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://codelearn.io",
-    siteName: "CodeLearn",
-    title: "CodeLearn — Master Coding. Build the Future.",
+    url: "https://zentax.io",
+    siteName: "Zentax",
+    title: "Zentax — Master Coding. Build the Future.",
     description:
       "Expert-crafted coding courses with an in-browser editor and 285k+ learners.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "CodeLearn — Master Coding. Build the Future.",
+    title: "Zentax — Master Coding. Build the Future.",
   },
   robots: {
     index: true,
@@ -69,12 +68,10 @@ export default function RootLayout({
       >
         <AuthProvider>
           {/*
-            Navbar is rendered on all routes.
-            Auth pages and full-screen lesson pages control their own top bar.
+            AppShell renders Navbar + Footer on all public routes.
+            /admin/* routes suppress both — the admin layout owns its chrome.
           */}
-          <Navbar />
-          {children}
-          <Footer />
+          <AppShell>{children}</AppShell>
         </AuthProvider>
       </body>
     </html>

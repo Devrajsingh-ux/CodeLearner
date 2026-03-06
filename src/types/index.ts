@@ -78,6 +78,40 @@ export interface Stat {
   description: string;
 }
 
+// ── Problems ─────────────────────────────────────────────────────────────────
+
+export type ProblemDifficulty = "Easy" | "Medium" | "Hard";
+
+export interface ProblemExample {
+  input: string;
+  output: string;
+  explanation?: string;
+}
+
+export interface Problem {
+  id: string;
+  number: number;
+  title: string;
+  difficulty: ProblemDifficulty;
+  tags: string[];
+  acceptance: number;
+  description: string;
+  examples: ProblemExample[];
+  constraints: string[];
+  hints: string[];
+  starterCode: Partial<Record<string, string>>;
+}
+
+export interface SupportedLanguage {
+  id: string;
+  label: string;
+  monacoId: string;
+  icon: string;
+  color: string;
+  judge0Id: number;
+  fileExt: string;
+}
+
 export interface AuthUser {
   id: string;
   name: string;

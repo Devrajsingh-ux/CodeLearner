@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { RegisterForm } from "@/components/auth/RegisterForm";
 
 export const metadata: Metadata = {
-  title: "Create account — CodeLearn",
-  description: "Join 285,000+ developers on CodeLearn. Free forever.",
+  title: "Create account — Zentax",
+  description: "Join 285,000+ developers on Zentax. Free forever.",
 };
 
 export default function RegisterPage() {

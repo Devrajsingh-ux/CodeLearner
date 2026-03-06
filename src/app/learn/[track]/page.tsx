@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const t = tracks.find((t) => t.slug === slug);
   if (!t) return { title: "Course not found" };
   return {
-    title: `${t.title} — CodeLearn`,
+    title: `${t.title} — Zentax`,
     description: t.description,
   };
 }

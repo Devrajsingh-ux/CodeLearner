@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 import { AlertCircle, ArrowRight, Eye, EyeOff, Lock, Mail } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -46,6 +46,8 @@ function GoogleIcon() {
 export function LoginForm() {
   const { login } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -69,7 +71,16 @@ export function LoginForm() {
     if (result.error) {
       setError(result.error);
     } else {
-      router.push("/dashboard");
+      // Resolve destination: explicit redirect param → role-based default
+      const stored = localStorage.getItem("cl_user");
+      const loggedIn = stored ? (JSON.parse(stored) as { role: string }) : null;
+      if (redirectTo) {
+        router.push(redirectTo);
+      } else if (loggedIn?.role === "admin") {
+        router.push("/admin/dashboard");
+      } else {
+        router.push("/dashboard");
+      }
     }
   }
 
@@ -184,17 +195,7 @@ export function LoginForm() {
           Sign in
         </Button>
 
-        {/* Demo badge */}
-        <div className="rounded-xl border border-violet-500/20 bg-violet-500/5 px-4 py-3 text-center">
-          <p className="text-xs text-zinc-500 mb-1 font-medium uppercase tracking-wider">
-            Demo credentials
-          </p>
-          <p className="text-xs font-mono">
-            <span className="text-zinc-300">demo@codelearn.io</span>
-            <span className="text-zinc-600 mx-1.5">/</span>
-            <span className="text-zinc-300">demo1234</span>
-          </p>
-        </div>
+        {/* Removed demo credentials block — Appwrite handles real accounts */}
       </form>
     </div>
   );

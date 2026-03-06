@@ -35,7 +35,7 @@ export function CTA() {
               </h2>
 
               <p className="mx-auto mt-4 max-w-xl text-base text-zinc-400 sm:mt-5 sm:text-lg">
-                Join 485,000+ developers who chose CodeLearn to sharpen their
+                Join 485,000+ developers who chose Zentax to sharpen their
                 skills, build real products, and land better jobs.
               </p>
 

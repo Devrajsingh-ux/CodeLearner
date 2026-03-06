@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const t = tracks.find((t) => t.slug === slug);
   const num = Number(lesson.replace("lesson-", ""));
   if (!t) return { title: "Lesson not found" };
-  return { title: `Lesson ${num} — ${t.title} — CodeLearn` };
+  return { title: `Lesson ${num} — ${t.title} — Zentax` };
 }
 
 export default async function LessonPage({ params }: Props) {

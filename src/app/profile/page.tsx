@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   AlertTriangle,
@@ -1059,7 +1059,7 @@ export default function ProfilePage() {
                 <Card>
                   <SectionHeading
                     title="Notification Preferences"
-                    description="Choose which emails and alerts you receive from CodeLearn."
+                    description="Choose which emails and alerts you receive from Zentax."
                   />
 
                   <div className="mb-4">
@@ -1186,7 +1186,7 @@ export default function ProfilePage() {
                       {
                         id: "learners",
                         label: "Learners only",
-                        desc: "Only signed-in CodeLearn members can view your profile.",
+                        desc: "Only signed-in Zentax members can view your profile.",
                       },
                       {
                         id: "private",
@@ -1305,7 +1305,7 @@ export default function ProfilePage() {
                     </h2>
                   </div>
                   <p className="mb-4 text-sm text-zinc-400">
-                    Permanently delete your CodeLearn account. This removes all
+                    Permanently delete your Zentax account. This removes all
                     progress, achievements, and data associated with your
                     account and{" "}
                     <strong className="text-zinc-200">cannot be undone</strong>.

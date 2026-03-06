@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import {
   LegalLayout,
   LegalLi,
@@ -9,9 +9,9 @@ import {
 } from "@/components/layout/LegalLayout";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — CodeLearn",
+  title: "Terms of Service — Zentax",
   description:
-    "The terms and conditions that govern your use of the CodeLearn platform.",
+    "The terms and conditions that govern your use of the Zentax platform.",
 };
 
 const SECTIONS = [
@@ -35,7 +35,7 @@ export default function TermsPage() {
   return (
     <LegalLayout
       title="Terms of Service"
-      subtitle="Please read these terms carefully before using CodeLearn. By accessing or using the platform you agree to be bound by them."
+      subtitle="Please read these terms carefully before using Zentax. By accessing or using the platform you agree to be bound by them."
       lastUpdated="February 1, 2026"
       sections={SECTIONS}
     >
@@ -43,8 +43,8 @@ export default function TermsPage() {
         <LegalP>
           These Terms of Service (&quot;Terms&quot;) constitute a legally
           binding agreement between you (&quot;User&quot;, &quot;you&quot;) and
-          CodeLearn Inc. (&quot;CodeLearn&quot;, &quot;we&quot;,
-          &quot;our&quot;) governing your access to and use of the CodeLearn
+          Zentax Inc. (&quot;Zentax&quot;, &quot;we&quot;,
+          &quot;our&quot;) governing your access to and use of the Zentax
           website and platform (the &quot;Service&quot;).
         </LegalP>
         <LegalP>
@@ -70,7 +70,7 @@ export default function TermsPage() {
           </LegalLi>
           <LegalLi>
             You must notify us immediately at{" "}
-            <LegalStrong>security@codelearn.io</LegalStrong> if you suspect
+            <LegalStrong>security@zentax.io</LegalStrong> if you suspect
             unauthorised access to your account.
           </LegalLi>
           <LegalLi>
@@ -86,13 +86,13 @@ export default function TermsPage() {
       <LegalSection id="content" title="Content & licences">
         <LegalP>
           <LegalStrong>Licence to use the Service.</LegalStrong> Subject to
-          these Terms, CodeLearn grants you a limited, non-exclusive,
+          these Terms, Zentax grants you a limited, non-exclusive,
           non-transferable, revocable licence to access and use the Service for
           personal, non-commercial learning purposes.
         </LegalP>
         <LegalP>
           <LegalStrong>Course content.</LegalStrong> Lesson text, video content,
-          exercise descriptions, and assessments are copyrighted by CodeLearn or
+          exercise descriptions, and assessments are copyrighted by Zentax or
           its content providers. You may not reproduce, redistribute, sell, or
           republish any course material without express written permission.
         </LegalP>
@@ -176,8 +176,8 @@ export default function TermsPage() {
 
       <LegalSection id="intellectual-property" title="Intellectual property">
         <LegalP>
-          The CodeLearn name, logo, brand assets, platform design, and all
-          original course content are the intellectual property of CodeLearn
+          The Zentax name, logo, brand assets, platform design, and all
+          original course content are the intellectual property of Zentax
           Inc. or its licensors, protected by copyright, trademark, and other
           applicable laws.
         </LegalP>
@@ -191,7 +191,7 @@ export default function TermsPage() {
         <LegalP>
           You retain ownership of content you create and post on the Service
           (forum posts, project showcases, code snippets shared publicly). By
-          posting, you grant CodeLearn a worldwide, royalty-free, sublicensable
+          posting, you grant Zentax a worldwide, royalty-free, sublicensable
           licence to use, reproduce, modify, and display that content for the
           purpose of operating and promoting the Service.
         </LegalP>
@@ -224,7 +224,7 @@ export default function TermsPage() {
 
       <LegalSection id="liability" title="Limitation of liability">
         <LegalP>
-          To the maximum extent permitted by applicable law, CodeLearn and its
+          To the maximum extent permitted by applicable law, Zentax and its
           directors, officers, employees, and contractors shall not be liable
           for any indirect, incidental, special, consequential, or punitive
           damages arising out of or relating to your use of the Service,
@@ -233,7 +233,7 @@ export default function TermsPage() {
         <LegalP>
           Our aggregate liability to you for any claim arising under these Terms
           shall not exceed the greater of (i) the total fees paid by you to
-          CodeLearn in the 12 months preceding the claim, or (ii) USD 100.
+          Zentax in the 12 months preceding the claim, or (ii) USD 100.
         </LegalP>
         <LegalP>
           Some jurisdictions do not allow limitation of certain damages; in
@@ -244,7 +244,7 @@ export default function TermsPage() {
 
       <LegalSection id="indemnification" title="Indemnification">
         <LegalP>
-          You agree to indemnify, defend, and hold harmless CodeLearn and its
+          You agree to indemnify, defend, and hold harmless Zentax and its
           affiliates, officers, agents, and employees from any claim, liability,
           damage, loss, and expense (including reasonable legal fees) arising
           from your use of the Service, your violation of these Terms, or your
@@ -299,9 +299,9 @@ export default function TermsPage() {
         <LegalP>
           For questions about these Terms, contact us at{" "}
           <strong className="font-medium text-violet-400">
-            legal@codelearn.io
+            legal@zentax.io
           </strong>{" "}
-          or by mail at CodeLearn Inc., 123 Market Street, Suite 400, San
+          or by mail at Zentax Inc., 123 Market Street, Suite 400, San
           Francisco, CA 94105, USA.
         </LegalP>
       </LegalSection>

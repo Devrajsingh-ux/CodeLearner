@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   createContext,
@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 import type { AuthUser } from "@/types";
+import { account } from "@/lib/appwrite";
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -19,38 +20,44 @@ interface AuthContextValue {
     email: string,
     password: string,
   ) => Promise<{ error?: string }>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 const STORAGE_KEY = "cl_user";
 
-// Demo accounts for local dev — replace with real API calls in production.
-const DEMO_USERS: Array<AuthUser & { password: string }> = [
-  {
-    id: "u1",
-    name: "Alex Dev",
-    email: "demo@codelearn.io",
-    password: "demo1234",
-    role: "student",
-    avatar: "AD",
-  },
-];
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Attempt to restore cached user immediately
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) setUser(JSON.parse(raw) as AuthUser);
     } catch {
       localStorage.removeItem(STORAGE_KEY);
-    } finally {
-      setIsLoading(false);
     }
+
+    // Verify session with Appwrite and refresh user info
+    (async () => {
+      try {
+        const acct = await account.get();
+        const mapped: AuthUser = {
+          id: (acct as any).$id || (acct as any).id || "",
+          name: (acct as any).name || "",
+          email: (acct as any).email || "",
+          role: "student",
+        };
+        setUser(mapped);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(mapped));
+      } catch {
+        // no active session or error — keep cached user if any
+      } finally {
+        setIsLoading(false);
+      }
+    })();
   }, []);
 
   const persist = useCallback((u: AuthUser | null) => {
@@ -61,23 +68,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(
     async (email: string, password: string) => {
-      // TODO: replace with `POST /api/auth/login` server action
-      await new Promise((r) => setTimeout(r, 700));
-      const found = DEMO_USERS.find(
-        (u) => u.email === email && u.password === password,
-      );
-      if (!found) return { error: "Invalid email or password." };
-      const { password: _pw, ...safe } = found;
-      persist(safe);
-      return {};
+      try {
+        // authenticate the user via email+password session
+        // Appwrite JS SDK exposes `createEmailPasswordSession` in this version
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        await account.createEmailPasswordSession(email, password);
+        const acct = await account.get();
+        const mapped: AuthUser = {
+          id: (acct as any).$id || (acct as any).id || "",
+          name: (acct as any).name || "",
+          email: (acct as any).email || "",
+          role: "student",
+        };
+        persist(mapped);
+        return {};
+      } catch (err: any) {
+        const msg = err?.message || "Login failed";
+        return { error: msg };
+      }
     },
     [persist],
   );
 
   const register = useCallback(
     async (name: string, email: string, password: string) => {
-      // TODO: replace with `POST /api/auth/register` server action
-      await new Promise((r) => setTimeout(r, 900));
       if (!name.trim() || name.trim().length < 2)
         return { error: "Name must be at least 2 characters." };
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
@@ -85,25 +100,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (password.length < 8)
         return { error: "Password must be at least 8 characters." };
 
-      const newUser: AuthUser = {
-        id: `u_${Date.now()}`,
-        name: name.trim(),
-        email: email.toLowerCase(),
-        role: "student",
-        avatar: name
-          .trim()
-          .split(" ")
-          .slice(0, 2)
-          .map((p) => p[0]?.toUpperCase())
-          .join(""),
-      };
-      persist(newUser);
-      return {};
+      try {
+        // Create a new Appwrite account. Use 'unique()' to let Appwrite generate an id
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        await account.create("unique()", email, password, name);
+
+        // After creating an account, create a session to sign the user in
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        await account.createEmailPasswordSession(email, password);
+
+        const acct = await account.get();
+        const mapped: AuthUser = {
+          id: (acct as any).$id || (acct as any).id || "",
+          name: (acct as any).name || name,
+          email: (acct as any).email || email,
+          role: "student",
+        };
+        persist(mapped);
+        return {};
+      } catch (err: any) {
+        const msg = err?.message || "Registration failed";
+        return { error: msg };
+      }
     },
     [persist],
   );
 
-  const logout = useCallback(() => persist(null), [persist]);
+  const logout = useCallback(async () => {
+    try {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      await account.deleteSession("current");
+    } catch {
+      // ignore errors
+    }
+    persist(null);
+  }, [persist]);
 
   return (
     <AuthContext.Provider value={{ user, isLoading, login, register, logout }}>

@@ -11,9 +11,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "About — CodeLearn",
+  title: "About — Zentax",
   description:
-    "Learn about CodeLearn's mission to make world-class coding education accessible to every developer on the planet.",
+    "Learn about Zentax's mission to make world-class coding education accessible to every developer on the planet.",
 };
 
 const STATS = [
@@ -28,7 +28,7 @@ const VALUES = [
     icon: Lightbulb,
     title: "Learn by Doing",
     description:
-      "Theory without practice is forgotten within days. Every concept on CodeLearn ships with real exercises, projects, and an in-browser code editor so you build muscle memory from day one.",
+      "Theory without practice is forgotten within days. Every concept on Zentax ships with real exercises, projects, and an in-browser code editor so you build muscle memory from day one.",
   },
   {
     icon: Globe,
@@ -111,7 +111,7 @@ const TIMELINE = [
   {
     year: "2021",
     title: "The idea",
-    body: "After watching yet another promising engineer give up on coding because no platform met them where they were, Maya and Jordan sketched CodeLearn on a whiteboard in a San Francisco café.",
+    body: "After watching yet another promising engineer give up on coding because no platform met them where they were, Maya and Jordan sketched Zentax on a whiteboard in a San Francisco café.",
   },
   {
     year: "2022",
@@ -121,7 +121,7 @@ const TIMELINE = [
   {
     year: "2023",
     title: "Public launch",
-    body: "CodeLearn opened its doors. 40 000 learners signed up in the first 30 days. The JavaScript track topped Product Hunt.",
+    body: "Zentax opened its doors. 40 000 learners signed up in the first 30 days. The JavaScript track topped Product Hunt.",
   },
   {
     year: "2024",
@@ -161,7 +161,7 @@ export default function AboutPage() {
             </span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-zinc-400">
-            CodeLearn exists to give every developer — regardless of background,
+            Zentax exists to give every developer — regardless of background,
             budget, or timezone — a clear, engaging, and effective path from
             first line of code to production-ready engineer.
           </p>

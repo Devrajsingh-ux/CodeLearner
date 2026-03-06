@@ -1,5 +1,5 @@
----
-name: buildCodeLearnPlatform
+﻿---
+name: buildZentaxPlatform
 description: Universal God Mode Protocol for a Production-Grade Coding Learning Platform
 ---
 # ROLE: Senior Multi-Stack Architect (God Mode)

@@ -66,7 +66,7 @@ export function Navbar() {
             <Code2 className="h-4 w-4 text-white" />
           </span>
           <span className="text-lg font-bold text-white tracking-tight">
-            Code<span className="text-violet-400">Learn</span>
+            Zentax
           </span>
         </Link>
 
@@ -87,6 +87,21 @@ export function Navbar() {
               </Link>
             </li>
           ))}
+          {user && (
+            <li>
+              <Link
+                href="/problems"
+                className={cn(
+                  "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-200",
+                  pathname === "/problems"
+                    ? "bg-violet-500/15 text-violet-400"
+                    : "text-zinc-400 hover:text-white hover:bg-white/8",
+                )}
+              >
+                Problems
+              </Link>
+            </li>
+          )}
         </ul>
 
         {/* Desktop CTA */}
@@ -205,6 +220,14 @@ export function Navbar() {
                 {label}
               </Link>
             ))}
+            {user && (
+              <Link
+                href="/problems"
+                className="block rounded-xl px-4 py-2.5 text-base font-medium text-zinc-300 hover:bg-white/8 hover:text-white transition-colors"
+              >
+                Problems
+              </Link>
+            )}
             <div className="mt-4 flex flex-col gap-2 pt-4 border-t border-white/8">
               {user ? (
                 <>

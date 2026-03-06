@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Press — CodeLearn",
+  title: "Press — Zentax",
   description:
-    "Media resources, recent coverage, brand assets, and press contact for CodeLearn.",
+    "Media resources, recent coverage, brand assets, and press contact for Zentax.",
 };
 
 const COVERAGE = [
@@ -14,7 +14,7 @@ const COVERAGE = [
     logo: "TC",
     logoBg: "from-green-500 to-emerald-600",
     title:
-      "CodeLearn raises $12M to make coding education genuinely free — and actually good",
+      "Zentax raises $12M to make coding education genuinely free — and actually good",
     date: "March 2024",
     href: "#",
   },
@@ -32,7 +32,7 @@ const COVERAGE = [
     logo: "HN",
     logoBg: "from-orange-500 to-red-600",
     title:
-      "Ask HN: Why is CodeLearn's in-browser editor faster than every other platform?",
+      "Ask HN: Why is Zentax's in-browser editor faster than every other platform?",
     date: "October 2023",
     href: "#",
   },
@@ -50,7 +50,7 @@ const COVERAGE = [
     logo: "D.",
     logoBg: "from-zinc-600 to-zinc-800",
     title:
-      "How CodeLearn built a Monaco Editor integration that starts in under 200 ms",
+      "How Zentax built a Monaco Editor integration that starts in under 200 ms",
     date: "June 2023",
     href: "#",
   },
@@ -59,7 +59,7 @@ const COVERAGE = [
     logo: "IQ",
     logoBg: "from-blue-600 to-cyan-600",
     title:
-      "CodeLearn's architecture: React Server Components at 285 000 concurrent learners",
+      "Zentax's architecture: React Server Components at 285 000 concurrent learners",
     date: "February 2025",
     href: "#",
   },
@@ -69,22 +69,22 @@ const BRAND_ASSETS = [
   {
     name: "Logo package (SVG + PNG)",
     description: "Full colour, white, and dark variants at all resolutions.",
-    file: "/brand/codelearn-logos.zip",
+    file: "/brand/zentax-logos.zip",
   },
   {
     name: "Press photography",
     description: "High-resolution product screenshots and team photos.",
-    file: "/brand/codelearn-press-photos.zip",
+    file: "/brand/zentax-press-photos.zip",
   },
   {
     name: "Brand guidelines (PDF)",
     description: "Colour palette, typography rules, and usage do's & don'ts.",
-    file: "/brand/codelearn-brand-guidelines.pdf",
+    file: "/brand/zentax-brand-guidelines.pdf",
   },
   {
     name: "One-page company fact sheet",
     description: "Key stats, leadership bios, and funding summary.",
-    file: "/brand/codelearn-factsheet.pdf",
+    file: "/brand/zentax-factsheet.pdf",
   },
 ];
 
@@ -120,14 +120,14 @@ export default function PressPage() {
             </span>
           </h1>
           <p className="mt-4 text-lg text-zinc-400">
-            Resources for journalists and content creators covering CodeLearn.
+            Resources for journalists and content creators covering Zentax.
             For enquiries not answered here, email us directly.
           </p>
           <a
-            href="mailto:press@codelearn.io"
+            href="mailto:press@zentax.io"
             className="mt-6 inline-flex items-center gap-2 rounded-xl border border-violet-500/40 bg-violet-500/10 px-5 py-2.5 text-sm font-medium text-violet-300 transition-colors hover:bg-violet-500/20"
           >
-            <Mail className="h-4 w-4" /> press@codelearn.io
+            <Mail className="h-4 w-4" /> press@zentax.io
           </a>
         </div>
       </section>
@@ -222,10 +222,10 @@ export default function PressPage() {
             </p>
             <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
               <a
-                href="mailto:press@codelearn.io"
+                href="mailto:press@zentax.io"
                 className="inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-violet-600 to-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-500/25 transition-all hover:from-violet-500 hover:to-indigo-500"
               >
-                <Mail className="h-4 w-4" /> press@codelearn.io
+                <Mail className="h-4 w-4" /> press@zentax.io
               </a>
               <Link
                 href="/about"

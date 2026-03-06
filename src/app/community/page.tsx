@@ -14,7 +14,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Community — CodeLearn",
+  title: "Community — Zentax",
   description:
     "Connect with 285K+ developers, ask questions, share your projects, and level up together.",
 };
@@ -26,7 +26,7 @@ const CHANNELS = [
     description:
       "Our primary hub — 28 topic channels, daily office hours, job board, and showcase rooms. 40 000+ members.",
     cta: "Join Discord",
-    href: "https://discord.gg/codelearn",
+    href: "https://discord.gg/zentax",
     color: "text-indigo-400",
     bg: "from-indigo-500/15 to-violet-500/15 border-indigo-500/25",
   },
@@ -36,7 +36,7 @@ const CHANNELS = [
     description:
       "Open-source exercise repo with 2 400+ hands-on problems. File issues, submit PRs, or start a discussion.",
     cta: "View on GitHub",
-    href: "https://github.com/codelearn-io",
+    href: "https://github.com/zentax-io",
     color: "text-zinc-200",
     bg: "from-zinc-700/20 to-zinc-800/20 border-zinc-600/25",
   },
@@ -260,7 +260,7 @@ export default function CommunityPage() {
                   </p>
                 </div>
                 <a
-                  href="https://discord.gg/codelearn"
+                  href="https://discord.gg/zentax"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex shrink-0 items-center gap-1.5 self-start rounded-xl border border-violet-500/30 bg-violet-500/10 px-3.5 py-2 text-xs font-semibold text-violet-300 transition-colors hover:bg-violet-500/20"
@@ -290,7 +290,7 @@ export default function CommunityPage() {
                 <Users className="h-4 w-4" /> Create free account
               </a>
               <a
-                href="https://discord.gg/codelearn"
+                href="https://discord.gg/zentax"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-7 py-3 text-sm font-semibold text-white transition-all hover:bg-white/10"

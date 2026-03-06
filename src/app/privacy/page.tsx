@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import {
   LegalLayout,
   LegalLi,
@@ -9,8 +9,8 @@ import {
 } from "@/components/layout/LegalLayout";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — CodeLearn",
-  description: "How CodeLearn collects, uses, and protects your personal data.",
+  title: "Privacy Policy — Zentax",
+  description: "How Zentax collects, uses, and protects your personal data.",
 };
 
 const SECTIONS = [
@@ -32,17 +32,17 @@ export default function PrivacyPage() {
   return (
     <LegalLayout
       title="Privacy Policy"
-      subtitle="This policy explains what personal data CodeLearn collects, why we collect it, and how you can control it."
+      subtitle="This policy explains what personal data Zentax collects, why we collect it, and how you can control it."
       lastUpdated="February 1, 2026"
       sections={SECTIONS}
     >
       <LegalSection id="overview" title="Overview">
         <LegalP>
-          CodeLearn (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) is
+          Zentax (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) is
           committed to protecting your privacy. This Privacy Policy describes
           how we collect, use, disclose, and safeguard your personal data when
           you use our website located at{" "}
-          <strong className="font-medium text-zinc-200">codelearn.io</strong>{" "}
+          <strong className="font-medium text-zinc-200">zentax.io</strong>{" "}
           and related services (collectively, the &quot;Platform&quot;).
         </LegalP>
         <LegalP>
@@ -147,7 +147,7 @@ export default function PrivacyPage() {
           <LegalLi>
             <LegalStrong>Legal requirements.</LegalStrong> We may disclose data
             to government authorities where required by applicable law or to
-            protect the rights, property, or safety of CodeLearn, our users, or
+            protect the rights, property, or safety of Zentax, our users, or
             the public.
           </LegalLi>
           <LegalLi>
@@ -220,7 +220,7 @@ export default function PrivacyPage() {
         <LegalP>
           To exercise any of these rights, email{" "}
           <strong className="font-medium text-violet-400">
-            privacy@codelearn.io
+            privacy@zentax.io
           </strong>
           . We will respond within 30 days (or 45 days where legally permitted
           for complex requests).
@@ -270,7 +270,7 @@ export default function PrivacyPage() {
           secure. We cannot guarantee absolute security. If you discover a
           vulnerability, please disclose it responsibly to{" "}
           <strong className="font-medium text-violet-400">
-            security@codelearn.io
+            security@zentax.io
           </strong>
           .
         </LegalP>
@@ -283,7 +283,7 @@ export default function PrivacyPage() {
           a child has provided us personal data, please contact us immediately
           at{" "}
           <strong className="font-medium text-violet-400">
-            privacy@codelearn.io
+            privacy@zentax.io
           </strong>{" "}
           and we will delete it promptly.
         </LegalP>
@@ -298,7 +298,7 @@ export default function PrivacyPage() {
         </LegalP>
         <LegalP>
           You may request a copy of the applicable SCCs by emailing
-          privacy@codelearn.io.
+          privacy@zentax.io.
         </LegalP>
       </LegalSection>
 
@@ -326,19 +326,19 @@ export default function PrivacyPage() {
 
       <LegalSection id="contact" title="Contact us">
         <LegalP>
-          Data controller: <LegalStrong>CodeLearn Inc.</LegalStrong>, 123 Market
+          Data controller: <LegalStrong>Zentax Inc.</LegalStrong>, 123 Market
           Street, Suite 400, San Francisco CA 94105, USA.
         </LegalP>
         <LegalP>
           Data Protection Officer:{" "}
           <strong className="font-medium text-violet-400">
-            dpo@codelearn.io
+            dpo@zentax.io
           </strong>
         </LegalP>
         <LegalP>
           General privacy enquiries:{" "}
           <strong className="font-medium text-violet-400">
-            privacy@codelearn.io
+            privacy@zentax.io
           </strong>
         </LegalP>
       </LegalSection>

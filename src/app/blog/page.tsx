@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Blog — CodeLearn",
+  title: "Blog — Zentax",
   description:
-    "Tutorials, deep-dives, engineering culture, and career advice from the CodeLearn team and community.",
+    "Tutorials, deep-dives, engineering culture, and career advice from the Zentax team and community.",
 };
 
 type Category =
@@ -42,7 +42,7 @@ const POSTS: Post[] = [
     slug: "react-19-new-features",
     title: "React 19 in Production: What Actually Changed",
     excerpt:
-      "Server Components are stable, the compiler is real, and the mental model has shifted. We spent three months migrating CodeLearn's own dashboard — here's what we learned.",
+      "Server Components are stable, the compiler is real, and the mental model has shifted. We spent three months migrating Zentax's own dashboard — here's what we learned.",
     category: "Engineering",
     author: {
       name: "Jordan Lee",
@@ -73,7 +73,7 @@ const POSTS: Post[] = [
     slug: "landing-your-first-dev-job",
     title: "How to Land Your First Developer Job in 2026",
     excerpt:
-      "The market is different but by no means closed. We analysed 400 successful CodeLearn graduates and distilled eight repeatable patterns.",
+      "The market is different but by no means closed. We analysed 400 successful Zentax graduates and distilled eight repeatable patterns.",
     category: "Career",
     author: {
       name: "Priya Sharma",
@@ -180,7 +180,7 @@ export default function BlogPage() {
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-violet-500/25 bg-violet-500/10 px-4 py-1.5 text-sm font-medium text-violet-300">
             <BookOpen className="h-3.5 w-3.5" />
-            The CodeLearn Blog
+            The Zentax Blog
           </div>
           <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-6xl">
             Ideas &{" "}
@@ -190,7 +190,7 @@ export default function BlogPage() {
           </h1>
           <p className="mt-4 text-lg text-zinc-400">
             Tutorials, engineering deep-dives, career playbooks, and everything
-            happening inside the CodeLearn community.
+            happening inside the Zentax community.
           </p>
         </div>
       </section>
