@@ -6,21 +6,12 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { account } from "@/lib/appwrite";
+import { useAuth } from "@/context/AuthContext";
 import { checkRateLimit, clearAttempts, recordFailedAttempt } from "@/lib/rateLimit";
-import type { AuthUser } from "@/types";
-
-// ── session helpers (reuse the same HttpOnly cookie API) ────────────────────
-async function saveSession(u: AuthUser) {
-  await fetch("/api/auth/session", {
-    method: "POST",
-    credentials: "same-origin",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ user: u }),
-  });
-}
 
 export function AdminLoginForm() {
   const router = useRouter();
+  const { reloadUser } = useAuth();
 
   const [email, setEmail]           = useState("");
   const [password, setPassword]     = useState("");
@@ -47,21 +38,22 @@ export function AdminLoginForm() {
     setIsLoading(true);
 
     try {
+      // Ensure no stale session exists (prevents "Creation of a session is prohibited when a session is active")
+      try {
+        // ignore if there's no session or deletion fails
+        // @ts-ignore
+        await account.deleteSession("current");
+      } catch {}
+
       // Authenticate via Appwrite
-      // @ts-ignore – SDK exposes createEmailPasswordSession in this version
       await account.createEmailPasswordSession(email, password);
 
-      const acct = await account.get();
+      // Reload AuthContext state (reads prefs.role from Appwrite and updates React state)
+      const loggedInUser = await reloadUser();
 
-      // ── Strict role check — only "admin" users may enter ────────────────
-      // Appwrite stores the role in user prefs; fall back to default.
-      const prefs   = (acct as any).prefs ?? {};
-      const role    = prefs.role ?? "student";
-
-      if (role !== "admin") {
+      if (!loggedInUser || loggedInUser.role !== "admin") {
         // Sign them back out immediately — wrong door
         try {
-          // @ts-ignore
           await account.deleteSession("current");
         } catch {}
         const result = recordFailedAttempt(email);
@@ -71,15 +63,7 @@ export function AdminLoginForm() {
         return;
       }
 
-      const mapped: AuthUser = {
-        id    : (acct as any).$id   || "",
-        name  : (acct as any).name  || "",
-        email : (acct as any).email || "",
-        role  : "admin",
-      };
-
       clearAttempts(email);
-      await saveSession(mapped);
       router.replace("/admin/dashboard");
     } catch (err: any) {
       const result = recordFailedAttempt(email);

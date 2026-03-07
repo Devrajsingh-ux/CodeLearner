@@ -27,6 +27,8 @@ interface AuthContextValue {
     password: string,
   ) => Promise<{ error?: string; needsVerification?: boolean }>;
   logout: () => Promise<void>;
+  /** Re-fetches the current Appwrite session and updates context state. */
+  reloadUser: () => Promise<AuthUser | null>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -75,13 +77,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const cached = await fetchSession();
         if (cached) setUser(cached);
 
-        // Verify with Appwrite and refresh
+        // Verify with Appwrite and refresh (read prefs.role too)
         const acct = await account.get();
+        const prefs = (acct as any).prefs ?? {};
+        const role: AuthUser["role"] =
+          prefs.role === "admin" || prefs.role === "instructor"
+            ? prefs.role
+            : "student";
         const mapped: AuthUser = {
           id: (acct as any).$id || (acct as any).id || "",
           name: (acct as any).name || "",
           email: (acct as any).email || "",
-          role: "student",
+          role,
         };
         setUser(mapped);
         await saveSession(mapped);
@@ -108,13 +115,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (rl.blocked) return { error: rl.message ?? "Account temporarily locked." };
 
       try {
+        // Ensure no existing session is active before creating a new one
+        try {
+          // @ts-ignore
+          await account.deleteSession("current");
+        } catch {}
+
         await account.createEmailPasswordSession(email, password);
         const acct = await account.get();
+        const prefs = (acct as any).prefs ?? {};
+        const role: AuthUser["role"] =
+          prefs.role === "admin" || prefs.role === "instructor"
+            ? prefs.role
+            : "student";
         const mapped: AuthUser = {
           id: (acct as any).$id || (acct as any).id || "",
           name: (acct as any).name || "",
           email: (acct as any).email || "",
-          role: "student",
+          role,
         };
         clearAttempts(email); // success — reset counter
         await persist(mapped);
@@ -158,6 +176,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         // Create a new Appwrite account — ID.unique() generates a valid unique ID
         const created = await account.create(ID.unique(), email, password, name);
+
+        // Ensure no existing session is active before creating a new one
+        try {
+          // @ts-ignore
+          await account.deleteSession("current");
+        } catch {}
 
         // Auto sign-in so we can call createEmailVerification (requires active session)
         await account.createEmailPasswordSession(email, password);
@@ -203,6 +227,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [persist],
   );
 
+  const reloadUser = useCallback(async (): Promise<AuthUser | null> => {
+    try {
+      const acct = await account.get();
+      const prefs = (acct as any).prefs ?? {};
+      const role: AuthUser["role"] =
+        prefs.role === "admin" || prefs.role === "instructor"
+          ? prefs.role
+          : "student";
+      const mapped: AuthUser = {
+        id: (acct as any).$id || (acct as any).id || "",
+        name: (acct as any).name || "",
+        email: (acct as any).email || "",
+        role,
+      };
+      setUser(mapped);
+      await saveSession(mapped);
+      return mapped;
+    } catch {
+      setUser(null);
+      await clearSession();
+      return null;
+    }
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       await account.deleteSession("current");
@@ -213,7 +261,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [persist]);
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, register, logout, reloadUser }}>
       {children}
     </AuthContext.Provider>
   );
