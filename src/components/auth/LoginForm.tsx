@@ -44,7 +44,7 @@ function GoogleIcon() {
 }
 
 export function LoginForm() {
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect");
@@ -71,16 +71,10 @@ export function LoginForm() {
     if (result.error) {
       setError(result.error);
     } else {
-      // Resolve destination: explicit redirect param → role-based default
-      const stored = localStorage.getItem("cl_user");
-      const loggedIn = stored ? (JSON.parse(stored) as { role: string }) : null;
-      if (redirectTo) {
-        router.push(redirectTo);
-      } else if (loggedIn?.role === "admin") {
-        router.push("/admin/dashboard");
-      } else {
-        router.push("/dashboard");
-      }
+      // After login, user state updates asynchronously.
+      // Redirect to explicit ?redirect param, otherwise always go to /dashboard.
+      // The dashboard handles further role-based routing (admin → /admin/dashboard).
+      router.push(redirectTo ?? "/dashboard");
     }
   }
 

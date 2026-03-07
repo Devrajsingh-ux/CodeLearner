@@ -1,5 +1,6 @@
 /**
- * Next.js Edge Middleware — applied to every non-static route.
+ * Next.js Proxy (Edge Middleware) — applied to every non-static route.
+ * File renamed from middleware.ts → proxy.ts for Next.js 16 compatibility.
  *
  * Injects security headers on every response:
  *   • Content-Security-Policy  (CSP)
@@ -43,7 +44,7 @@ function buildCsp(): string {
   ].join("; ");
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const response = NextResponse.next();
 
   response.headers.set("Content-Security-Policy", buildCsp());

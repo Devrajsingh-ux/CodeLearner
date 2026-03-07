@@ -9,7 +9,7 @@ import {
   useState,
 } from "react";
 import type { AuthUser } from "@/types";
-import { account } from "@/lib/appwrite";
+import { account, ID } from "@/lib/appwrite";
 import { DEFAULT_SETTINGS } from "@/data/admin";
 import {
   checkRateLimit,
@@ -108,8 +108,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (rl.blocked) return { error: rl.message ?? "Account temporarily locked." };
 
       try {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         await account.createEmailPasswordSession(email, password);
         const acct = await account.get();
         const mapped: AuthUser = {
@@ -158,16 +156,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (rl.blocked) return { error: rl.message ?? "Too many attempts." };
 
       try {
-        // Create a new Appwrite account. Use 'unique()' to let Appwrite generate an id
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        const created = await account.create("unique()", email, password, name);
+        // Create a new Appwrite account — ID.unique() generates a valid unique ID
+        const created = await account.create(ID.unique(), email, password, name);
 
-        // Send email verification link (Appwrite will include userId+secret in redirect)
+        // Auto sign-in so we can call createEmailVerification (requires active session)
+        await account.createEmailPasswordSession(email, password);
+
+        // Send email verification link
         try {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          await account.createEmailVerification({ url: `${DEFAULT_SETTINGS.siteUrl}/auth/verify` });
+          await account.createEmailVerification(
+            `${DEFAULT_SETTINGS.siteUrl}/auth/verify`,
+          );
         } catch (verr) {
           // non-fatal — log and continue
           console.error("createEmailVerification failed", verr);
@@ -185,10 +184,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return { needsVerification: true };
         }
 
-        // Otherwise sign the user in and persist
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        await account.createEmailPasswordSession(email, password);
+        // Session was already created above — just fetch the account details
         const acct = await account.get();
         const mapped: AuthUser = {
           id: (acct as any).$id || (acct as any).id || "",
@@ -209,8 +205,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     try {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       await account.deleteSession("current");
     } catch {
       // ignore errors

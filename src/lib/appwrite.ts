@@ -1,4 +1,4 @@
-import { Client, Account, Databases } from "appwrite";
+import { Client, Account, Databases, ID } from "appwrite";
 
 // NEXT_PUBLIC_ env vars are baked into the browser bundle at build time.
 // Hardcoded strings act as safe fallbacks so the SDK is always configured
@@ -18,4 +18,4 @@ const client = new Client()
 const account = new Account(client);
 const databases = new Databases(client);
 
-export { client, account, databases };
+export { client, account, databases, ID };
