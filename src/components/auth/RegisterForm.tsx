@@ -80,6 +80,7 @@ export function RegisterForm() {
   const [agreed, setAgreed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [verificationSent, setVerificationSent] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -96,13 +97,10 @@ export function RegisterForm() {
 
     if (result.error) {
       setError(result.error);
+      setVerificationSent(false);
     } else if (result.needsVerification) {
       setError("");
-      // show a success message instructing the user to check email
-      setIsLoading(false);
-      setTimeout(() => {
-        alert("A verification email was sent. Please check your inbox and verify your email before signing in.");
-      }, 50);
+      setVerificationSent(true);
     } else {
       router.push("/dashboard");
     }
@@ -189,6 +187,12 @@ export function RegisterForm() {
         >
           {error}
         </p>
+      )}
+
+      {verificationSent && (
+        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-sm text-emerald-200">
+          A verification email was sent. Please check your inbox and follow the link to verify your email before signing in.
+        </div>
       )}
 
       <Button

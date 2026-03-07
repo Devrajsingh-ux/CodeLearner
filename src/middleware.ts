@@ -18,27 +18,35 @@ import type { NextRequest } from "next/server";
 // 'unsafe-inline' + 'unsafe-eval' are needed for Monaco Editor / React Dev Tools.
 // Tighten further in production by removing 'unsafe-eval' once Monaco is
 // configured with a Web Worker URL / nonce approach.
-const CSP_DIRECTIVES = [
-  "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "font-src 'self' https://fonts.gstatic.com data:",
-  "img-src 'self' data: blob: https:",
-  // Appwrite endpoint must be whitelisted for XHR/fetch
-  "connect-src 'self' https://sgp.cloud.appwrite.io wss://sgp.cloud.appwrite.io",
-  "worker-src 'self' blob:",    // Monaco Web Workers
-  "frame-src 'none'",
-  "frame-ancestors 'none'",
-  "object-src 'none'",
-  "base-uri 'self'",
-  "form-action 'self'",
-  "upgrade-insecure-requests",
-].join("; ");
+function buildCsp(): string {
+  // Derive the Appwrite origin from the env var so CSP stays in sync
+  const appwriteEndpoint =
+    process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT ?? "https://sgp.cloud.appwrite.io/v1";
+  const appwriteOrigin = new URL(appwriteEndpoint).origin;
+  const appwriteWs = appwriteOrigin.replace(/^https/, "wss");
+
+  return [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com data:",
+    "img-src 'self' data: blob: https:",
+    // Appwrite endpoint dynamically whitelisted
+    `connect-src 'self' ${appwriteOrigin} ${appwriteWs}`,
+    "worker-src 'self' blob:",    // Monaco Web Workers
+    "frame-src 'none'",
+    "frame-ancestors 'none'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "upgrade-insecure-requests",
+  ].join("; ");
+}
 
 export function middleware(request: NextRequest) {
   const response = NextResponse.next();
 
-  response.headers.set("Content-Security-Policy", CSP_DIRECTIVES);
+  response.headers.set("Content-Security-Policy", buildCsp());
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
