@@ -16,12 +16,7 @@ export const metadata: Metadata = {
     "Learn about Zentax's mission to make world-class coding education accessible to every developer on the planet.",
 };
 
-const STATS = [
-  { value: "285K+", label: "Active learners" },
-  { value: "100+", label: "Course tracks" },
-  { value: "4.9★", label: "Average rating" },
-  { value: "92%", label: "Completion rate" },
-];
+const STATS: { value: string; label: string }[] = [];
 
 const VALUES = [
   {
@@ -130,12 +125,42 @@ const TIMELINE = [
   },
   {
     year: "2025",
-    title: "285K learners",
+    title: "Quarter-million milestone",
     body: "Crossed a quarter-million developers. Opened our open-source exercise repository and shipped the AI code-review assistant.",
   },
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  // Fetch real platform stats server-side
+  let platformStats: { activeLearners: number; courseTracks: number; completionRate: number } = {
+    activeLearners: 0,
+    courseTracks: 0,
+    completionRate: 0,
+  };
+  try {
+    const base = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    const res = await fetch(`${base}/api/platform/stats`, { next: { revalidate: 3600 } });
+    if (res.ok) platformStats = await res.json();
+  } catch { /* ignore — fallback to zeros */ }
+
+  const stats = [
+    {
+      value: platformStats.activeLearners > 0
+        ? `${(platformStats.activeLearners / 1000).toFixed(0)}K+`
+        : "—",
+      label: "Active learners",
+    },
+    {
+      value: platformStats.courseTracks > 0 ? `${platformStats.courseTracks}+` : "—",
+      label: "Course tracks",
+    },
+    { value: "4.9★", label: "Average rating" },
+    {
+      value: platformStats.completionRate > 0 ? `${platformStats.completionRate}%` : "—",
+      label: "Completion rate",
+    },
+  ];
+
   return (
     <main className="min-h-screen bg-zinc-950 pb-24">
       {/* ── Ambient glow ────────────────────────────────────── */}
@@ -172,7 +197,7 @@ export default function AboutPage() {
       <section className="relative border-y border-white/6 bg-white/2">
         <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
           <dl className="grid grid-cols-2 gap-8 md:grid-cols-4">
-            {STATS.map(({ value, label }) => (
+            {stats.map(({ value, label }) => (
               <div key={label} className="text-center">
                 <dt className="text-3xl font-extrabold text-white">{value}</dt>
                 <dd className="mt-1 text-sm text-zinc-500">{label}</dd>

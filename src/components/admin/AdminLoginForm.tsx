@@ -83,7 +83,7 @@ export function AdminLoginForm() {
       <Input
         label="Admin email"
         type="email"
-        placeholder="admin@zentax.io"
+        placeholder="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         autoComplete="username"

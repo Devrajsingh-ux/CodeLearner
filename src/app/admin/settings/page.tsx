@@ -1,8 +1,23 @@
 ﻿"use client";
 
-import { Check, Info, Save } from "lucide-react";
-import { useState } from "react";
-import { DEFAULT_SETTINGS, type PlatformSettings } from "@/data/admin";
+import { Check, Info, Loader2, Save } from "lucide-react";
+import { useEffect, useState } from "react";
+import type { PlatformSettings } from "@/data/admin";
+
+const EMPTY_SETTINGS: PlatformSettings = {
+  platformName: "",
+  siteUrl: "",
+  supportEmail: "",
+  registrationOpen: true,
+  maintenanceMode: false,
+  featuredCourseCount: 6,
+  maxFreeCoursesPerUser: 3,
+  enableOAuthGitHub: false,
+  enableOAuthGoogle: false,
+  enableEmailVerification: false,
+  smtpHost: "",
+  analyticsId: "",
+};
 import { cn } from "@/lib/utils";
 
 // ─── Reusable input widgets ───────────────────────────────────────────────────
@@ -108,11 +123,22 @@ function NumberInput({
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function AdminSettingsPage() {
-  const [settings, setSettings] = useState<PlatformSettings>(DEFAULT_SETTINGS);
+  const [settings, setSettings] = useState<PlatformSettings>(EMPTY_SETTINGS);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
   const [activeSection, setActiveSection] = useState<
     "general" | "auth" | "content" | "integrations"
   >("general");
+
+  useEffect(() => {
+    fetch("/api/admin/settings", { credentials: "same-origin" })
+      .then((r) => r.json())
+      .then((d) => setSettings(d.settings ?? EMPTY_SETTINGS))
+      .catch(() => setSettings(EMPTY_SETTINGS))
+      .finally(() => setIsLoading(false));
+  }, []);
 
   function update<K extends keyof PlatformSettings>(
     key: K,
@@ -122,10 +148,24 @@ export default function AdminSettingsPage() {
     setSaved(false);
   }
 
-  function handleSave() {
-    // In production: POST /api/admin/settings
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+  async function handleSave() {
+    setIsSaving(true);
+    setError("");
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PUT",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(settings),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (e: any) {
+      setError(e.message ?? "Failed to save settings");
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   const SECTIONS = [
@@ -142,30 +182,33 @@ export default function AdminSettingsPage() {
         <div>
           <h2 className="text-2xl font-bold text-white">Platform Settings</h2>
           <p className="mt-1 text-sm text-zinc-500">
-            Configure global behaviour for Zentax.
+            {isLoading ? "Loading settings…" : "Configure global behaviour for Zentax."}
           </p>
         </div>
         <button
           type="button"
           onClick={handleSave}
+          disabled={isSaving || isLoading}
           className={cn(
-            "flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all",
+            "flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all disabled:opacity-60",
             saved
               ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
               : "bg-violet-600 text-white hover:bg-violet-500 shadow-lg shadow-violet-500/20",
           )}
         >
-          {saved ? (
-            <>
-              <Check className="h-4 w-4" /> Saved!
-            </>
+          {isSaving ? (
+            <><Loader2 className="h-4 w-4 animate-spin" /> Saving…</>
+          ) : saved ? (
+            <><Check className="h-4 w-4" /> Saved!</>
           ) : (
-            <>
-              <Save className="h-4 w-4" /> Save Changes
-            </>
+            <><Save className="h-4 w-4" /> Save Changes</>
           )}
         </button>
       </div>
+
+      {error && (
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">{error}</div>
+      )}
 
       {/* Maintenance warning banner */}
       {settings.maintenanceMode && (
@@ -414,21 +457,20 @@ export default function AdminSettingsPage() {
         <button
           type="button"
           onClick={handleSave}
+          disabled={isSaving || isLoading}
           className={cn(
-            "flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all",
+            "flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all disabled:opacity-60",
             saved
               ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
               : "bg-violet-600 text-white hover:bg-violet-500 shadow-lg shadow-violet-500/20",
           )}
         >
-          {saved ? (
-            <>
-              <Check className="h-4 w-4" /> Saved!
-            </>
+          {isSaving ? (
+            <><Loader2 className="h-4 w-4 animate-spin" /> Saving…</>
+          ) : saved ? (
+            <><Check className="h-4 w-4" /> Saved!</>
           ) : (
-            <>
-              <Save className="h-4 w-4" /> Save Changes
-            </>
+            <><Save className="h-4 w-4" /> Save Changes</>
           )}
         </button>
       </div>

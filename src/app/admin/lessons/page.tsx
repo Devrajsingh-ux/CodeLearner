@@ -10,9 +10,8 @@ import {
   Unlock,
   X,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
-  ADMIN_LESSONS,
   type AdminLesson,
   type LessonType,
 } from "@/data/admin";
@@ -43,7 +42,9 @@ function TypeBadge({ type }: { type: LessonType }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function AdminLessonsPage() {
-  const [lessons, setLessons] = useState<AdminLesson[]>(ADMIN_LESSONS);
+  const [lessons, setLessons] = useState<AdminLesson[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<LessonType | "all">("all");
   const [trackFilter, setTrackFilter] = useState("all");
@@ -55,9 +56,26 @@ export default function AdminLessonsPage() {
     setTimeout(() => setToast(null), 2800);
   }
 
+  async function loadLessons() {
+    setIsLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/admin/lessons", { credentials: "same-origin" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setLessons(data.lessons ?? []);
+    } catch (e: any) {
+      setError(e.message ?? "Failed to load lessons");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => { loadLessons(); }, []);
+
   const trackOptions = useMemo((): string[] => {
-    return ["all", ...Array.from(new Set<string>(ADMIN_LESSONS.map((l: AdminLesson) => l.trackTitle)))];
-  }, []);
+    return ["all", ...Array.from(new Set<string>(lessons.map((l) => l.trackTitle).filter(Boolean)))];
+  }, [lessons]);
 
   const filtered = useMemo(() => {
     let list = [...lessons];
@@ -74,11 +92,19 @@ export default function AdminLessonsPage() {
     return list;
   }, [lessons, search, typeFilter, trackFilter, lockedFilter]);
 
-  function toggleLocked(id: string) {
-    setLessons((prev) =>
-      prev.map((l) => (l.id === id ? { ...l, isLocked: !l.isLocked } : l)),
-    );
-    showToast("Lock status updated.");
+  async function toggleLocked(id: string) {
+    const current = lessons.find((l) => l.id === id)?.isLocked ?? false;
+    try {
+      const res = await fetch("/api/admin/lessons", {
+        method: "PATCH",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, isLocked: !current }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      setLessons((prev) => prev.map((l) => (l.id === id ? { ...l, isLocked: !l.isLocked } : l)));
+      showToast("Lock status updated.");
+    } catch (e: any) { showToast(`Error: ${e.message}`); }
   }
 
   const counts = {
@@ -92,12 +118,25 @@ export default function AdminLessonsPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6">
       {/* Header */}
-      <div>
-        <h2 className="text-2xl font-bold text-white">Lessons</h2>
-        <p className="mt-1 text-sm text-zinc-500">
-          {counts.total} lessons · {counts.exercises} exercises · {counts.articles} articles · {counts.quizzes} quizzes · {counts.locked} locked
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-white">Lessons</h2>
+          <p className="mt-1 text-sm text-zinc-500">
+            {isLoading ? "Loading…" : `${counts.total} lessons · ${counts.exercises} exercises · ${counts.articles} articles · ${counts.quizzes} quizzes · ${counts.locked} locked`}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={loadLessons}
+          disabled={isLoading}
+          className="flex items-center gap-1.5 rounded-xl border border-white/8 bg-zinc-900 px-3 py-2 text-xs text-zinc-400 transition-colors hover:border-white/20 hover:text-white disabled:opacity-50"
+        >
+          {isLoading ? "Loading…" : "↻ Refresh"}
+        </button>
       </div>
+      {error && (
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">{error}</div>
+      )}
 
       {/* Quick stat chips */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

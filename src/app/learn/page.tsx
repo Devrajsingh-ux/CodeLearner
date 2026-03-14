@@ -9,10 +9,10 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CourseCard } from "@/components/home/CourseCard";
 import { Button } from "@/components/ui/Button";
-import { CATEGORIES, tracks } from "@/data/courses";
+import { CATEGORIES } from "@/data/courses";
 import { cn, formatNumber } from "@/lib/utils";
 import type { Track, TrackCategory } from "@/types";
 
@@ -42,6 +42,7 @@ const DIFFICULTY_DOT: Record<string, string> = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function FilterSidebar({
+  allTracks,
   category,
   setCategory,
   difficulty,
@@ -49,6 +50,7 @@ function FilterSidebar({
   hasFilters,
   clearAll,
 }: {
+  allTracks: Track[];
   category: CategoryFilter;
   setCategory: (c: CategoryFilter) => void;
   difficulty: Difficulty;
@@ -69,8 +71,8 @@ function FilterSidebar({
           {(["All", ...CATEGORIES] as CategoryFilter[]).map((cat) => {
             const count =
               cat === "All"
-                ? tracks.length
-                : tracks.filter((t) => t.category === cat).length;
+                ? allTracks.length
+                : allTracks.filter((t) => t.category === cat).length;
             const emoji =
               cat === "All" ? "🗂️" : (CATEGORY_META[cat]?.emoji ?? "📚");
             const isActive = category === cat;
@@ -115,8 +117,8 @@ function FilterSidebar({
           {DIFFICULTIES.map((d) => {
             const count =
               d === "All"
-                ? tracks.length
-                : tracks.filter((t) => t.difficulty === d).length;
+                ? allTracks.length
+                : allTracks.filter((t) => t.difficulty === d).length;
             const isActive = difficulty === d;
             return (
               <button
@@ -166,12 +168,22 @@ function FilterSidebar({
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function LearnPage() {
+  const [allTracks, setAllTracks] = useState<Track[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [difficulty, setDifficulty] = useState<Difficulty>("All");
   const [category, setCategory] = useState<CategoryFilter>("All");
   const [mobileSidebar, setMobileSidebar] = useState(false);
 
-  const filtered: Track[] = tracks.filter((t) => {
+  useEffect(() => {
+    fetch("/api/courses")
+      .then((r) => r.json())
+      .then((data) => setAllTracks(data.tracks ?? []))
+      .catch(() => setAllTracks([]))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  const filtered: Track[] = allTracks.filter((t) => {
     const q = query.toLowerCase();
     const matchesQuery =
       !query ||
@@ -185,8 +197,6 @@ export default function LearnPage() {
   });
 
   const hasFilters = query !== "" || difficulty !== "All" || category !== "All";
-
-  // When no active filters → show courses grouped by category
   const showGrouped = !hasFilters;
 
   function clearAll() {
@@ -196,6 +206,7 @@ export default function LearnPage() {
   }
 
   const sidebarProps = {
+    allTracks,
     category,
     setCategory,
     difficulty,
@@ -204,12 +215,11 @@ export default function LearnPage() {
     clearAll,
   };
 
-  // Quick stats for the hero
-  const totalHours = tracks.reduce((s, t) => {
+  const totalHours = allTracks.reduce((s, t) => {
     const h = Number.parseInt(t.duration, 10);
     return s + (Number.isNaN(h) ? 0 : h);
   }, 0);
-  const totalEnrolled = tracks.reduce((s, t) => s + t.enrolledCount, 0);
+  const totalEnrolled = allTracks.reduce((s, t) => s + t.enrolledCount, 0);
 
   return (
     <main className="min-h-screen bg-zinc-950 pt-24 pb-24">
@@ -232,18 +242,18 @@ export default function LearnPage() {
               <div className="mt-4 flex flex-wrap gap-5 text-sm text-zinc-500">
                 <span className="flex items-center gap-1.5">
                   <BookOpen className="h-4 w-4 text-violet-400" />
-                  <strong className="text-zinc-200">{tracks.length}</strong>{" "}
+                  <strong className="text-zinc-200">{isLoading ? "—" : allTracks.length}</strong>{" "}
                   tracks
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Clock className="h-4 w-4 text-cyan-400" />
-                  <strong className="text-zinc-200">{totalHours}+</strong> hours
+                  <strong className="text-zinc-200">{isLoading ? "—" : `${totalHours}+`}</strong> hours
                   of content
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Users className="h-4 w-4 text-emerald-400" />
                   <strong className="text-zinc-200">
-                    {formatNumber(totalEnrolled)}
+                    {isLoading ? "—" : formatNumber(totalEnrolled)}
                   </strong>{" "}
                   learners enrolled
                 </span>
@@ -319,7 +329,7 @@ export default function LearnPage() {
               {showGrouped ? (
                 <p className="text-sm text-zinc-500">
                   <span className="font-semibold text-zinc-200">
-                    {tracks.length}
+                    {isLoading ? "—" : allTracks.length}
                   </span>{" "}
                   courses across{" "}
                   <span className="font-semibold text-zinc-200">
@@ -332,7 +342,7 @@ export default function LearnPage() {
                   <span className="font-semibold text-zinc-200">
                     {filtered.length}
                   </span>{" "}
-                  of {tracks.length} courses
+                  of {allTracks.length} courses
                   {category !== "All" && (
                     <span className="ml-1 font-medium text-violet-400">
                       in {category}
@@ -352,7 +362,7 @@ export default function LearnPage() {
             </div>
 
             {/* No results */}
-            {filtered.length === 0 && (
+            {!isLoading && filtered.length === 0 && (
               <div className="flex flex-col items-center py-28 text-center">
                 <span className="mb-4 text-5xl">🔍</span>
                 <p className="text-xl font-semibold text-white">
@@ -367,11 +377,23 @@ export default function LearnPage() {
               </div>
             )}
 
+            {/* Skeleton while loading */}
+            {isLoading && (
+              <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-72 animate-pulse rounded-2xl border border-white/6 bg-zinc-900"
+                  />
+                ))}
+              </div>
+            )}
+
             {/* Grouped browse (default "All" view) */}
-            {showGrouped && filtered.length > 0 && (
+            {!isLoading && showGrouped && filtered.length > 0 && (
               <div className="space-y-14">
                 {CATEGORIES.map((cat) => {
-                  const catTracks = tracks.filter((t) => t.category === cat);
+                  const catTracks = allTracks.filter((t) => t.category === cat);
                   if (catTracks.length === 0) return null;
                   const emoji = CATEGORY_META[cat]?.emoji ?? "📚";
                   return (
@@ -418,7 +440,7 @@ export default function LearnPage() {
             )}
 
             {/* Filtered results grid */}
-            {!showGrouped && filtered.length > 0 && (
+            {!isLoading && !showGrouped && filtered.length > 0 && (
               <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                 {filtered.map((track) => (
                   <CourseCard key={track.id} track={track} />

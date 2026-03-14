@@ -12,8 +12,8 @@ import {
   UserX,
   X,
 } from "lucide-react";
-import { useMemo, useState } from "react";
-import { ADMIN_USERS, type AdminUser, type UserRole, type UserStatus } from "@/data/admin";
+import { useEffect, useMemo, useState } from "react";
+import { type AdminUser, type UserRole, type UserStatus } from "@/data/admin";
 import { cn, formatNumber } from "@/lib/utils";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -234,7 +234,9 @@ function SortHeader({
 // ═════════════════════════════════════════════════════════════════════════════
 
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState<AdminUser[]>(ADMIN_USERS);
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<UserRole | "all">("all");
   const [statusFilter, setStatusFilter] = useState<UserStatus | "all">("all");
@@ -256,6 +258,23 @@ export default function AdminUsersPage() {
     setToast(msg);
     setTimeout(() => setToast(null), 2800);
   }
+
+  async function loadUsers() {
+    setIsLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/admin/users", { credentials: "same-origin" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setUsers(data.users ?? []);
+    } catch (e: any) {
+      setError(e.message ?? "Failed to load users");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => { loadUsers(); }, []);
 
   // ── Sort toggle ──────────────────────────────────────────────────────────
   function handleSort(key: SortKey) {
@@ -286,10 +305,21 @@ export default function AdminUsersPage() {
   }, [users, search, roleFilter, statusFilter, sortKey, sortDir]);
 
   // ── Actions ───────────────────────────────────────────────────────────────
-  function saveRole(id: string, role: UserRole) {
-    setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, role } : u)));
-    setEditUser(null);
-    showToast(`Role updated to "${role}"`);
+  async function saveRole(id: string, role: UserRole) {
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "PATCH",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, action: "setRole", role }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, role } : u)));
+      setEditUser(null);
+      showToast(`Role updated to "${role}"`);
+    } catch (e: any) {
+      showToast(`Error: ${e.message}`);
+    }
   }
 
   function toggleSuspend(user: AdminUser) {
@@ -301,16 +331,24 @@ export default function AdminUsersPage() {
         : `${user.name} will lose access immediately. You can reverse this later.`,
       confirmLabel: isSuspended ? "Restore" : "Suspend",
       danger: !isSuspended,
-      action: () => {
-        setUsers((prev) =>
-          prev.map((u) =>
-            u.id === user.id
-              ? { ...u, status: isSuspended ? "active" : "suspended" }
-              : u,
-          ),
-        );
-        setConfirmModal(null);
-        showToast(isSuspended ? "User restored." : "User suspended.");
+      action: async () => {
+        try {
+          const res = await fetch("/api/admin/users", {
+            method: "PATCH",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: user.id, action: isSuspended ? "restore" : "suspend" }),
+          });
+          if (!res.ok) throw new Error(await res.text());
+          setUsers((prev) =>
+            prev.map((u) => u.id === user.id ? { ...u, status: isSuspended ? "active" : "suspended" } : u),
+          );
+          setConfirmModal(null);
+          showToast(isSuspended ? "User restored." : "User suspended.");
+        } catch (e: any) {
+          setConfirmModal(null);
+          showToast(`Error: ${e.message}`);
+        }
       },
     });
   }
@@ -321,10 +359,22 @@ export default function AdminUsersPage() {
       message: `This will permanently remove ${user.name} and all their data. This action cannot be undone.`,
       confirmLabel: "Delete permanently",
       danger: true,
-      action: () => {
-        setUsers((prev) => prev.filter((u) => u.id !== user.id));
-        setConfirmModal(null);
-        showToast("User deleted.");
+      action: async () => {
+        try {
+          const res = await fetch("/api/admin/users", {
+            method: "DELETE",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: user.id }),
+          });
+          if (!res.ok) throw new Error(await res.text());
+          setUsers((prev) => prev.filter((u) => u.id !== user.id));
+          setConfirmModal(null);
+          showToast("User deleted.");
+        } catch (e: any) {
+          setConfirmModal(null);
+          showToast(`Error: ${e.message}`);
+        }
       },
     });
   }
@@ -343,10 +393,21 @@ export default function AdminUsersPage() {
         <div>
           <h2 className="text-2xl font-bold text-white">Users</h2>
           <p className="mt-1 text-sm text-zinc-500">
-            {formatNumber(counts.total)} total · {formatNumber(counts.active)} active · {counts.suspended} suspended
+            {isLoading ? "Loading…" : `${formatNumber(counts.total)} total · ${formatNumber(counts.active)} active · ${counts.suspended} suspended`}
           </p>
         </div>
+        <button
+          type="button"
+          onClick={loadUsers}
+          disabled={isLoading}
+          className="flex items-center gap-1.5 rounded-xl border border-white/8 bg-zinc-900 px-3 py-2 text-xs text-zinc-400 transition-colors hover:border-white/20 hover:text-white disabled:opacity-50"
+        >
+          {isLoading ? "Loading…" : "↻ Refresh"}
+        </button>
       </div>
+      {error && (
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">{error}</div>
+      )}
 
       {/* ── Quick count cards ─────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

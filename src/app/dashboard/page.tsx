@@ -3,7 +3,6 @@
 import {
   ArrowRight,
   BookOpen,
-  CheckCircle2,
   ChevronRight,
   Clock,
   Flame,
@@ -22,58 +21,10 @@ import { Button } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { getTechColor, TechIcon } from "@/components/ui/TechIcon";
 import { useAuth } from "@/context/AuthContext";
-import { tracks } from "@/data/courses";
 import { formatNumber } from "@/lib/utils";
+import type { Track } from "@/types";
 
-const ENROLLED_TRACK_IDS = ["1", "14", "32"];
-const MOCK_PROGRESS: Record<string, number> = { "1": 68, "14": 32, "32": 15 };
-const MOCK_STREAK = 7;
-const MOCK_XP = 3420;
-const MOCK_LEVEL = 6;
-const XP_TO_NEXT = MOCK_LEVEL * MOCK_LEVEL * 100 + 100;
-
-const STAT_CONFIG = [
-  {
-    icon: Flame,
-    label: "Day Streak",
-    getValue: () => `${MOCK_STREAK}`,
-    accent: "#f59e0b",
-  },
-  {
-    icon: Trophy,
-    label: "Total XP",
-    getValue: () => formatNumber(MOCK_XP),
-    accent: "#8b5cf6",
-  },
-  {
-    icon: Zap,
-    label: "Current Level",
-    getValue: () => `${MOCK_LEVEL}`,
-    accent: "#06b6d4",
-  },
-  {
-    icon: BookOpen,
-    label: "Courses",
-    getValue: () => `${ENROLLED_TRACK_IDS.length}`,
-    accent: "#10b981",
-  },
-];
-
-const DAILY_GOALS = [
-  { label: "Complete 1 lesson", done: true },
-  { label: "Earn 50 XP", done: true },
-  { label: "Practice exercise", done: false },
-];
-
-const WEEK_DAYS = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
-];
+const WEEK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 export default function DashboardPage() {
   const { user, isLoading } = useAuth();
@@ -94,13 +45,18 @@ export default function DashboardPage() {
     );
   }
 
-  const enrolledTracks = tracks.filter((t) =>
-    ENROLLED_TRACK_IDS.includes(t.id),
-  );
-  const recommended = tracks
-    .filter((t) => !ENROLLED_TRACK_IDS.includes(t.id))
-    .slice(0, 4);
+  // Enrollment not yet implemented — show empty state gracefully
+  const enrolledTracks: Track[] = [];
+  const recommended: Track[] = [];
   const firstName = user.name.split(" ")[0];
+  const xpToNext = user.level * user.level * 100 + 100;
+
+  const STAT_CONFIG = [
+    { icon: Flame, label: "Day Streak", getValue: () => `${user.streak}`, accent: "#f59e0b" },
+    { icon: Trophy, label: "Total XP", getValue: () => formatNumber(user.xp), accent: "#8b5cf6" },
+    { icon: Zap, label: "Current Level", getValue: () => `${user.level}`, accent: "#06b6d4" },
+    { icon: BookOpen, label: "Courses", getValue: () => `${enrolledTracks.length}`, accent: "#10b981" },
+  ];
 
   return (
     <div className="min-h-screen bg-zinc-950">
@@ -137,11 +93,11 @@ export default function DashboardPage() {
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-0.5 text-xs font-medium text-amber-400">
                     <Flame className="h-3 w-3" />
-                    {MOCK_STREAK}-day streak
+                    {user.streak}-day streak
                   </span>
                   <span className="inline-flex items-center gap-1 rounded-full border border-violet-500/20 bg-violet-500/10 px-2.5 py-0.5 text-xs font-medium text-violet-400">
                     <Star className="h-3 w-3" />
-                    Level {MOCK_LEVEL}
+                    Level {user.level}
                   </span>
                 </div>
               </div>
@@ -210,7 +166,7 @@ export default function DashboardPage() {
 
               <div className="space-y-3">
                 {enrolledTracks.map((track, idx) => {
-                  const pct = MOCK_PROGRESS[track.id] ?? 0;
+                  const pct = 0; // progress will be fetched from the progress API
                   const techColor = getTechColor(track.slug);
                   const lessonsCompleted = Math.round(
                     (pct / 100) * track.lessonsCount,
@@ -287,39 +243,15 @@ export default function DashboardPage() {
 
             {/* Daily Goals */}
             <div className="rounded-2xl border border-white/6 bg-white/3 p-5">
-              <div className="mb-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Target className="h-4 w-4 text-cyan-400" />
-                  <span className="text-sm font-semibold text-white">
-                    Today's Goals
-                  </span>
-                </div>
-                <span className="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2 py-0.5 text-xs font-medium text-cyan-400">
-                  {DAILY_GOALS.filter((g) => g.done).length} /{" "}
-                  {DAILY_GOALS.length}
+              <div className="mb-4 flex items-center gap-2">
+                <Target className="h-4 w-4 text-cyan-400" />
+                <span className="text-sm font-semibold text-white">
+                  Today's Goals
                 </span>
               </div>
-
-              <div className="space-y-3">
-                {DAILY_GOALS.map((goal) => (
-                  <div key={goal.label} className="flex items-center gap-3">
-                    <CheckCircle2
-                      className={`h-4 w-4 shrink-0 transition-colors ${
-                        goal.done ? "text-emerald-400" : "text-zinc-700"
-                      }`}
-                    />
-                    <span
-                      className={`text-sm ${
-                        goal.done
-                          ? "text-zinc-500 line-through"
-                          : "text-zinc-300"
-                      }`}
-                    >
-                      {goal.label}
-                    </span>
-                  </div>
-                ))}
-              </div>
+              <p className="text-sm text-zinc-600">
+                Complete lessons to unlock daily goals.
+              </p>
             </div>
           </div>
 
@@ -334,28 +266,28 @@ export default function DashboardPage() {
                     Level Progress
                   </span>
                   <span className="rounded-full border border-violet-500/20 bg-violet-500/10 px-2 py-0.5 text-xs font-semibold text-violet-400">
-                    Lv. {MOCK_LEVEL}
+                    Lv. {user.level}
                   </span>
                 </div>
                 <div className="mb-3 flex items-end gap-1">
                   <span className="text-3xl font-bold text-white tabular-nums">
-                    {formatNumber(MOCK_XP)}
+                    {formatNumber(user.xp)}
                   </span>
                   <span className="mb-1 text-sm text-zinc-500">
-                    / {formatNumber(XP_TO_NEXT)} XP
+                    / {formatNumber(xpToNext)} XP
                   </span>
                 </div>
                 <ProgressBar
-                  value={MOCK_XP}
-                  max={XP_TO_NEXT}
+                  value={user.xp}
+                  max={xpToNext}
                   color="violet"
                   size="md"
                 />
                 <p className="mt-2 text-xs text-zinc-500">
                   <span className="font-medium text-violet-400">
-                    {formatNumber(XP_TO_NEXT - MOCK_XP)} XP
+                    {formatNumber(xpToNext - user.xp)} XP
                   </span>{" "}
-                  to Level {MOCK_LEVEL + 1}
+                  to Level {user.level + 1}
                 </p>
               </div>
             </div>
@@ -427,8 +359,9 @@ export default function DashboardPage() {
               </h3>
               <div className="grid grid-cols-7 gap-1.5">
                 {WEEK_DAYS.map((day, i) => {
-                  const active = i < 5;
-                  const today = i === 4;
+                  const todayIndex = (new Date().getDay() + 6) % 7;
+                  const isToday = i === todayIndex;
+                  const isActive = i <= todayIndex && (todayIndex - i) < user.streak;
                   return (
                     <div
                       key={day}
@@ -437,9 +370,9 @@ export default function DashboardPage() {
                       <div
                         className={[
                           "h-8 w-full rounded-lg transition-all",
-                          today
+                          isToday
                             ? "bg-violet-500 shadow-md shadow-violet-500/30"
-                            : active
+                            : isActive
                               ? "bg-violet-500/30"
                               : "bg-white/5",
                         ].join(" ")}
@@ -452,8 +385,8 @@ export default function DashboardPage() {
                 })}
               </div>
               <p className="mt-3 text-xs text-zinc-500">
-                <span className="font-medium text-white">5 days</span> active —
-                great work!
+                <span className="font-medium text-white">{user.streak} day{user.streak !== 1 ? "s" : ""}</span> active —
+                keep it up!
               </p>
             </div>
           </div>

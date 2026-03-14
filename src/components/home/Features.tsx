@@ -55,7 +55,7 @@ const features = [
     icon: MessageSquare,
     title: "Community & Mentorship",
     description:
-      "Ask questions, share work, and get feedback from 285k+ learners and expert instructors.",
+      "Ask questions, share work, and get feedback from our growing community and expert instructors.",
     color: "text-pink-400",
     bg: "bg-pink-500/10",
   },

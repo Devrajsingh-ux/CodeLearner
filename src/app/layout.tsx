@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     template: "%s — Zentax",
   },
   description:
-    "Expert-crafted coding courses with an in-browser editor, project-based learning, and a community of 285k+ developers. Free forever plan.",
+    "Expert-crafted coding courses with an in-browser editor, project-based learning, and a thriving developer community. Free forever plan.",
   keywords: [
     "coding",
     "programming",
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     siteName: "Zentax",
     title: "Zentax — Master Coding. Build the Future.",
     description:
-      "Expert-crafted coding courses with an in-browser editor and 285k+ learners.",
+      "Expert-crafted coding courses with an in-browser editor and a growing community of developers.",
   },
   twitter: {
     card: "summary_large_image",

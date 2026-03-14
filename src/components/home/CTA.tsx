@@ -1,6 +1,10 @@
-﻿import { ArrowRight, CheckCircle2 } from "lucide-react";
+﻿"use client";
+
+import { useEffect, useState } from "react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import { formatNumber } from "@/lib/utils";
 
 const perks = [
   "Free forever plan — no credit card",
@@ -34,10 +38,7 @@ export function CTA() {
                 </span>
               </h2>
 
-              <p className="mx-auto mt-4 max-w-xl text-base text-zinc-400 sm:mt-5 sm:text-lg">
-                Join 485,000+ developers who chose Zentax to sharpen their
-                skills, build real products, and land better jobs.
-              </p>
+              <LiveStat />
 
               {/* Perks — 1 col mobile, 2 col sm+ */}
               <ul className="mx-auto mt-6 mb-8 grid max-w-md grid-cols-1 gap-2.5 text-left sm:mt-8 sm:mb-10 sm:max-w-lg sm:grid-cols-2 sm:gap-3">
@@ -78,5 +79,42 @@ export function CTA() {
         </div>
       </div>
     </section>
+  );
+}
+
+function LiveStat() {
+  const [total, setTotal] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    fetch("/api/courses")
+      .then((r) => r.json())
+      .then((data) => {
+        if (!mounted) return;
+        const tracks = Array.isArray(data.tracks) ? data.tracks : [];
+        const sum = tracks.reduce((s: number, t: any) => s + (Number(t.enrolledCount) || 0), 0);
+        setTotal(sum || 0);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setTotal(null);
+      })
+      .finally(() => mounted && setIsLoading(false));
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const display = isLoading
+    ? "…"
+    : total == null
+    ? "—"
+    : `${formatNumber(total)}+`;
+
+  return (
+    <p className="mx-auto mt-4 max-w-xl text-base text-zinc-400 sm:mt-5 sm:text-lg">
+      Join {display} developers who chose Zentax to sharpen their skills, build real products, and land better jobs.
+    </p>
   );
 }

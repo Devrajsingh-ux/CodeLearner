@@ -146,7 +146,7 @@ const POSTS: Post[] = [
   },
   {
     slug: "community-2025-year-in-review",
-    title: "2025 Year in Review: 285K Learners, 60 New Tracks",
+    title: "2025 Year in Review: Platform Growth, 60 New Tracks",
     excerpt:
       "A look back at everything we shipped, the community milestones that moved us, and a preview of what's coming in 2026.",
     category: "Community",

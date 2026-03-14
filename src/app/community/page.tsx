@@ -16,7 +16,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Community — Zentax",
   description:
-    "Connect with 285K+ developers, ask questions, share your projects, and level up together.",
+    "Connect with our community of developers, ask questions, share your projects, and level up together.",
 };
 
 const CHANNELS = [
@@ -24,7 +24,7 @@ const CHANNELS = [
     icon: MessageCircle,
     name: "Discord server",
     description:
-      "Our primary hub — 28 topic channels, daily office hours, job board, and showcase rooms. 40 000+ members.",
+      "Our primary hub — 28 topic channels, daily office hours, job board, and showcase rooms.",
     cta: "Join Discord",
     href: "https://discord.gg/zentax",
     color: "text-indigo-400",
@@ -53,61 +53,13 @@ const CHANNELS = [
 ];
 
 const STATS = [
-  { icon: Users, value: "285K+", label: "Active members", color: "#8b5cf6" },
-  {
-    icon: MessageCircle,
-    value: "1.2M+",
-    label: "Messages this month",
-    color: "#06b6d4",
-  },
-  { icon: Code2, value: "18K+", label: "Projects shared", color: "#10b981" },
-  { icon: Star, value: "97%", label: "Questions answered", color: "#f59e0b" },
+  { icon: Users,          value: null as number | null, label: "Active members",        color: "#8b5cf6" },
+  { icon: MessageCircle,  value: null as number | null, label: "Messages this month",   color: "#06b6d4" },
+  { icon: Code2,          value: null as number | null, label: "Projects shared",       color: "#10b981" },
+  { icon: Star,           value: null as number | null, label: "Questions answered",    color: "#f59e0b" },
 ];
 
-const TOP_CONTRIBUTORS = [
-  {
-    name: "Adrian K.",
-    initials: "AK",
-    gradient: "from-violet-500 to-indigo-600",
-    role: "JavaScript · 1 240 XP this month",
-    badge: "Top helper",
-  },
-  {
-    name: "Lin Wei",
-    initials: "LW",
-    gradient: "from-cyan-500 to-blue-600",
-    role: "Python · 980 XP this month",
-    badge: "Problem solver",
-  },
-  {
-    name: "Chioma N.",
-    initials: "CN",
-    gradient: "from-emerald-500 to-teal-600",
-    role: "React · 870 XP this month",
-    badge: "Mentor",
-  },
-  {
-    name: "Erik D.",
-    initials: "ED",
-    gradient: "from-pink-500 to-rose-600",
-    role: "Rust · 820 XP this month",
-    badge: "Open source",
-  },
-  {
-    name: "Yui T.",
-    initials: "YT",
-    gradient: "from-amber-500 to-orange-600",
-    role: "Go · 760 XP this month",
-    badge: "Streak king",
-  },
-  {
-    name: "Fatima A.",
-    initials: "FA",
-    gradient: "from-fuchsia-500 to-purple-700",
-    role: "TypeScript · 690 XP this month",
-    badge: "Code reviewer",
-  },
-];
+const TOP_CONTRIBUTORS: never[] = [];
 
 const EVENTS = [
   {
@@ -168,7 +120,7 @@ export default function CommunityPage() {
           {STATS.map(({ icon: Icon, value, label, color }) => (
             <div key={label} className="text-center">
               <Icon className="mx-auto mb-2 h-5 w-5" style={{ color }} />
-              <p className="text-2xl font-extrabold text-white">{value}</p>
+              <p className="text-2xl font-extrabold text-white">{value ?? "—"}</p>
               <p className="mt-0.5 text-xs text-zinc-500">{label}</p>
             </div>
           ))}
@@ -206,6 +158,7 @@ export default function CommunityPage() {
         </section>
 
         {/* ── Top contributors ─────────────────────────── */}
+        {TOP_CONTRIBUTORS.length > 0 && (
         <section className="mb-16">
           <div className="mb-8 flex items-center gap-3">
             <Trophy className="h-5 w-5 text-amber-400" />
@@ -237,6 +190,7 @@ export default function CommunityPage() {
             )}
           </div>
         </section>
+        )}
 
         {/* ── Events ───────────────────────────────────── */}
         <section className="mb-16">

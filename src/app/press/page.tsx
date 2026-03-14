@@ -59,7 +59,7 @@ const COVERAGE = [
     logo: "IQ",
     logoBg: "from-blue-600 to-cyan-600",
     title:
-      "Zentax's architecture: React Server Components at 285 000 concurrent learners",
+      "Zentax's architecture: React Server Components built for massive scale",
     date: "February 2025",
     href: "#",
   },
@@ -89,10 +89,10 @@ const BRAND_ASSETS = [
 ];
 
 const STATS = [
-  { value: "285K+", label: "Monthly active learners" },
-  { value: "$12M", label: "Series A raised" },
-  { value: "Feb 2026", label: "Founded" },
-  { value: "28", label: "Team members" },
+  { value: "—", label: "Monthly active learners" },
+  { value: "—", label: "Funding raised" },
+  { value: "2026", label: "Founded" },
+  { value: "—", label: "Team members" },
 ];
 
 export default function PressPage() {

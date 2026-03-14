@@ -1,4 +1,4 @@
-﻿import {
+import {
   ArrowLeft,
   Award,
   BookOpen,
@@ -15,19 +15,68 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Query } from "node-appwrite";
 import { Badge } from "@/components/ui/Badge";
 import { getTechColor, TechIcon } from "@/components/ui/TechIcon";
-import { tracks } from "@/data/courses";
+import { createAdminClient, DB_ID, COL_COURSES } from "@/lib/appwriteServer";
 import { getCurriculum } from "@/lib/lessons";
+import type { TrackCurriculum } from "@/lib/lessons";
 import { formatNumber } from "@/lib/utils";
+import type { Track } from "@/types";
+
+export const revalidate = 60; // ISR: re-generate at most every 60 s
 
 interface Props {
   params: Promise<{ track: string }>;
 }
 
+// ── Fetch course from Appwrite by slug ───────────────────────────────────────
+
+async function fetchTrack(slug: string): Promise<Track | null> {
+  try {
+    const { databases } = createAdminClient();
+    const resp = await databases.listDocuments(DB_ID, COL_COURSES, [
+      Query.equal("slug", slug),
+      Query.equal("status", "published"),
+      Query.limit(1),
+    ]);
+    if (resp.total === 0) return null;
+    const doc = resp.documents[0];
+
+    function parseTags(raw: unknown): string[] {
+      if (Array.isArray(raw)) return raw.filter(Boolean);
+      if (typeof raw === "string" && raw.trim())
+        return raw.split(",").map((t) => t.trim()).filter(Boolean);
+      return [];
+    }
+
+    return {
+      id           : doc.$id,
+      slug,
+      title        : doc.title         ?? "",
+      description  : (doc.description && doc.description.trim()) || `A ${doc.difficulty ?? "Beginner"}-level course covering ${doc.title ?? "core concepts"}.`,
+      icon         : "\ud83d\udcda",
+      color        : "#8B5CF6",
+      gradient     : "from-violet-500/20 to-cyan-500/20",
+      difficulty   : (doc.difficulty  ?? "Beginner") as Track["difficulty"],
+      lessonsCount : doc.lessonsCount  ?? 0,
+      duration     : doc.duration      ?? "",
+      enrolledCount: doc.enrolledCount ?? 0,
+      rating       : doc.rating        ?? 0,
+      tags         : parseTags(doc.tags),
+      category     : (doc.category     ?? "Languages") as Track["category"],
+      isFeatured   : doc.isFeatured    ?? false,
+      isNew        : doc.isNew         ?? false,
+    };
+  } catch {
+    return null;
+  }
+}
+
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { track: slug } = await params;
-  const t = tracks.find((t) => t.slug === slug);
+  const t = await fetchTrack(slug);
   if (!t) return { title: "Course not found" };
   return {
     title: `${t.title} — Zentax`,
@@ -37,17 +86,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function TrackPage({ params }: Props) {
   const { track: slug } = await params;
-  const track = tracks.find((t) => t.slug === slug);
+  const track = await fetchTrack(slug);
   if (!track) notFound();
 
   const techColor = getTechColor(slug);
-  const curriculum = getCurriculum(slug, track.title, track.lessonsCount);
+  const curriculum = await getCurriculum(slug, track.title, track.lessonsCount);
   const totalLessons = curriculum.sections.reduce(
-    (acc, s) => acc + s.lessons.length,
+    (acc: number, s: TrackCurriculum["sections"][number]) => acc + s.lessons.length,
     0,
   );
   const totalXP = curriculum.sections.reduce(
-    (acc, s) => acc + s.lessons.reduce((a, l) => a + l.xp, 0),
+    (acc: number, s: TrackCurriculum["sections"][number]) =>
+      acc + s.lessons.reduce((a: number, l: TrackCurriculum["sections"][number]["lessons"][number]) => a + l.xp, 0),
     0,
   );
 
@@ -214,10 +264,10 @@ export default async function TrackPage({ params }: Props) {
         </div>
 
         <div className="space-y-3">
-          {curriculum.sections.map((section, sIdx) => {
+          {curriculum.sections.map((section: TrackCurriculum["sections"][number], sIdx: number) => {
             const globalOffset = curriculum.sections
               .slice(0, sIdx)
-              .reduce((a, s) => a + s.lessons.length, 0);
+              .reduce((a: number, s: TrackCurriculum["sections"][number]) => a + s.lessons.length, 0);
 
             return (
               <details key={section.title} open={sIdx === 0} className="group">
@@ -242,7 +292,7 @@ export default async function TrackPage({ params }: Props) {
 
                 {/* Lesson rows */}
                 <div className="overflow-hidden rounded-b-2xl border border-t-0 border-white/6">
-                  {section.lessons.map((lesson, lIdx) => {
+                  {section.lessons.map((lesson: TrackCurriculum["sections"][number]["lessons"][number], lIdx: number) => {
                     const lessonNum = globalOffset + lIdx + 1;
                     const isFirst = sIdx === 0 && lIdx === 0;
 

@@ -10,7 +10,6 @@ import {
 } from "react";
 import type { AuthUser } from "@/types";
 import { account, ID } from "@/lib/appwrite";
-import { DEFAULT_SETTINGS } from "@/data/admin";
 import {
   checkRateLimit,
   clearAttempts,
@@ -32,6 +31,35 @@ interface AuthContextValue {
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+
+// ─── Map Appwrite account → AuthUser ─────────────────────────────────────────
+
+function mapAuthUser(
+  acct: any,
+  prefs: Record<string, any>,
+  fallback?: { name?: string; email?: string; role?: AuthUser["role"]; username?: string },
+): AuthUser {
+  const role: AuthUser["role"] =
+    prefs.role === "admin" || prefs.role === "instructor"
+      ? prefs.role
+      : fallback?.role ?? "student";
+  const resolvedEmail = acct.email || fallback?.email || "";
+  // username preference takes priority; fall back to the supplied fallback, then email prefix
+  const username =
+    (typeof prefs.username === "string" && prefs.username.trim())
+      ? prefs.username.trim()
+      : (fallback?.username?.trim() || resolvedEmail.split("@")[0] || "");
+  return {
+    id: acct.$id ?? acct.id ?? "",
+    name: acct.name || fallback?.name || "",
+    email: resolvedEmail,
+    username,
+    role,
+    xp: typeof prefs.xp === "number" ? prefs.xp : 0,
+    level: typeof prefs.level === "number" && prefs.level >= 1 ? prefs.level : 1,
+    streak: typeof prefs.streak === "number" ? prefs.streak : 0,
+  };
+}
 
 // ─── Session helpers (HttpOnly cookie via /api/auth/session) ─────────────────
 
@@ -80,16 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Verify with Appwrite and refresh (read prefs.role too)
         const acct = await account.get();
         const prefs = (acct as any).prefs ?? {};
-        const role: AuthUser["role"] =
-          prefs.role === "admin" || prefs.role === "instructor"
-            ? prefs.role
-            : "student";
-        const mapped: AuthUser = {
-          id: (acct as any).$id || (acct as any).id || "",
-          name: (acct as any).name || "",
-          email: (acct as any).email || "",
-          role,
-        };
+        const mapped = mapAuthUser(acct, prefs);
         setUser(mapped);
         await saveSession(mapped);
       } catch {
@@ -124,16 +143,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await account.createEmailPasswordSession(email, password);
         const acct = await account.get();
         const prefs = (acct as any).prefs ?? {};
-        const role: AuthUser["role"] =
-          prefs.role === "admin" || prefs.role === "instructor"
-            ? prefs.role
-            : "student";
-        const mapped: AuthUser = {
-          id: (acct as any).$id || (acct as any).id || "",
-          name: (acct as any).name || "",
-          email: (acct as any).email || "",
-          role,
-        };
+        const mapped = mapAuthUser(acct, prefs);
         clearAttempts(email); // success — reset counter
         await persist(mapped);
         return {};
@@ -186,23 +196,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Auto sign-in so we can call createEmailVerification (requires active session)
         await account.createEmailPasswordSession(email, password);
 
+        // Persist username (derived from name) in Appwrite account prefs
+        const derivedUsername = name.trim().toLowerCase().replace(/[^a-z0-9_.-]/g, "").slice(0, 20) || email.split("@")[0];
+        try {
+          await account.updatePrefs({ username: derivedUsername, xp: 0, level: 1, streak: 0, role: "student" });
+        } catch {}
+
         // Send email verification link
         try {
-          await account.createEmailVerification(
-            `${DEFAULT_SETTINGS.siteUrl}/auth/verify`,
-          );
+          // Fetch siteUrl from live platform settings; fall back to current origin
+          let siteUrl = window.location.origin;
+          try {
+            const cfg = await fetch("/api/admin/settings", { credentials: "same-origin" });
+            const cfgData = await cfg.json();
+            if (cfgData?.settings?.siteUrl) siteUrl = cfgData.settings.siteUrl;
+          } catch {}
+          await account.createEmailVerification(`${siteUrl}/auth/verify`);
         } catch (verr) {
           // non-fatal — log and continue
           console.error("createEmailVerification failed", verr);
         }
 
         // If platform requires verification, do not auto-create session — ask user to verify
-        if (DEFAULT_SETTINGS.enableEmailVerification) {
+        let enableEmailVerification = false;
+        try {
+          const cfg = await fetch("/api/admin/settings", { credentials: "same-origin" });
+          const cfgData = await cfg.json();
+          enableEmailVerification = cfgData?.settings?.enableEmailVerification ?? false;
+        } catch {}
+        if (enableEmailVerification) {
           const mapped: AuthUser = {
             id: (created as any).$id || (created as any).id || "",
             name: name,
             email: email,
+            username: derivedUsername,
             role: "student",
+            xp: 0,
+            level: 1,
+            streak: 0,
           };
           await persist(mapped);
           return { needsVerification: true };
@@ -210,12 +241,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Session was already created above — just fetch the account details
         const acct = await account.get();
-        const mapped: AuthUser = {
-          id: (acct as any).$id || (acct as any).id || "",
-          name: (acct as any).name || name,
-          email: (acct as any).email || email,
-          role: "student",
-        };
+        const prefs = (acct as any).prefs ?? {};
+        const mapped = mapAuthUser(acct, prefs, { name, email, role: "student", username: derivedUsername });
         clearAttempts(email);
         await persist(mapped);
         return {};
@@ -231,16 +258,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const acct = await account.get();
       const prefs = (acct as any).prefs ?? {};
-      const role: AuthUser["role"] =
-        prefs.role === "admin" || prefs.role === "instructor"
-          ? prefs.role
-          : "student";
-      const mapped: AuthUser = {
-        id: (acct as any).$id || (acct as any).id || "",
-        name: (acct as any).name || "",
-        email: (acct as any).email || "",
-        role,
-      };
+      const mapped = mapAuthUser(acct, prefs);
       setUser(mapped);
       await saveSession(mapped);
       return mapped;

@@ -208,7 +208,7 @@ export default function HelpPage() {
               <div>
                 <p className="font-semibold text-white">Ask the community</p>
                 <p className="text-sm text-zinc-500">
-                  285K+ developers ready to help
+                  Our community of developers ready to help
                 </p>
               </div>
               <ArrowRight className="ml-auto h-4 w-4 text-zinc-600 transition-colors group-hover:text-violet-400" />

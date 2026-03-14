@@ -2,11 +2,11 @@
 
 import { ArrowRight, BookOpen, Clock, Users } from "lucide-react";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { CATEGORIES, tracks } from "@/data/courses";
+import { CATEGORIES } from "@/data/courses";
 import { cn, formatNumber } from "@/lib/utils";
-import type { TrackCategory } from "@/types";
+import type { Track, TrackCategory } from "@/types";
 import { CourseCard } from "./CourseCard";
 
 type Tab = "Featured" | TrackCategory;
@@ -15,48 +15,39 @@ const TABS: Tab[] = ["Featured", ...CATEGORIES];
 const CATEGORY_META: Record<string, { emoji: string; description: string }> = {
   Featured: {
     emoji: "⭐",
-    description:
-      "Hand-picked tracks loved by our community — the best place to start.",
+    description: "Hand-picked tracks loved by our community — the best place to start.",
   },
   Languages: {
     emoji: "💻",
-    description:
-      "Master JavaScript, Python, Rust, Go, Elixir, and 13 more languages.",
+    description: "Master JavaScript, Python, Rust, Go, Elixir, and 13 more languages.",
   },
   Frontend: {
     emoji: "🎨",
-    description:
-      "Build stunning UIs with React, Vue, Angular, Svelte, and Tailwind CSS.",
+    description: "Build stunning UIs with React, Vue, Angular, Svelte, and Tailwind CSS.",
   },
   Backend: {
     emoji: "⚙️",
-    description:
-      "Design robust APIs with Node.js, NestJS, Django, FastAPI, and GraphQL.",
+    description: "Design robust APIs with Node.js, NestJS, Django, FastAPI, and GraphQL.",
   },
   "Data & AI": {
     emoji: "📊",
-    description:
-      "From SQL & Pandas to production LLMs, RAG pipelines, and deep learning.",
+    description: "From SQL & Pandas to production LLMs, RAG pipelines, and deep learning.",
   },
   Mobile: {
     emoji: "📱",
-    description:
-      "Ship beautiful apps to iOS and Android with Flutter, React Native, and Swift.",
+    description: "Ship beautiful apps to iOS and Android with Flutter, React Native, and Swift.",
   },
   "DevOps & Cloud": {
     emoji: "☁️",
-    description:
-      "Automate, deploy, and scale with Docker, Kubernetes, AWS, and Linux.",
+    description: "Automate, deploy, and scale with Docker, Kubernetes, AWS, and Linux.",
   },
   Systems: {
     emoji: "🏗️",
-    description:
-      "Ace FAANG interviews with DSA and design million-user distributed systems.",
+    description: "Ace FAANG interviews with DSA and design million-user distributed systems.",
   },
   "Web3 & Security": {
     emoji: "🔐",
-    description:
-      "Smart contracts in Solidity, ethical hacking, and full-stack Web3 dApps.",
+    description: "Smart contracts in Solidity, ethical hacking, and full-stack Web3 dApps.",
   },
   "Game Dev": {
     emoji: "🎮",
@@ -65,13 +56,23 @@ const CATEGORY_META: Record<string, { emoji: string; description: string }> = {
 };
 
 export function CoursesSection() {
+  const [allTracks, setAllTracks] = useState<Track[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("Featured");
   const tabsRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    fetch("/api/courses")
+      .then((r) => r.json())
+      .then((data) => setAllTracks(data.tracks ?? []))
+      .catch(() => setAllTracks([]))
+      .finally(() => setIsLoading(false));
+  }, []);
+
   const visible =
     activeTab === "Featured"
-      ? tracks.filter((t) => t.isFeatured)
-      : tracks.filter((t) => t.category === activeTab);
+      ? allTracks.filter((t) => t.isFeatured)
+      : allTracks.filter((t) => t.category === activeTab);
 
   const totalHours = visible.reduce((sum, t) => {
     const h = Number.parseInt(t.duration.replace("h", ""), 10);
@@ -103,7 +104,7 @@ export function CoursesSection() {
               size="sm"
               rightIcon={<ArrowRight className="h-4 w-4" />}
             >
-              Browse all {tracks.length} courses
+              Browse all {isLoading ? "…" : allTracks.length} courses
             </Button>
           </Link>
         </div>
@@ -123,8 +124,8 @@ export function CoursesSection() {
             const isActive = activeTab === tab;
             const count =
               tab === "Featured"
-                ? tracks.filter((t) => t.isFeatured).length
-                : tracks.filter((t) => t.category === tab).length;
+                ? allTracks.filter((t) => t.isFeatured).length
+                : allTracks.filter((t) => t.category === tab).length;
             const { emoji } = CATEGORY_META[tab] ?? { emoji: "📚" };
             return (
               <button
@@ -182,7 +183,13 @@ export function CoursesSection() {
         </div>
 
         {/* ── Course grid ───────────────────────────────────────────── */}
-        {visible.length > 0 ? (
+        {isLoading ? (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="h-64 animate-pulse rounded-2xl border border-white/6 bg-zinc-900" />
+            ))}
+          </div>
+        ) : visible.length > 0 ? (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {visible.map((track) => (
               <CourseCard key={track.id} track={track} />
@@ -199,14 +206,14 @@ export function CoursesSection() {
         )}
 
         {/* ── Footer CTA ────────────────────────────────────────────── */}
-        {visible.length > 0 && (
+        {!isLoading && visible.length > 0 && (
           <div className="mt-12 flex flex-col items-center gap-3 text-center">
             <p className="text-sm text-zinc-500">
-              Showing {visible.length} of {tracks.length} available courses
+              Showing {visible.length} of {allTracks.length} available courses
             </p>
             <Link href="/learn">
               <Button size="lg" rightIcon={<ArrowRight className="h-5 w-5" />}>
-                Explore all {tracks.length} courses
+                Explore all {allTracks.length} courses
               </Button>
             </Link>
           </div>

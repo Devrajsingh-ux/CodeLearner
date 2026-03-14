@@ -36,7 +36,7 @@ const CONTACT_OPTIONS = [
   {
     icon: MessageCircle,
     title: "Discord community",
-    description: "Fastest response — 285K+ members and active mods.",
+    description: "Fastest response — our active community members and mods.",
     cta: "Join Discord",
     href: "https://discord.gg/zentax",
     color: "text-indigo-400",

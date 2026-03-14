@@ -2,9 +2,20 @@
 
 import { ArrowRight, Play, Star } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { formatNumber } from "@/lib/utils";
 
 export function Hero() {
+  const [activeLearners, setActiveLearners] = useState<number>(0);
+
+  useEffect(() => {
+    fetch("/api/platform/stats")
+      .then((r) => r.json())
+      .then((data) => setActiveLearners(Number(data.activeLearners) || 0))
+      .catch(() => {});
+  }, []);
+
   return (
     <section
       className="relative flex min-h-svh items-center overflow-hidden pt-16 sm:pt-20"
@@ -71,7 +82,9 @@ export function Hero() {
                   ))}
                 </div>
                 <span className="text-xs sm:text-sm">
-                  485k+ learners trust us
+                  {activeLearners > 0
+                    ? `${formatNumber(activeLearners)}+ learners trust us`
+                    : "trusted by thousands of learners"}
                 </span>
               </div>
             </div>
@@ -121,6 +134,7 @@ export function Hero() {
             )}
           </div>
         </div>
+
       </div>
     </section>
   );
