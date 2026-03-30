@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 import { client } from "@/lib/appwrite";
 import { Footer } from "./Footer";
 import { Navbar } from "./Navbar";
@@ -23,7 +23,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       {!isAdmin && <Navbar />}
-      {children}
+      <div id="main-content">{children}</div>
       {!isAdmin && <Footer />}
     </>
   );

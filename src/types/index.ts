@@ -61,6 +61,64 @@ export interface Progress {
   percentComplete: number;
 }
 
+export interface Enrollment {
+  id?: string;
+  userId: string;
+  courseId: string;
+  courseSlug: string;
+  courseTitle: string;
+  enrolledAt: string;
+  lastAccessedAt: string;
+  status: "active" | "completed" | "paused";
+  completedLessons: number;
+  totalLessons: number;
+  percentComplete: number;
+}
+
+export interface LessonProgress {
+  id?: string;
+  userId: string;
+  courseId: string;
+  lessonId: string;
+  lessonSlug: string;
+  completedAt: string;
+  xpEarned: number;
+}
+
+export interface DailyActivity {
+  id?: string;
+  userId: string;
+  date: string; // YYYY-MM-DD format
+  lessonsCompleted: number;
+  problemsSolved: number;
+  xpEarned: number;
+  minutesStudied: number;
+  questsCompleted: string[]; // array of quest IDs
+  createdAt: string;
+}
+
+export interface UserStreak {
+  id?: string;
+  userId: string;
+  currentStreak: number;
+  longestStreak: number;
+  lastActivityDate: string; // YYYY-MM-DD format
+  streakStartDate: string; // YYYY-MM-DD format
+  updatedAt: string;
+}
+
+export interface ProblemSolved {
+  id?: string;
+  userId: string;
+  problemId: string;
+  problemTitle: string;
+  difficulty: "Easy" | "Medium" | "Hard";
+  language: string;
+  solvedAt: string;
+  timeSpent: number; // minutes
+  xpEarned: number;
+}
+
 export interface Testimonial {
   id: string;
   name: string;

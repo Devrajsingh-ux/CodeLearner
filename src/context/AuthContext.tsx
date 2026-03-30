@@ -211,7 +211,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const cfgData = await cfg.json();
             if (cfgData?.settings?.siteUrl) siteUrl = cfgData.settings.siteUrl;
           } catch {}
-          await account.createEmailVerification(`${siteUrl}/auth/verify`);
+          await account.createEmailVerification(`${siteUrl}/verify`);
         } catch (verr) {
           // non-fatal — log and continue
           console.error("createEmailVerification failed", verr);

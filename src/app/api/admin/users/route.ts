@@ -56,10 +56,12 @@ export async function GET(request: NextRequest) {
 
   try {
     const { users } = createAdminClient();
-    const resp = await users.list([Query.limit(100), Query.orderDesc("$createdAt")]);
+    const resp = await users.list([Query.limit(100), Query.orderDesc("registration")]);
     return NextResponse.json({ users: resp.users.map(mapUser), total: resp.total });
   } catch (e: any) {
-    return NextResponse.json({ error: e?.message ?? "Failed" }, { status: 500 });
+    const msg = e?.message ?? "Failed";
+    const hint = !process.env.APPWRITE_API_KEY ? " — APPWRITE_API_KEY is not set in .env.local" : "";
+    return NextResponse.json({ error: msg + hint }, { status: 500 });
   }
 }
 

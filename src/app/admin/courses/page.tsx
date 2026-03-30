@@ -21,8 +21,6 @@ import {
   type AdminCourse,
   type CourseStatus,
 } from "@/data/admin";
-import { WordImportDialog } from "@/components/admin/WordImportDialog";
-import { AICourseGeneratorDialog } from "@/components/admin/AICourseGeneratorDialog";
 import { cn, formatNumber } from "@/lib/utils";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -497,8 +495,6 @@ export default function AdminCoursesPage() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [toast, setToast] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [showImportModal, setShowImportModal] = useState(false);
-  const [showAIModal, setShowAIModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<AdminCourse | null>(null);
 
   function showToast(msg: string) {
@@ -634,22 +630,7 @@ export default function AdminCoursesPage() {
           >
             {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "↻"} Refresh
           </button>
-          <button
-            type="button"
-            onClick={() => setShowAIModal(true)}
-            className="flex items-center gap-1.5 rounded-xl border border-indigo-500/40 bg-gradient-to-r from-violet-500/10 to-indigo-500/10 px-4 py-2 text-sm font-semibold text-indigo-300 transition-all hover:from-violet-500/20 hover:to-indigo-500/20 hover:text-indigo-200"
-          >
-            <Sparkles className="h-4 w-4" />
-            Generate with AI
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowImportModal(true)}
-            className="flex items-center gap-1.5 rounded-xl border border-violet-500/40 bg-violet-500/10 px-4 py-2 text-sm font-semibold text-violet-300 transition-colors hover:bg-violet-500/20 hover:text-violet-200"
-          >
-            <FileUp className="h-4 w-4" />
-            Import Word
-          </button>
+          
           <button
             type="button"
             onClick={() => setShowAddModal(true)}
@@ -956,29 +937,7 @@ export default function AdminCoursesPage() {
         />
       )}
 
-      {/* AI Course Generator modal */}
-      {showAIModal && (
-        <AICourseGeneratorDialog
-          onClose={() => setShowAIModal(false)}
-          onGenerated={(course) => {
-            setCourses((prev) => [course, ...prev]);
-            setShowAIModal(false);
-            showToast(`"${course.title}" generated successfully!`);
-          }}
-        />
-      )}
-
-      {/* Import from Word modal */}
-      {showImportModal && (
-        <WordImportDialog
-          onClose={() => setShowImportModal(false)}
-          onImported={(course) => {
-            setCourses((prev) => [course, ...prev]);
-            setShowImportModal(false);
-            showToast(`"${course.title}" imported successfully!`);
-          }}
-        />
-      )}
+      {/* (AI generator and Word import removed) */}
 
       {/* Confirm delete modal */}
       {deleteTarget && (

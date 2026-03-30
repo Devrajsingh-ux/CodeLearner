@@ -42,6 +42,7 @@ type Tab = "content" | "editor";
 interface Props {
   lesson: LessonContent;
   lessonNum: number;
+  lessonSlug: string;
   trackSlug: string;
   trackTitle: string;
   prevSlug: string | null;
@@ -129,6 +130,7 @@ function renderInline(text: string): React.ReactNode {
 export function LessonClient({
   lesson,
   lessonNum,
+  lessonSlug,
   trackSlug,
   trackTitle,
   prevSlug,
@@ -138,11 +140,54 @@ export function LessonClient({
   const [tab, setTab] = useState<Tab>("content");
   const [sidebarOpen, setSidebar] = useState(false);
   const [completed, setCompleted] = useState(false);
+  const [isMarkingComplete, setIsMarkingComplete] = useState(false);
 
   const totalLessons = curriculum.sections.reduce(
     (a, s) => a + s.lessons.length,
     0,
   );
+
+  // Mark lesson as complete and save to database
+  async function handleMarkComplete() {
+    if (completed || isMarkingComplete) return;
+
+    setIsMarkingComplete(true);
+
+    try {
+      const res = await fetch("/api/progress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          courseId: trackSlug,
+          lessonId: lessonSlug,
+          lessonSlug,
+          xpEarned: lesson.xp || 10,
+        }),
+      });
+
+      if (res.ok) {
+        setCompleted(true);
+
+        // Navigate to next lesson after showing success
+        if (nextSlug) {
+          setTimeout(() => {
+            window.location.href = `/learn/${trackSlug}/${nextSlug}`;
+          }, 500);
+        }
+      } else {
+        const data = await res.json();
+        console.error("Failed to mark as complete:", data.error);
+        // Still set as completed locally for UX, but log the error
+        setCompleted(true);
+      }
+    } catch (error) {
+      console.error("Error marking lesson as complete:", error);
+      // Still set as completed locally for UX
+      setCompleted(true);
+    } finally {
+      setIsMarkingComplete(false);
+    }
+  }
 
   return (
     <div className="flex h-screen flex-col bg-zinc-950 pt-16">
@@ -320,23 +365,17 @@ export function LessonClient({
                 <div className="mt-8 flex flex-wrap gap-3">
                   <button
                     type="button"
-                    onClick={() => {
-                      setCompleted(true);
-                      if (nextSlug) {
-                        setTimeout(() => {
-                          window.location.href = `/learn/${trackSlug}/${nextSlug}`;
-                        }, 500);
-                      }
-                    }}
+                    onClick={handleMarkComplete}
+                    disabled={isMarkingComplete}
                     className={cn(
-                      "flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all",
+                      "flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all disabled:opacity-70 disabled:cursor-not-allowed",
                       completed
                         ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
                         : "bg-linear-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/20 hover:from-violet-500 hover:to-indigo-500",
                     )}
                   >
                     <CheckCircle2 className="h-4 w-4" />
-                    {completed ? "Completed! 🎉" : "Mark as Complete"}
+                    {isMarkingComplete ? "Saving..." : completed ? "Completed! 🎉" : "Mark as Complete"}
                   </button>
 
                   {nextSlug && !completed && (

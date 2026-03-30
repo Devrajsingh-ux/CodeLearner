@@ -7,7 +7,6 @@ import {
   Clock,
   Code2,
   Lock,
-  Play,
   Star,
   Users,
   Zap,
@@ -18,6 +17,7 @@ import { notFound } from "next/navigation";
 import { Query } from "node-appwrite";
 import { Badge } from "@/components/ui/Badge";
 import { getTechColor, TechIcon } from "@/components/ui/TechIcon";
+import { EnrollButton } from "@/components/learn/EnrollButton";
 import { createAdminClient, DB_ID, COL_COURSES } from "@/lib/appwriteServer";
 import { getCurriculum } from "@/lib/lessons";
 import type { TrackCurriculum } from "@/lib/lessons";
@@ -222,12 +222,12 @@ export default async function TrackPage({ params }: Props) {
                     <p className="mb-1 text-sm text-zinc-500">forever</p>
                   </div>
 
-                  <Link
-                    href={`/learn/${slug}/lesson-1`}
-                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-violet-600 to-indigo-600 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-500/25 transition-all hover:from-violet-500 hover:to-indigo-500"
-                  >
-                    <Play className="h-4 w-4" /> Start Learning
-                  </Link>
+                  <EnrollButton
+                    courseId={track.id}
+                    courseSlug={slug}
+                    courseTitle={track.title}
+                    totalLessons={totalLessons}
+                  />
 
                   <div className="mt-5 space-y-3 text-sm text-zinc-400">
                     {[

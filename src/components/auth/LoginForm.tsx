@@ -4,9 +4,11 @@ import { AlertCircle, ArrowRight, Eye, EyeOff, Lock, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { OAuthProvider } from "appwrite";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { useAuth } from "@/context/AuthContext";
+import { account } from "@/lib/appwrite";
 
 function GitHubIcon() {
   return (
@@ -78,12 +80,29 @@ export function LoginForm() {
     }
   }
 
+  async function handleOAuthLogin(provider: "github" | "google") {
+    try {
+      setError("");
+      // OAuth redirects to Appwrite's OAuth page, then back to our callback
+      const oauthProvider = provider === "github" ? OAuthProvider.Github : OAuthProvider.Google;
+      account.createOAuth2Session(
+        oauthProvider,
+        `${window.location.origin}/oauth/callback`,
+        `${window.location.origin}/login?error=oauth_failed`
+      );
+    } catch (err) {
+      console.error("OAuth login error:", err);
+      setError("OAuth login failed. Please try again.");
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Social login */}
       <div className="grid grid-cols-2 gap-3">
         <button
           type="button"
+          onClick={() => handleOAuthLogin("github")}
           className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-zinc-300 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
         >
           <GitHubIcon />
@@ -91,6 +110,7 @@ export function LoginForm() {
         </button>
         <button
           type="button"
+          onClick={() => handleOAuthLogin("google")}
           className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-zinc-300 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
         >
           <GoogleIcon />

@@ -4,21 +4,19 @@ import {
   Check,
   Eye,
   EyeOff,
-  Github,
-  Globe,
   KeyRound,
+  Laptop,
   LogOut,
   Mail,
+  Shield,
+  Smartphone,
 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
-import { cn } from "@/lib/utils";
 import { SectionHeading } from "../_shared";
-
-// ─── PasswordField ────────────────────────────────────────────────────────────
 
 function PasswordField({
   label,
@@ -26,14 +24,12 @@ function PasswordField({
   value,
   onChange,
   error,
-  hint,
 }: {
   label: string;
   id: string;
   value: string;
   onChange: (v: string) => void;
   error?: string;
-  hint?: string;
 }) {
   const [show, setShow] = useState(false);
   return (
@@ -44,13 +40,12 @@ function PasswordField({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       error={error}
-      hint={hint}
       autoComplete="new-password"
       rightAddon={
         <button
           type="button"
           onClick={() => setShow((s) => !s)}
-          className="text-zinc-400 hover:text-zinc-200 transition-colors focus-visible:outline-none"
+          className="text-zinc-400 hover:text-zinc-200"
           aria-label={show ? "Hide password" : "Show password"}
         >
           {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -59,8 +54,6 @@ function PasswordField({
     />
   );
 }
-
-// ─── PasswordStrength ─────────────────────────────────────────────────────────
 
 function PasswordStrength({ password }: { password: string }) {
   const score = [
@@ -71,54 +64,42 @@ function PasswordStrength({ password }: { password: string }) {
     password.length >= 14,
   ].filter(Boolean).length;
 
-  const levels = [
-    { label: "Weak",       color: "bg-red-500"     },
-    { label: "Fair",       color: "bg-amber-500"   },
-    { label: "Good",       color: "bg-yellow-400"  },
-    { label: "Strong",     color: "bg-emerald-500" },
-    { label: "Very strong",color: "bg-emerald-400" },
-  ];
-  const { label, color } = levels[score - 1] ?? levels[0];
+  const label =
+    score >= 5
+      ? "Very strong"
+      : score >= 4
+        ? "Strong"
+        : score >= 3
+          ? "Good"
+          : score >= 2
+            ? "Fair"
+            : "Weak";
 
   return (
-    <output
-      className="space-y-1.5"
-      aria-live="polite"
-      aria-label={`Password strength: ${label}`}
-    >
+    <div className="space-y-1.5">
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map((n) => (
-          <div
+          <span
             key={n}
-            className={cn(
-              "h-1.5 flex-1 rounded-full transition-all duration-300",
-              n <= score ? color : "bg-white/10",
-            )}
+            className={[
+              "h-1.5 flex-1 rounded-full transition-all",
+              n <= score
+                ? score >= 4
+                  ? "bg-emerald-500"
+                  : score >= 3
+                    ? "bg-amber-400"
+                    : "bg-red-500"
+                : "bg-white/10",
+            ].join(" ")}
           />
         ))}
       </div>
-      <p
-        className={cn(
-          "text-xs font-medium",
-          score >= 4
-            ? "text-emerald-400"
-            : score >= 3
-              ? "text-yellow-400"
-              : score >= 2
-                ? "text-amber-400"
-                : "text-red-400",
-        )}
-      >
-        {label}
-      </p>
-    </output>
+      <p className="text-xs text-zinc-400">Strength: {label}</p>
+    </div>
   );
 }
 
-// ─── Props ────────────────────────────────────────────────────────────────────
-
 interface AccountTabProps {
-  // Email
   emailValue: string;
   setEmailValue: (v: string) => void;
   emailError: string;
@@ -126,7 +107,6 @@ interface AccountTabProps {
   emailSaving: boolean;
   emailSaved: boolean;
   onChangeEmail: (e: React.FormEvent) => void;
-  // Password
   currentPw: string;
   setCurrentPw: (v: string) => void;
   newPw: string;
@@ -137,12 +117,9 @@ interface AccountTabProps {
   pwSaving: boolean;
   pwSaved: boolean;
   onChangePassword: (e: React.FormEvent) => void;
-  // Session
   currentSessionDate: string;
   onLogout: () => void;
 }
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 export function AccountTab({
   emailValue,
@@ -165,17 +142,36 @@ export function AccountTab({
   currentSessionDate,
   onLogout,
 }: AccountTabProps) {
+  const sessionItems = useMemo(
+    () => [
+      {
+        id: "sess-1",
+        name: "Current device",
+        details: `Chrome on Linux · ${currentSessionDate}`,
+        icon: Laptop,
+        current: true,
+      },
+      {
+        id: "sess-2",
+        name: "Mobile app",
+        details: "Android device · 2 hours ago",
+        icon: Smartphone,
+        current: false,
+      },
+    ],
+    [currentSessionDate],
+  );
+
   return (
-    <div className="space-y-6">
-      {/* Email */}
-      <Card>
+    <div className="space-y-5">
+      <Card className="rounded-3xl border-white/10 bg-white/4">
         <SectionHeading
-          title="Email Address"
-          description="Your login email and where we send important notifications."
+          title="Email & Verification"
+          description="Change your login email and keep your account verified."
         />
         <form onSubmit={onChangeEmail} noValidate className="space-y-4">
           <Input
-            label="Email"
+            label="Primary email"
             type="email"
             value={emailValue}
             onChange={(e) => {
@@ -183,125 +179,131 @@ export function AccountTab({
               setEmailError("");
             }}
             error={emailError}
-            autoComplete="email"
             leftAddon={<Mail className="h-4 w-4" />}
           />
           <div className="flex items-center justify-end gap-3">
-            {emailSaved && (
-              <output className="flex items-center gap-1.5 text-sm text-emerald-400">
+            {emailSaved ? (
+              <output className="inline-flex items-center gap-1.5 text-sm text-emerald-400">
                 <Check className="h-4 w-4" /> Email updated
               </output>
-            )}
+            ) : null}
             <Button type="submit" isLoading={emailSaving} size="sm">
-              {emailSaving ? "Saving…" : "Update email"}
+              {emailSaving ? "Saving..." : "Update Email"}
             </Button>
           </div>
         </form>
       </Card>
 
-      {/* Password */}
-      <Card>
+      <Card className="rounded-3xl border-white/10 bg-white/4">
         <SectionHeading
-          title="Change Password"
-          description="Use a strong password with at least 8 characters, including letters and numbers."
+          title="Password"
+          description="Use a strong password and rotate it regularly."
         />
         <form onSubmit={onChangePassword} noValidate className="space-y-4">
           <PasswordField
             id="current-password"
-            label="Current Password"
+            label="Current password"
             value={currentPw}
             onChange={setCurrentPw}
             error={pwErrors.currentPw}
           />
           <PasswordField
             id="new-password"
-            label="New Password"
+            label="New password"
             value={newPw}
             onChange={setNewPw}
             error={pwErrors.newPw}
-            hint="Minimum 8 characters"
           />
           <PasswordField
             id="confirm-password"
-            label="Confirm New Password"
+            label="Confirm password"
             value={confirmPw}
             onChange={setConfirmPw}
             error={pwErrors.confirmPw}
           />
-          {newPw.length > 0 && <PasswordStrength password={newPw} />}
-          <div className="flex items-center justify-end gap-3 pt-1">
-            {pwSaved && (
-              <output className="flex items-center gap-1.5 text-sm text-emerald-400">
-                <Check className="h-4 w-4" /> Password updated
+          {newPw ? <PasswordStrength password={newPw} /> : null}
+          <div className="flex items-center justify-end gap-3">
+            {pwSaved ? (
+              <output className="inline-flex items-center gap-1.5 text-sm text-emerald-400">
+                <Check className="h-4 w-4" /> Password changed
               </output>
-            )}
+            ) : null}
             <Button
               type="submit"
               isLoading={pwSaving}
               size="sm"
               leftIcon={<KeyRound className="h-4 w-4" />}
             >
-              {pwSaving ? "Updating…" : "Update password"}
+              {pwSaving ? "Updating..." : "Update Password"}
             </Button>
           </div>
         </form>
       </Card>
 
-      {/* Connected accounts */}
-      <Card>
+      <Card className="rounded-3xl border-white/10 bg-white/4">
         <SectionHeading
-          title="Connected Accounts"
-          description="Link OAuth providers for faster sign-in."
+          title="Session Management"
+          description="Review active devices and secure your sessions."
         />
-        <div className="space-y-3">
-          {[
-            { provider: "GitHub", icon: Github, connected: false },
-            { provider: "Google", icon: Globe,  connected: false },
-          ].map(({ provider, icon: Icon, connected }) => (
+        <div className="space-y-2">
+          {sessionItems.map(({ id, name, details, icon: Icon, current }) => (
             <div
-              key={provider}
-              className="flex items-center justify-between rounded-xl border border-white/8 px-4 py-3"
+              key={id}
+              className="flex items-center justify-between rounded-xl border border-white/8 bg-zinc-900/30 px-3 py-2.5"
             >
-              <div className="flex items-center gap-3">
-                <Icon className="h-5 w-5 text-zinc-400" />
+              <div className="flex items-center gap-2.5">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-500/15">
+                  <Icon className="h-4 w-4 text-cyan-300" />
+                </span>
                 <div>
-                  <p className="text-sm font-medium text-zinc-200">{provider}</p>
-                  <p className="text-xs text-zinc-500">
-                    {connected ? "Connected" : "Not connected"}
-                  </p>
+                  <p className="text-sm font-medium text-zinc-200">{name}</p>
+                  <p className="text-xs text-zinc-500">{details}</p>
                 </div>
               </div>
-              <Button variant={connected ? "danger" : "outline"} size="sm">
-                {connected ? "Disconnect" : "Connect"}
-              </Button>
+              {current ? (
+                <Badge variant="success">Current</Badge>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs text-red-300"
+                >
+                  Revoke
+                </Button>
+              )}
             </div>
           ))}
         </div>
-      </Card>
 
-      {/* Active session */}
-      <Card>
-        <SectionHeading
-          title="Active Sessions"
-          description="Sign out of all other browsers and devices."
-        />
-        <div className="flex items-center justify-between rounded-xl border border-white/8 bg-white/3 px-4 py-3">
-          <div>
-            <p className="text-sm font-medium text-zinc-200">This device</p>
-            <p className="text-xs text-zinc-500">
-              Current session — {currentSessionDate}
-            </p>
-          </div>
-          <Badge variant="success">Active</Badge>
-        </div>
-        <div className="mt-4 flex justify-end">
+        <div className="mt-4 flex items-center justify-between rounded-xl border border-amber-500/25 bg-amber-500/10 px-3 py-2.5">
+          <p className="text-xs text-amber-200">
+            Signing out everywhere removes access on all devices.
+          </p>
           <Button
             variant="secondary"
             size="sm"
             leftIcon={<LogOut className="h-4 w-4" />}
             onClick={onLogout}
           >
-            Sign out everywhere
+            Sign Out All
+          </Button>
+        </div>
+      </Card>
+
+      <Card className="rounded-3xl border-red-500/30 bg-red-500/8">
+        <SectionHeading
+          title="Account Safety"
+          description="Keep your account protected with additional checks."
+        />
+        <div className="flex items-center justify-between rounded-xl border border-white/8 bg-zinc-900/35 px-3 py-2.5">
+          <div className="flex items-center gap-2">
+            <Shield className="h-4.5 w-4.5 text-amber-300" />
+            <p className="text-sm text-zinc-200">
+              Two-factor authentication not enabled
+            </p>
+          </div>
+          <Button variant="outline" size="sm">
+            Enable 2FA
           </Button>
         </div>
       </Card>

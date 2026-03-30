@@ -32,6 +32,11 @@ export const COL_TESTIMONIALS = "testimonials";
 export const COL_PROBLEMS     = "problems";
 export const COL_LANGUAGES    = "languages"; // new collection for supported languages
 export const COL_SNIPPETS     = "snippets";
+export const COL_ENROLLMENTS  = "enrollments"; // user course enrollments
+export const COL_PROGRESS     = "progress";    // lesson completion tracking
+export const COL_ACTIVITY     = "activity";    // daily user activity
+export const COL_STREAKS      = "streaks";     // user streak tracking
+export const COL_PROBLEMS_SOLVED = "problems_solved"; // coding problems tracking
 export const SETTINGS_DOC     = "platform";
 
 // ── Admin auth guard ──────────────────────────────────────────────────────────

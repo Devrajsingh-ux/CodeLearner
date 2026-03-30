@@ -59,9 +59,7 @@ function PasswordStrength({ password }: { password: string }) {
             ) : (
               <XCircle className="h-3.5 w-3.5 text-zinc-600" />
             )}
-            <span className={ok ? "text-zinc-300" : "text-zinc-600"}>
-              {label}
-            </span>
+            <span className={ok ? "text-zinc-300" : "text-zinc-600"}>{label}</span>
           </li>
         ))}
       </ul>
@@ -157,34 +155,23 @@ export function RegisterForm() {
         <PasswordStrength password={password} />
       </div>
 
-      <label className="flex cursor-pointer items-start gap-3 text-sm text-zinc-400">
+      <label className="flex cursor-pointer items-center gap-2.5 text-sm text-zinc-400 select-none">
         <input
           type="checkbox"
           checked={agreed}
           onChange={(e) => setAgreed(e.target.checked)}
-          className="mt-0.5 h-4 w-4 rounded border-white/20 bg-white/5 accent-violet-500 shrink-0"
+          className="h-4 w-4 rounded border-white/20 bg-white/5 accent-violet-500"
         />
-        I agree to the{" "}
-        <a
-          href="/terms"
-          className="text-violet-400 hover:text-violet-300 transition-colors"
-        >
-          Terms of Service
-        </a>{" "}
-        and{" "}
-        <a
-          href="/privacy"
-          className="text-violet-400 hover:text-violet-300 transition-colors"
-        >
-          Privacy Policy
-        </a>
+        <span>
+          I agree to the {" "}
+          <a href="/terms" className="text-violet-400 hover:text-violet-300 transition-colors">Terms of Service</a>
+          {" "}and{" "}
+          <a href="/privacy" className="text-violet-400 hover:text-violet-300 transition-colors">Privacy Policy</a>
+        </span>
       </label>
 
       {error && (
-        <p
-          className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400"
-          role="alert"
-        >
+        <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400" role="alert">
           {error}
         </p>
       )}

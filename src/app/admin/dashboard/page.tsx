@@ -43,6 +43,7 @@ interface DashStats {
   totalLessons : number;
   topCourses   : TopCourse[];
   activity     : ActivityItem[];
+  error?       : string;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -116,7 +117,9 @@ export default function AdminDashboardPage() {
     try {
       const res = await fetch("/api/admin/stats", { credentials: "same-origin" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      setStats(await res.json());
+      const data = await res.json();
+      if (data.error) setError(`Appwrite error: ${data.error}. Check APPWRITE_API_KEY in .env.local`);
+      setStats(data);
     } catch (e: any) {
       setError(e.message ?? "Failed to load stats");
     } finally {

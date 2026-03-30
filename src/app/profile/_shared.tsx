@@ -50,6 +50,8 @@ export function profileReducer(
 // ─── Notification preferences ─────────────────────────────────────────────────
 
 export interface NotificationPrefs {
+  muteAll: boolean;
+  frequency: "instant" | "daily" | "weekly";
   courseUpdates: boolean;
   weeklyDigest: boolean;
   achievementAlerts: boolean;
@@ -57,6 +59,17 @@ export interface NotificationPrefs {
   newCourses: boolean;
   communityReplies: boolean;
   marketingEmails: boolean;
+}
+
+export function getTier(level: number): {
+  name: "Bronze" | "Silver" | "Gold" | "Platinum" | "Diamond";
+  color: string;
+} {
+  if (level >= 25) return { name: "Diamond", color: "text-cyan-300" };
+  if (level >= 16) return { name: "Platinum", color: "text-violet-300" };
+  if (level >= 10) return { name: "Gold", color: "text-amber-300" };
+  if (level >= 5) return { name: "Silver", color: "text-zinc-300" };
+  return { name: "Bronze", color: "text-orange-300" };
 }
 
 // ─── Enrolled track shape (placeholder until enrollment is wired) ─────────────
@@ -115,9 +128,7 @@ export function Toggle({
         >
           {label}
         </label>
-        {description && (
-          <p className="text-xs text-zinc-500">{description}</p>
-        )}
+        {description && <p className="text-xs text-zinc-500">{description}</p>}
       </div>
       <button
         type="button"

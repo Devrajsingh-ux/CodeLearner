@@ -23,8 +23,13 @@ export async function GET(request: NextRequest) {
     users.list([Query.limit(1)]),
     databases.listDocuments(DB_ID, COL_COURSES, [Query.limit(1)]),
     databases.listDocuments(DB_ID, COL_LESSONS, [Query.limit(1)]),
-    users.list([Query.orderDesc("$createdAt"), Query.limit(8)]),
+    users.list([Query.orderDesc("registration"), Query.limit(8)]),
   ]);
+
+  // If the primary users query failed, surface the error (likely missing API key)
+  const appwriteError = usersResp.status === "rejected"
+    ? (usersResp.reason as any)?.message ?? "Appwrite admin client error"
+    : null;
 
   const totalUsers   = usersResp.status   === "fulfilled" ? usersResp.value.total   : 0;
   const totalCourses = coursesResp.status === "fulfilled" ? coursesResp.value.total : 0;
@@ -71,5 +76,6 @@ export async function GET(request: NextRequest) {
     totalLessons,
     activity,
     topCourses,
+    ...(appwriteError && { error: appwriteError }),
   });
 }

@@ -61,6 +61,7 @@ export default async function LessonPage({ params }: Props) {
     <LessonClient
       lesson={lessonData}
       lessonNum={num}
+      lessonSlug={lessonSlug}
       trackSlug={slug}
       trackTitle={track.title}
       prevSlug={prevSlug}
