@@ -1,19 +1,29 @@
 import { Client, Account, Databases, ID } from "appwrite";
 
-// NEXT_PUBLIC_ env vars are baked into the browser bundle at build time.
-// Hardcoded strings act as safe fallbacks so the SDK is always configured
-// even when the host hasn't set the env vars yet.
-const ENDPOINT =
-  process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT ??
-  "https://sgp.cloud.appwrite.io/v1";
+/**
+ * Client-side Appwrite SDK configuration.
+ * Environment variables MUST be set - no hardcoded fallbacks for security.
+ */
 
-const PROJECT =
-  process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID ??
-  "69aa826d003e711776fd";
+const ENDPOINT = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT;
+const PROJECT = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID;
 
-const client = new Client()
-  .setEndpoint(ENDPOINT)
-  .setProject(PROJECT);
+// Validate required environment variables at runtime (browser only)
+if (typeof window !== 'undefined') {
+  if (!ENDPOINT) {
+    console.error("CRITICAL: NEXT_PUBLIC_APPWRITE_ENDPOINT is not set");
+  }
+  if (!PROJECT) {
+    console.error("CRITICAL: NEXT_PUBLIC_APPWRITE_PROJECT_ID is not set");
+  }
+}
+
+const client = new Client();
+
+// Only configure if env vars are available (prevents crashes during build)
+if (ENDPOINT && PROJECT) {
+  client.setEndpoint(ENDPOINT).setProject(PROJECT);
+}
 
 const account = new Account(client);
 const databases = new Databases(client);

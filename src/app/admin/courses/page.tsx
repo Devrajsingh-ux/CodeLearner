@@ -496,6 +496,7 @@ export default function AdminCoursesPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<AdminCourse | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
 
   function showToast(msg: string) {
     setToast(msg);
@@ -603,6 +604,45 @@ export default function AdminCoursesPage() {
     showToast(`"${course.title}" created successfully!`);
   }
 
+  async function importAllCurricula() {
+    if (!confirm("Import all 49 programming language curricula to the database?\n\nThis will create courses and lessons for all languages.")) {
+      return;
+    }
+
+    setIsImporting(true);
+    setError(""); // Clear previous errors
+    
+    try {
+      const res = await fetch("/api/admin/courses/seed-curricula", {
+        method: "POST",
+        credentials: "same-origin",
+      });
+      const json = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(json.error ?? `HTTP ${res.status}`);
+      }
+
+      // Show detailed results
+      const successMsg = `✅ Import complete!\n${json.success} courses imported successfully\n${json.skipped} already existed\n${json.failed} failed`;
+      
+      if (json.failed > 0) {
+        console.error("Failed imports:", json.details.failed);
+        showToast(`⚠️ ${json.success} imported, ${json.failed} failed. Check console for details.`);
+      } else {
+        showToast(`✅ All ${json.success} courses imported successfully!`);
+      }
+      
+      await loadCourses(); // Reload courses list
+    } catch (err: any) {
+      console.error("Import error:", err);
+      setError(`Import failed: ${err.message ?? "Unknown error"}`);
+      showToast(`❌ Import failed: ${err.message}`);
+    } finally {
+      setIsImporting(false);
+    }
+  }
+
   const counts = {
     published: courses.filter((c) => c.status === "published").length,
     draft: courses.filter((c) => c.status === "draft").length,
@@ -629,6 +669,19 @@ export default function AdminCoursesPage() {
             className="flex items-center gap-1.5 rounded-xl border border-white/8 bg-zinc-900 px-3 py-2 text-xs text-zinc-400 transition-colors hover:border-white/20 hover:text-white disabled:opacity-50"
           >
             {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "↻"} Refresh
+          </button>
+
+          <button
+            type="button"
+            onClick={importAllCurricula}
+            disabled={isImporting}
+            className="flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs font-medium text-emerald-400 transition-colors hover:bg-emerald-500/20 disabled:opacity-50"
+          >
+            {isImporting ? (
+              <><Loader2 className="h-3.5 w-3.5 animate-spin" />Importing…</>
+            ) : (
+              <><Sparkles className="h-3.5 w-3.5" />Import 49 Curricula</>
+            )}
           </button>
           
           <button

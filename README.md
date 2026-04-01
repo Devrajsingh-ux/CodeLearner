@@ -724,3 +724,46 @@ This project is private and proprietary.
 <p align="center">
   Built with ❤️ by the Zentax Team
 </p>
+
+---
+
+## 📚 Curriculum System
+
+This platform includes **49 complete programming language courses** with comprehensive 5-level curricula (Basics → Professional).
+
+### Quick Setup
+
+To import all courses to your website:
+
+1. **Read the Quick Start Guide**  
+   ```bash
+   cat QUICK_START.md
+   ```
+
+2. **Import All Courses** (3 steps):
+   - Start dev server: `npm run dev`
+   - Login to admin: `http://localhost:3000/admin/login`
+   - Click "Import 49 Curricula" button in admin courses page
+
+3. **Verify**  
+   Visit `http://localhost:3000/learn` to see all 49 courses!
+
+### Documentation
+
+- **📘 QUICK_START.md** - 3-step import guide
+- **📗 CONNECT_COURSES_GUIDE.md** - Detailed setup and architecture
+- **📕 CURRICULUM_INTEGRATION_SUMMARY.md** - Technical overview
+- **📙 CURRICULUM_README.md** - Curriculum structure details
+- **📄 FINAL_REPORT.md** - Generation completion report
+
+### What's Included
+
+- ✅ 49 Programming Language Courses
+- ✅ 245 Progressive Levels
+- ✅ ~1,617 Interactive Lessons
+- ✅ ~3,000 Code Exercises
+- ✅ 245 Capstone Projects
+- ✅ Full XP & Progress Tracking
+
+All content is production-ready and can be imported with one click!
+

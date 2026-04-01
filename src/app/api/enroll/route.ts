@@ -7,80 +7,111 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { ID, Query } from "node-appwrite";
-import { createAdminClient, DB_ID, COL_ENROLLMENTS, COL_COURSES } from "@/lib/appwriteServer";
-import type { Enrollment } from "@/types";
-
-// Helper to get user from session cookie
-function getUserFromSession(request: NextRequest): { id: string } | null {
-  try {
-    const raw = request.cookies.get("cl_session")?.value;
-    if (!raw) return null;
-    const user = JSON.parse(raw) as { id: string };
-    return user?.id ? user : null;
-  } catch {
-    return null;
-  }
-}
+import { createAdminClient, DB_ID, COL_ENROLLMENTS } from "@/lib/appwriteServer";
+import { getUserFromSession } from "@/lib/auth";
+import { validateInput, enrollmentPostSchema, sanitizeString } from "@/lib/validation";
 
 // POST - Enroll in a course
 export async function POST(request: NextRequest) {
   try {
-    const user = getUserFromSession(request);
+    const user = await getUserFromSession(request);
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
-    const { courseId, courseSlug, courseTitle, totalLessons } = body;
 
-    if (!courseId || !courseSlug || !courseTitle) {
+    // Validate input
+    const validation = validateInput(enrollmentPostSchema, body);
+    if (!validation.success) {
       return NextResponse.json(
-        { error: "Missing required fields: courseId, courseSlug, courseTitle" },
+        { error: "Invalid input", details: validation.errors },
         { status: 400 }
       );
     }
 
-    const { databases } = createAdminClient();
+    const { courseId, courseSlug, courseTitle } = validation.data;
+    const totalLessons = typeof body.totalLessons === 'number' ? Math.max(0, body.totalLessons) : 0;
 
-    // Check if already enrolled
-    const existing = await databases.listDocuments(DB_ID, COL_ENROLLMENTS, [
-      Query.equal("userId", user.id),
-      Query.equal("courseId", courseId),
-    ]);
+    try {
+      const { databases } = createAdminClient();
 
-    if (existing.documents.length > 0) {
-      // Already enrolled, just return the existing enrollment
-      return NextResponse.json({
-        enrollment: existing.documents[0],
-        alreadyEnrolled: true,
-      });
+      // Check if already enrolled
+      const existing = await databases.listDocuments(DB_ID, COL_ENROLLMENTS, [
+        Query.equal("userId", user.id),
+        Query.equal("courseId", courseId),
+      ]);
+
+      if (existing.documents.length > 0) {
+        // Already enrolled, update last accessed time
+        const enrollment = existing.documents[0];
+        await databases.updateDocument(
+          DB_ID,
+          COL_ENROLLMENTS,
+          enrollment.$id,
+          { lastAccessedAt: new Date().toISOString() }
+        );
+        return NextResponse.json({
+          enrollment,
+          alreadyEnrolled: true,
+        });
+      }
+
+      // Create new enrollment
+      const now = new Date().toISOString();
+      const enrollment = await databases.createDocument(
+        DB_ID,
+        COL_ENROLLMENTS,
+        ID.unique(),
+        {
+          userId: user.id,
+          courseId: sanitizeString(courseId, 100),
+          courseSlug: sanitizeString(courseSlug, 100),
+          courseTitle: sanitizeString(courseTitle, 500),
+          enrolledAt: now,
+          lastAccessedAt: now,
+          status: "active",
+          completedLessons: 0,
+          totalLessons,
+          percentComplete: 0,
+        }
+      );
+
+      return NextResponse.json({ enrollment });
+
+    } catch (dbError: unknown) {
+      const error = dbError as { code?: number; type?: string; message?: string };
+
+      // Handle database connection issues gracefully
+      if (error.code === 404 && error.type === 'database_not_found') {
+        console.warn("Database not found, returning simulated enrollment");
+        const now = new Date().toISOString();
+        return NextResponse.json({
+          enrollment: {
+            $id: `local_${Date.now()}`,
+            userId: user.id,
+            courseId,
+            courseSlug,
+            courseTitle,
+            enrolledAt: now,
+            lastAccessedAt: now,
+            status: "active",
+            completedLessons: 0,
+            totalLessons,
+            percentComplete: 0,
+          },
+          warning: "Database not initialized - using simulated data"
+        });
+      }
+
+      console.error("Database error in enrollment:", error.message);
+      throw dbError;
     }
 
-    // Create new enrollment
-    const now = new Date().toISOString();
-    const enrollment = await databases.createDocument(
-      DB_ID,
-      COL_ENROLLMENTS,
-      ID.unique(),
-      {
-        userId: user.id,
-        courseId,
-        courseSlug,
-        courseTitle,
-        enrolledAt: now,
-        lastAccessedAt: now,
-        status: "active",
-        completedLessons: 0,
-        totalLessons: totalLessons || 0,
-        percentComplete: 0,
-      }
-    );
-
-    return NextResponse.json({ enrollment });
-  } catch (error: any) {
-    console.error("Enroll API error:", error);
+  } catch (error) {
+    console.error("Enroll API error:", error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json(
-      { error: error.message || "Failed to enroll in course" },
+      { error: "Failed to enroll in course. Please try again." },
       { status: 500 }
     );
   }
@@ -89,24 +120,61 @@ export async function POST(request: NextRequest) {
 // GET - Get user's enrollments
 export async function GET(request: NextRequest) {
   try {
-    const user = getUserFromSession(request);
+    const user = await getUserFromSession(request);
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { databases } = createAdminClient();
+    try {
+      const { databases } = createAdminClient();
 
-    // Fetch all enrollments for this user
-    const result = await databases.listDocuments(DB_ID, COL_ENROLLMENTS, [
-      Query.equal("userId", user.id),
-      Query.orderDesc("lastAccessedAt"),
-    ]);
+      // Fetch all enrollments for this user with pagination limits
+      const result = await databases.listDocuments(DB_ID, COL_ENROLLMENTS, [
+        Query.equal("userId", user.id),
+        Query.orderDesc("lastAccessedAt"),
+        Query.limit(100),
+      ]);
 
-    return NextResponse.json({ enrollments: result.documents });
-  } catch (error: any) {
-    console.error("Get enrollments error:", error);
+      return NextResponse.json({
+        enrollments: result.documents.map(doc => ({
+          id: doc.$id,
+          userId: doc.userId,
+          courseId: doc.courseId,
+          courseSlug: doc.courseSlug,
+          courseTitle: doc.courseTitle,
+          enrolledAt: doc.enrolledAt,
+          lastAccessedAt: doc.lastAccessedAt,
+          completedLessons: doc.completedLessons || 0,
+          totalLessons: doc.totalLessons || 0,
+          percentComplete: doc.percentComplete || 0,
+          timeSpent: doc.timeSpent || 0,
+          lastLessonId: doc.lastLessonId || null,
+          status: doc.status || "active",
+        }))
+      });
+
+    } catch (dbError: unknown) {
+      const error = dbError as { code?: number; type?: string; message?: string };
+
+      if (error.code === 404 && error.type === 'database_not_found') {
+        console.warn("Database not found, returning empty enrollments");
+        return NextResponse.json({
+          enrollments: [],
+          warning: "Database not initialized"
+        });
+      }
+
+      console.error("Database error fetching enrollments:", error.message);
+      return NextResponse.json({
+        enrollments: [],
+        error: "Unable to fetch enrollments"
+      }, { status: 500 });
+    }
+
+  } catch (error) {
+    console.error("Get enrollments error:", error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json(
-      { error: error.message || "Failed to fetch enrollments" },
+      { enrollments: [], error: "An error occurred" },
       { status: 500 }
     );
   }

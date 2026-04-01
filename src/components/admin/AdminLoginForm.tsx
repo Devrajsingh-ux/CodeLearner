@@ -66,12 +66,20 @@ export function AdminLoginForm() {
       clearAttempts(email);
       router.replace("/admin/dashboard");
     } catch (err: any) {
+      // Helpful dev-only logging: surface the raw error to aid debugging
+      if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
+        // eslint-disable-next-line no-console
+        console.error("Admin login error:", err);
+      }
       const result = recordFailedAttempt(email);
       if (result.locked) {
         setError("Account locked after too many failed attempts. Try again in 15 minutes.");
       } else {
         const warning = result.warning ? ` (${result.warning})` : "";
-        setError((err?.message || "Invalid credentials.") + warning);
+        // Show more detail in development so we can diagnose network/CORS/Appwrite issues.
+        const fallback = err?.message || (typeof err === "string" ? err : "Invalid credentials.");
+        const detailed = process.env.NODE_ENV === "development" ? `${fallback} — ${JSON.stringify(err)}` : fallback;
+        setError(detailed + warning);
       }
     } finally {
       setIsLoading(false);

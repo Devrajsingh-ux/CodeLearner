@@ -248,7 +248,7 @@ export default function LearnPage() {
       try {
         const res = await fetch("/api/courses");
         const json = await res.json();
-        setAllTracks(json.data || []);
+        setAllTracks(json.tracks || []);
       } catch (e) {
         console.error("Failed to load tracks", e);
       } finally {

@@ -13,51 +13,45 @@ import {
   COL_ACTIVITY,
   COL_STREAKS,
 } from "@/lib/appwriteServer";
-
-// Helper to get user from session cookie
-function getUserFromSession(request: NextRequest): { id: string } | null {
-  try {
-    const raw = request.cookies.get("cl_session")?.value;
-    if (!raw) return null;
-    const user = JSON.parse(raw) as { id: string };
-    return user?.id ? user : null;
-  } catch {
-    return null;
-  }
-}
-
-// Helper to format date as YYYY-MM-DD
-function formatDate(date: Date): string {
-  return date.toISOString().split('T')[0];
-}
-
-// Helper to calculate days between dates
-function daysBetween(date1: string, date2: string): number {
-  const d1 = new Date(date1);
-  const d2 = new Date(date2);
-  return Math.floor((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24));
-}
+import { getUserFromSession } from "@/lib/auth";
+import { validateInput, activityPostSchema, activityGetSchema, sanitizeString } from "@/lib/validation";
+import {
+  formatDateISO,
+  daysBetween,
+  unauthorizedResponse,
+  validationErrorResponse,
+  handleDatabaseError,
+  withErrorHandling
+} from "@/lib/utils";
 
 // POST - Record activity and update streak
 export async function POST(request: NextRequest) {
-  try {
-    const user = getUserFromSession(request);
+  return withErrorHandling(async () => {
+    const user = await getUserFromSession(request);
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return unauthorizedResponse();
     }
 
     const body = await request.json();
+
+    // Validate input
+    const validation = validateInput(activityPostSchema, body);
+    if (!validation.success) {
+      return validationErrorResponse(validation.errors || []);
+    }
+
     const {
-      type, // "lesson" | "problem" | "quest"
+      type,
       xpEarned = 0,
       minutesStudied = 0,
       problemId = null,
       questId = null
-    } = body;
+    } = validation.data;
+
+    const today = formatDateISO();
+    const now = new Date().toISOString();
 
     const { databases, users } = createAdminClient();
-    const today = formatDate(new Date());
-    const now = new Date().toISOString();
 
     // Get or create today's activity record
     let todayActivity = null;
@@ -100,8 +94,9 @@ export async function POST(request: NextRequest) {
       updates.problemsSolved = (todayActivity.problemsSolved || 0) + 1;
     } else if (type === "quest" && questId) {
       const currentQuests = todayActivity.questsCompleted || [];
-      if (!currentQuests.includes(questId)) {
-        updates.questsCompleted = [...currentQuests, questId];
+      const sanitizedQuestId = sanitizeString(questId, 100);
+      if (!currentQuests.includes(sanitizedQuestId)) {
+        updates.questsCompleted = [...currentQuests, sanitizedQuestId];
       }
     }
 
@@ -201,26 +196,45 @@ export async function POST(request: NextRequest) {
       date: today
     });
 
-  } catch (error: any) {
-    console.error("Activity tracking error:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to track activity" },
-      { status: 500 }
-    );
-  }
+  }, (error) => {
+    // Handle database connection issues gracefully
+    const errorResult = handleDatabaseError(error, {
+      fallbackData: {
+        success: true,
+        activity: {
+          xpEarned: 0,
+          minutesStudied: 0,
+          lessonsCompleted: 0,
+          problemsSolved: 0,
+        },
+        date: formatDateISO(),
+        warning: "Database not initialized - activity not persisted"
+      }
+    }, "activity tracking");
+
+    if (errorResult.success) {
+      return NextResponse.json(errorResult.data);
+    }
+    return errorResult.response;
+  });
 }
 
 // GET - Get user's activity history
 export async function GET(request: NextRequest) {
-  try {
-    const user = getUserFromSession(request);
+  return withErrorHandling(async () => {
+    const user = await getUserFromSession(request);
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return unauthorizedResponse();
     }
 
     const { searchParams } = new URL(request.url);
-    const days = parseInt(searchParams.get("days") || "7", 10);
 
+    // Validate query parameters
+    const validation = validateInput(activityGetSchema, {
+      days: searchParams.get("days")
+    });
+
+    const days = validation.success ? validation.data.days : 7;
     const { databases } = createAdminClient();
 
     // Get recent activity
@@ -237,6 +251,7 @@ export async function GET(request: NextRequest) {
     ]);
 
     const streakInfo = streaks.documents.length > 0 ? streaks.documents[0] : null;
+    const today = formatDateISO();
 
     // Calculate totals
     const totalXpThisWeek = activities.documents
@@ -249,7 +264,7 @@ export async function GET(request: NextRequest) {
       .reduce((sum, activity) => sum + (activity.xpEarned || 0), 0);
 
     const totalMinutesToday = activities.documents
-      .filter(activity => activity.date === formatDate(new Date()))
+      .filter(activity => activity.date === today)
       .reduce((sum, activity) => sum + (activity.minutesStudied || 0), 0);
 
     return NextResponse.json({
@@ -261,11 +276,28 @@ export async function GET(request: NextRequest) {
       }
     });
 
-  } catch (error: any) {
-    console.error("Get activity error:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to fetch activity" },
-      { status: 500 }
-    );
-  }
+  }, (error) => {
+    // Handle database connection issues gracefully
+    const errorResult = handleDatabaseError(error, {
+      fallbackData: {
+        activities: [],
+        streak: {
+          currentStreak: 0,
+          longestStreak: 0,
+          lastActivityDate: formatDateISO(),
+          streakStartDate: formatDateISO(),
+        },
+        stats: {
+          xpThisWeek: 0,
+          minutesToday: 0,
+        },
+        warning: "Database not initialized"
+      }
+    }, "activity fetch");
+
+    if (errorResult.success) {
+      return NextResponse.json(errorResult.data);
+    }
+    return errorResult.response;
+  });
 }

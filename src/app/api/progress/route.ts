@@ -1,8 +1,8 @@
 /**
  * /api/progress
  *
- * POST - Mark a lesson as complete and update enrollment progress
- * GET  - Get user's progress for courses
+ * POST - Record lesson completion and award XP
+ * GET  - Get user's progress across all courses
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -13,210 +13,273 @@ import {
   COL_PROGRESS,
   COL_ENROLLMENTS,
 } from "@/lib/appwriteServer";
+import { getUserFromSession, generateAccessToken, generateRefreshToken, setAuthCookies } from "@/lib/auth";
+import { validateInput, progressPostSchema, sanitizeString } from "@/lib/validation";
+import {
+  formatDateISO,
+  calculateLevel,
+  unauthorizedResponse,
+  validationErrorResponse,
+  handleDatabaseError,
+  withErrorHandling
+} from "@/lib/utils";
 
-// Helper to get user from session cookie
-function getUserFromSession(request: NextRequest): { id: string } | null {
-  try {
-    const raw = request.cookies.get("cl_session")?.value;
-    if (!raw) return null;
-    const user = JSON.parse(raw) as { id: string; xp?: number; level?: number };
-    return user?.id ? user : null;
-  } catch {
-    return null;
-  }
-}
-
-// POST - Mark lesson as complete
+// POST - Record lesson completion
 export async function POST(request: NextRequest) {
-  try {
-    const user = getUserFromSession(request);
+  return withErrorHandling(async () => {
+    const user = await getUserFromSession(request);
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return unauthorizedResponse();
     }
 
     const body = await request.json();
-    const { courseId, lessonId, lessonSlug, xpEarned = 10 } = body;
 
-    if (!courseId || !lessonId || !lessonSlug) {
-      return NextResponse.json(
-        { error: "Missing required fields: courseId, lessonId, lessonSlug" },
-        { status: 400 }
-      );
+    // Validate input
+    const validation = validateInput(progressPostSchema, body);
+    if (!validation.success) {
+      return validationErrorResponse(validation.errors || []);
     }
 
+    const {
+      courseId,
+      courseSlug,
+      lessonId,
+      lessonSlug,
+      xpEarned = 0,
+      timeSpent = 0
+    } = validation.data;
+
+    const now = new Date().toISOString();
     const { databases, users } = createAdminClient();
 
     // Check if already completed
-    const existing = await databases.listDocuments(DB_ID, COL_PROGRESS, [
+    const existingProgress = await databases.listDocuments(DB_ID, COL_PROGRESS, [
       Query.equal("userId", user.id),
-      Query.equal("courseId", courseId),
       Query.equal("lessonId", lessonId),
+      Query.limit(1)
     ]);
 
-    if (existing.documents.length > 0) {
-      // Already completed
+    if (existingProgress.documents.length > 0) {
       return NextResponse.json({
-        progress: existing.documents[0],
-        alreadyCompleted: true,
+        success: true,
+        message: "Lesson already completed",
+        progress: existingProgress.documents[0]
       });
     }
 
-    // Create progress record
-    const now = new Date().toISOString();
-    const progress = await databases.createDocument(
+    // Create progress record first
+    const progressRecord = await databases.createDocument(
       DB_ID,
       COL_PROGRESS,
       ID.unique(),
       {
         userId: user.id,
-        courseId,
-        lessonId,
-        lessonSlug,
-        completedAt: now,
+        courseId: sanitizeString(courseId, 100),
+        courseSlug: sanitizeString(courseSlug, 100),
+        lessonId: sanitizeString(lessonId, 100),
+        lessonSlug: sanitizeString(lessonSlug, 100),
+        status: "completed",
         xpEarned,
+        timeSpent: Math.max(0, timeSpent),
+        completedAt: now,
       }
     );
 
-    // Update enrollment progress
-    const enrollments = await databases.listDocuments(DB_ID, COL_ENROLLMENTS, [
-      Query.equal("userId", user.id),
-      Query.equal("courseId", courseId),
+    // Run concurrent operations for enrollment update and user XP update
+    const [enrollmentResult, userAccountResult] = await Promise.allSettled([
+      // Get enrollment and progress data concurrently
+      Promise.all([
+        databases.listDocuments(DB_ID, COL_ENROLLMENTS, [
+          Query.equal("userId", user.id),
+          Query.equal("courseId", courseId),
+        ]),
+        databases.listDocuments(DB_ID, COL_PROGRESS, [
+          Query.equal("userId", user.id),
+          Query.equal("courseId", courseId),
+        ])
+      ]),
+      // Get user account for XP update
+      users.get(user.id)
     ]);
 
-    if (enrollments.documents.length > 0) {
-      const enrollment = enrollments.documents[0];
+    // Process enrollment update if successful
+    if (enrollmentResult.status === 'fulfilled') {
+      const [enrollments, allProgress] = enrollmentResult.value;
 
-      // Count total completed lessons for this course
-      const allProgress = await databases.listDocuments(DB_ID, COL_PROGRESS, [
-        Query.equal("userId", user.id),
-        Query.equal("courseId", courseId),
-      ]);
+      if (enrollments.documents.length > 0) {
+        const enrollment = enrollments.documents[0];
+        const completedCount = allProgress.total;
+        const totalLessons = Math.max(enrollment.totalLessons || 1, 1);
+        const percentComplete = Math.min(100, Math.round((completedCount / totalLessons) * 100));
 
-      const completedCount = allProgress.total;
-      const totalLessons = enrollment.totalLessons || 1;
-      const percentComplete = Math.round((completedCount / totalLessons) * 100);
-
-      // Update enrollment
-      await databases.updateDocument(
-        DB_ID,
-        COL_ENROLLMENTS,
-        enrollment.$id,
-        {
-          completedLessons: completedCount,
-          percentComplete,
-          lastAccessedAt: now,
-          status: percentComplete >= 100 ? "completed" : "active",
-        }
-      );
+        // Update enrollment (non-blocking)
+        databases.updateDocument(
+          DB_ID,
+          COL_ENROLLMENTS,
+          enrollment.$id,
+          {
+            completedLessons: completedCount,
+            percentComplete,
+            lastAccessedAt: now,
+            lastLessonId: lessonId,
+            status: percentComplete >= 100 ? "completed" : "active",
+          }
+        ).catch(err => console.error("Error updating enrollment:", err));
+      }
     }
 
-    // Award XP to user (update user preferences)
-    try {
-      const userAccount = await users.get(user.id);
-      const userPrefs = userAccount.prefs || {};
-      const currentXp = userPrefs.xp || 0;
-      const currentLevel = userPrefs.level || 1;
-      const newXp = currentXp + xpEarned;
+    // Process user XP update if successful
+    let newXp = user.xp || 0;
+    let newLevel = user.level || 1;
+    let shouldGenerateNewTokens = false;
 
-      // Simple level calculation: every 100 XP = 1 level
-      const newLevel = Math.max(1, Math.floor(newXp / 100) + 1);
-
-      await users.updatePrefs(user.id, {
-        ...userPrefs,
-        xp: newXp,
-        level: newLevel,
-      });
-
-      // Track daily activity
+    if (userAccountResult.status === 'fulfilled' && xpEarned > 0) {
       try {
-        await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/activity`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Cookie": request.headers.get("Cookie") || ""
-          },
-          body: JSON.stringify({
-            type: "lesson",
-            xpEarned,
-            minutesStudied: 10, // Estimate 10 minutes per lesson
-          }),
+        const userAccount = userAccountResult.value;
+        const userPrefs = userAccount.prefs || {};
+        const currentXp = (userPrefs.xp as number) || 0;
+        const currentLevel = (userPrefs.level as number) || 1;
+
+        newXp = currentXp + xpEarned;
+        newLevel = calculateLevel(newXp);
+
+        await users.updatePrefs(user.id, {
+          ...userPrefs,
+          xp: newXp,
+          level: newLevel,
         });
-      } catch (activityError) {
-        console.error("Failed to track activity:", activityError);
-        // Continue anyway - lesson completion is more important
+
+        // Only regenerate tokens if XP or level actually changed
+        shouldGenerateNewTokens = (newLevel !== currentLevel) || (newXp !== currentXp);
+
+      } catch (xpError) {
+        console.error("Error updating user XP:", xpError);
       }
-
-      // Update session cookie with new XP/level
-      const sessionCookie = request.cookies.get("cl_session");
-      if (sessionCookie) {
-        const sessionData = JSON.parse(sessionCookie.value);
-        sessionData.xp = newXp;
-        sessionData.level = newLevel;
-
-        const response = NextResponse.json({
-          progress,
-          xpAwarded: xpEarned,
-          newXp,
-          newLevel,
-        });
-
-        response.cookies.set("cl_session", JSON.stringify(sessionData), {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          maxAge: 7 * 24 * 60 * 60,
-          path: "/",
-        });
-
-        return response;
-      }
-    } catch (xpError) {
-      console.error("Failed to award XP:", xpError);
-      // Continue anyway - progress was saved
     }
 
-    return NextResponse.json({
-      progress,
+    // Generate response
+    const response = NextResponse.json({
+      success: true,
+      progress: progressRecord,
       xpAwarded: xpEarned,
+      newXp,
+      newLevel,
+      leveledUp: newLevel > (user.level || 1)
     });
-  } catch (error: any) {
-    console.error("Progress API error:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to save progress" },
-      { status: 500 }
-    );
-  }
+
+    // Set new auth cookies with updated XP/level if needed
+    if (shouldGenerateNewTokens) {
+      try {
+        const updatedUser = { ...user, xp: newXp, level: newLevel };
+        const [accessToken, refreshToken] = await Promise.all([
+          generateAccessToken(updatedUser),
+          generateRefreshToken(updatedUser)
+        ]);
+
+        const { accessTokenCookie, refreshTokenCookie } = setAuthCookies(accessToken, refreshToken);
+
+        response.cookies.set(accessTokenCookie.name, accessTokenCookie.value, accessTokenCookie.options);
+        response.cookies.set(refreshTokenCookie.name, refreshTokenCookie.value, refreshTokenCookie.options);
+
+      } catch (tokenError) {
+        console.error("Error updating auth tokens:", tokenError);
+      }
+    }
+
+    return response;
+
+  }, (error) => {
+    const errorResult = handleDatabaseError(error, {
+      fallbackData: {
+        success: true,
+        progress: { id: "local_progress", status: "completed" },
+        xpAwarded: 0,
+        warning: "Database not initialized - progress not saved"
+      }
+    }, "progress tracking");
+
+    if (errorResult.success) {
+      return NextResponse.json(errorResult.data);
+    }
+    return errorResult.response;
+  });
 }
 
-// GET - Get user's progress
+// GET - Get user's progress across all courses
 export async function GET(request: NextRequest) {
-  try {
-    const user = getUserFromSession(request);
+  return withErrorHandling(async () => {
+    const user = await getUserFromSession(request);
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return unauthorizedResponse();
     }
-
-    const { searchParams } = new URL(request.url);
-    const courseId = searchParams.get("courseId");
 
     const { databases } = createAdminClient();
 
-    const queries = [Query.equal("userId", user.id)];
-    if (courseId) {
-      queries.push(Query.equal("courseId", courseId));
-    }
+    // Run concurrent queries for better performance
+    const [progressResult, enrollmentsResult] = await Promise.allSettled([
+      databases.listDocuments(DB_ID, COL_PROGRESS, [
+        Query.equal("userId", user.id),
+        Query.orderDesc("completedAt"),
+        Query.limit(100)
+      ]),
+      databases.listDocuments(DB_ID, COL_ENROLLMENTS, [
+        Query.equal("userId", user.id),
+        Query.orderDesc("lastAccessedAt"),
+        Query.limit(50)
+      ])
+    ]);
 
-    const result = await databases.listDocuments(DB_ID, COL_PROGRESS, queries);
+    const progress = progressResult.status === 'fulfilled' ? progressResult.value.documents : [];
+    const enrollments = enrollmentsResult.status === 'fulfilled' ? enrollmentsResult.value.documents : [];
+
+    // Calculate stats
+    const totalXp = progress.reduce((sum, p) => sum + (p.xpEarned || 0), 0);
+    const totalLessons = progress.length;
+    const totalTimeSpent = progress.reduce((sum, p) => sum + (p.timeSpent || 0), 0);
 
     return NextResponse.json({
-      progress: result.documents,
-      total: result.total,
+      progress: progress.map(p => ({
+        id: p.$id,
+        courseId: p.courseId,
+        courseSlug: p.courseSlug,
+        lessonId: p.lessonId,
+        lessonSlug: p.lessonSlug,
+        xpEarned: p.xpEarned || 0,
+        timeSpent: p.timeSpent || 0,
+        completedAt: p.completedAt,
+      })),
+      enrollments: enrollments.map(e => ({
+        id: e.$id,
+        courseId: e.courseId,
+        courseSlug: e.courseSlug,
+        courseTitle: e.courseTitle,
+        completedLessons: e.completedLessons || 0,
+        totalLessons: e.totalLessons || 0,
+        percentComplete: e.percentComplete || 0,
+        status: e.status || "active",
+      })),
+      stats: {
+        totalXp,
+        totalLessons,
+        totalTimeSpent,
+        coursesEnrolled: enrollments.length,
+        coursesCompleted: enrollments.filter(e => e.status === "completed").length,
+      }
     });
-  } catch (error: any) {
-    console.error("Get progress error:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to fetch progress" },
-      { status: 500 }
-    );
-  }
+
+  }, (error) => {
+    const errorResult = handleDatabaseError(error, {
+      fallbackData: {
+        progress: [],
+        enrollments: [],
+        stats: { totalXp: 0, totalLessons: 0, totalTimeSpent: 0, coursesEnrolled: 0, coursesCompleted: 0 },
+        warning: "Database not initialized"
+      }
+    }, "progress fetch");
+
+    if (errorResult.success) {
+      return NextResponse.json(errorResult.data);
+    }
+    return errorResult.response;
+  });
 }

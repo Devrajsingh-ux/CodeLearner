@@ -3,18 +3,27 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbo",
+    "dev:webpack": "next dev --webpack",
+    "dev:turbo": "next dev --turbo",
     "build": "next build",
     "start": "next start",
     "lint": "biome check",
     "format": "biome format --write",
-    "create-admin": "node scripts/create-admin.mjs"
+    "type-check": "tsc --noEmit",
+    "create-admin": "node scripts/create-admin.mjs",
+    "setup:db": "node scripts/setup-database.js",
+    "setup:all": "npm run setup:db && echo '✅ Setup complete! You can now run: npm run dev'",
+    "clean": "rm -rf .next",
+    "reset": "npm run clean && npm install"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
     "appwrite": "^23.0.0",
     "clsx": "^2.1.1",
+    "dotenv": "^16.6.1",
     "framer-motion": "^12.38.0",
+    "jose": "^5.10.0",
     "lucide-react": "^0.575.0",
     "mammoth": "^1.11.0",
     "next": "16.1.6",
@@ -22,6 +31,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-icons": "^5.5.0",
+    "redis": "^4.7.1",
     "tailwind-merge": "^3.5.0",
     "zod": "^4.3.6"
   },
