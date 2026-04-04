@@ -12,8 +12,10 @@ import { Navbar } from "./Navbar";
  * so the admin panel can own its own full-screen chrome.
  */
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
   const isAdmin = pathname.startsWith("/admin");
+  // Hide footer on auth pages (login / register)
+  const hideFooterOnAuth = pathname.startsWith("/login") || pathname.startsWith("/register");
 
   // Ping the Appwrite backend on app open to verify the setup
   useEffect(() => {
@@ -24,7 +26,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <>
       {!isAdmin && <Navbar />}
       <div id="main-content">{children}</div>
-      {!isAdmin && <Footer />}
+      {!isAdmin && !hideFooterOnAuth && <Footer />}
     </>
   );
 }

@@ -65,6 +65,7 @@ export const COL_ACTIVITY     = "activity";
 export const COL_STREAKS      = "streaks";
 export const COL_PROBLEMS_SOLVED = "problems_solved";
 export const SETTINGS_DOC     = "platform";
+export const COL_NOTIFICATIONS = "notifications";
 
 // ── Secure Admin auth guard (uses JWT verification) ──────────────────────────
 

@@ -3,26 +3,19 @@
 import {
   ArrowRight,
   Award,
-  BookOpen,
   Brain,
   CheckCircle2,
   ChevronRight,
   Clock,
-  Code2,
   Flame,
-  LayoutDashboard,
   Medal,
-  Menu,
   Play,
   Radar,
-  Shield,
   Sparkles,
   Star,
   Target,
   TrendingUp,
   Trophy,
-  Users,
-  X,
   Zap,
 } from "lucide-react";
 import Link from "next/link";
@@ -121,7 +114,6 @@ export default function DashboardPage() {
   const pathname = usePathname();
 
   const [isHydrated, setIsHydrated] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [catalog, setCatalog] = useState<Track[]>([]);
   const [coursesLoading, setCoursesLoading] = useState(true);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
@@ -289,13 +281,7 @@ export default function DashboardPage() {
       streak: 0,
     } as const);
 
-  const navItems = [
-    { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
-    { href: "/learn", label: "Courses", icon: BookOpen },
-    { href: "/problems", label: "Practice", icon: Code2 },
-    { href: "/community", label: "Community", icon: Users },
-    { href: "/profile", label: "Profile", icon: Shield },
-  ];
+  // Left-side dashboard navigation removed per UI request
 
   const continueTracks = useMemo(() => {
     if (catalog.length === 0 || enrollments.length === 0) return [];
@@ -487,88 +473,14 @@ export default function DashboardPage() {
       </div>
 
       <main className="relative mx-auto max-w-[1500px] px-4 pb-20 pt-24 sm:px-6 lg:px-8">
-        <button
-          type="button"
-          onClick={() => setSidebarOpen(true)}
-          className="mb-4 inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-200 backdrop-blur-md transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 lg:hidden"
-          aria-label="Open dashboard navigation"
-        >
-          <Menu className="h-4 w-4" /> Menu
-        </button>
+        {/* Left navigation removed — no mobile nav button */}
 
         <div className="grid gap-6 lg:grid-cols-12">
-          <aside className="hidden lg:col-span-3 lg:block xl:col-span-2">
-            <div className="sticky top-24 rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
-              <p className="mb-3 px-2 text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                Dashboard
-              </p>
-              <nav className="space-y-1" aria-label="Dashboard navigation">
-                {navItems.map(({ href, label, icon: Icon }) => {
-                  const active = pathname === href;
-                  return (
-                    <Link
-                      key={href}
-                      href={href}
-                      className={cn(
-                        "flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500",
-                        active
-                          ? "bg-violet-500/20 text-violet-200 shadow-lg shadow-violet-500/20"
-                          : "text-zinc-400 hover:bg-white/5 hover:text-zinc-200",
-                      )}
-                    >
-                      <Icon className="h-4 w-4" />
-                      {label}
-                    </Link>
-                  );
-                })}
-              </nav>
-            </div>
-          </aside>
+          {/* Left navigation removed — main content expands to full width on large screens */}
 
-          {sidebarOpen && (
-            <div className="fixed inset-0 z-50 bg-black/70 p-4 backdrop-blur-sm lg:hidden">
-              <div
-                className="h-full max-w-xs rounded-3xl border border-white/10 bg-zinc-900/95 p-4"
-                role="dialog"
-                aria-modal="true"
-                aria-label="Dashboard navigation"
-              >
-                <div className="mb-3 flex items-center justify-between">
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                    Navigate
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setSidebarOpen(false)}
-                    className="rounded-lg p-1 text-zinc-400 hover:bg-white/5 hover:text-zinc-100"
-                    aria-label="Close dashboard navigation"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-                <nav className="space-y-1">
-                  {navItems.map(({ href, label, icon: Icon }) => (
-                    <Link
-                      key={href}
-                      href={href}
-                      onClick={() => setSidebarOpen(false)}
-                      className={cn(
-                        "flex items-center gap-2 rounded-xl px-3 py-2 text-sm",
-                        pathname === href
-                          ? "bg-violet-500/20 text-violet-200"
-                          : "text-zinc-300 hover:bg-white/5",
-                      )}
-                    >
-                      <Icon className="h-4 w-4" />
-                      {label}
-                    </Link>
-                  ))}
-                </nav>
-              </div>
-            </div>
-          )}
+          {/* Mobile nav removed */}
 
-          <div className="space-y-6 lg:col-span-9 xl:col-span-10">
+          <div className="space-y-6 lg:col-span-12 xl:col-span-12">
             <section
               className={cn(
                 "rounded-3xl border border-violet-500/20 bg-linear-to-br from-white/7 to-white/3 p-5 backdrop-blur-xl sm:p-6",

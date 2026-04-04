@@ -40,13 +40,17 @@ export async function POST(request: NextRequest) {
       return validationErrorResponse(validation.errors || []);
     }
 
+    // `validateInput` ensures `validation.success` is true and `validation.data` is present,
+    // but TypeScript doesn't narrow the type here. Assert `validation.data` is non-null
+    // before destructuring to satisfy the compiler.
+    const data = validation.data as NonNullable<typeof validation.data>;
     const {
       type,
       xpEarned = 0,
       minutesStudied = 0,
       problemId = null,
       questId = null
-    } = validation.data;
+    } = data;
 
     const today = formatDateISO();
     const now = new Date().toISOString();
@@ -234,7 +238,10 @@ export async function GET(request: NextRequest) {
       days: searchParams.get("days")
     });
 
-    const days = validation.success ? validation.data.days : 7;
+    let days = 7;
+    if (validation.success && validation.data && typeof validation.data.days === "number") {
+      days = validation.data.days;
+    }
     const { databases } = createAdminClient();
 
     // Get recent activity

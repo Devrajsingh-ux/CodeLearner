@@ -40,6 +40,9 @@ export async function POST(request: NextRequest) {
       return validationErrorResponse(validation.errors || []);
     }
 
+    // `validateInput` returned success above, but TypeScript doesn't narrow `validation.data`.
+    // Assert it's non-null before destructuring.
+    const postData = validation.data as NonNullable<typeof validation.data>;
     const {
       courseId,
       courseSlug,
@@ -47,7 +50,7 @@ export async function POST(request: NextRequest) {
       lessonSlug,
       xpEarned = 0,
       timeSpent = 0
-    } = validation.data;
+    } = postData;
 
     const now = new Date().toISOString();
     const { databases, users } = createAdminClient();

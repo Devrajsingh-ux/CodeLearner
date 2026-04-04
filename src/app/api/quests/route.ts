@@ -186,7 +186,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { questId } = validation.data;
+    // `validateInput` returned success above, but TypeScript doesn't narrow `validation.data`.
+    // Assert it's non-null before destructuring.
+    const postData = validation.data as NonNullable<typeof validation.data>;
+    const { questId } = postData;
 
     // In production, quests are auto-completed by activity tracking
     // This endpoint is for testing/admin purposes only

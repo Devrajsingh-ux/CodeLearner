@@ -92,7 +92,7 @@ export async function verifyToken(token: string): Promise<TokenPayload | null> {
   try {
     const secret = getJwtSecret();
     const { payload } = await jwtVerify(token, secret);
-    return payload as TokenPayload;
+    return payload as unknown as TokenPayload;
   } catch (error) {
     // Only log non-expiration errors (expiration is expected)
     if (!(error instanceof errors.JWTExpired)) {

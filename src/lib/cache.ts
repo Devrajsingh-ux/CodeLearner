@@ -168,24 +168,38 @@ class MemoryCache {
 
 // Redis cache implementation
 class RedisCache {
-  private client: RedisClientType;
+  private client?: RedisClientType;
   private connected = false;
   private connectionAttempts = 0;
   private readonly maxConnectionAttempts = 3;
   private reconnectTimeout: NodeJS.Timeout | null = null;
+  private redisDisabled = false;
 
   constructor() {
-    this.client = createClient({
-      url: process.env.REDIS_URL || 'redis://localhost:6379',
-    }) as RedisClientType;
-
-    this.setupEventHandlers();
-    this.connect();
+    // Do not eagerly create/connect the client at module import time.
+    // Creating the client and connecting is deferred until the first cache operation
+    // to avoid throwing errors during build/dev when Redis is absent or when
+    // the runtime environment doesn't support native Node APIs.
+    this.client = undefined as unknown as RedisClientType;
+    this.connected = false;
+    this.connectionAttempts = 0;
+    this.redisDisabled = false;
   }
 
   private setupEventHandlers() {
+    if (!this.client) return;
+
     this.client.on('error', (err) => {
-      console.error('Redis error:', err.message);
+      if (this.redisDisabled) return; // Prevent log spam
+      
+      // Log the raw error for full context
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes('URL is not a constructor') || msg.includes('Socket already opened')) {
+        this.redisDisabled = true;
+        console.warn('Redis disabled due to compatibility issues or unrecoverable error:', msg);
+      } else {
+        console.error('Redis error:', msg);
+      }
       this.connected = false;
     });
 
@@ -199,15 +213,33 @@ class RedisCache {
 
     this.client.on('disconnect', () => {
       this.connected = false;
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development' && !this.redisDisabled) {
         console.warn('Redis disconnected');
       }
     });
   }
 
   private async connect(): Promise<void> {
+    if (this.redisDisabled) return;
+
+    // If client is not created yet, attempt to create it now
+    if (!this.client) {
+      const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+      try {
+        this.client = createClient({ url: redisUrl }) as RedisClientType;
+        this.setupEventHandlers();
+      } catch (err) {
+        console.warn('Redis init failed (disabling storage):', err instanceof Error ? err.message : String(err));
+        this.redisDisabled = true;
+        return;
+      }
+    }
+
     if (this.connectionAttempts >= this.maxConnectionAttempts) {
-      console.error('Max Redis connection attempts reached');
+      if (!this.redisDisabled) {
+        console.warn('Max Redis connection attempts reached. Disabling Redis.');
+        this.redisDisabled = true;
+      }
       return;
     }
 
@@ -216,20 +248,38 @@ class RedisCache {
     try {
       await this.client.connect();
     } catch (error) {
-      console.error('Redis connection failed:', error instanceof Error ? error.message : 'Unknown error');
+      const msg = error instanceof Error ? error.message : String(error);
+      
+      if (msg.includes('URL is not a constructor') || msg.includes('Socket already opened')) {
+         this.redisDisabled = true;
+         console.warn('Redis disabled due to unrecoverable connection failure:', msg);
+         return;
+      }
+
+      console.error('Redis connection failed:', msg);
 
       // Exponential backoff retry
-      if (this.connectionAttempts < this.maxConnectionAttempts) {
+      if (this.connectionAttempts < this.maxConnectionAttempts && !this.redisDisabled) {
         const delay = Math.pow(2, this.connectionAttempts) * 1000; // 2s, 4s, 8s
         this.reconnectTimeout = setTimeout(() => this.connect(), delay);
+      } else if (this.connectionAttempts >= this.maxConnectionAttempts) {
+        this.redisDisabled = true;
+        console.warn('Max Redis connection attempts reached. Disabling Redis.');
       }
     }
   }
 
   async set<T>(key: string, value: T, config: CacheConfig): Promise<void> {
-    if (!this.connected) {
+    if (this.redisDisabled) return;
+
+    // Ensure client is initialized and connected. If not possible, skip.
+    try {
+      if (!this.connected) await this.connect();
+    } catch {
       return;
     }
+
+    if (!this.connected || !this.client) return;
 
     try {
       const serialized = JSON.stringify({
@@ -248,14 +298,20 @@ class RedisCache {
         }
       }
     } catch (error) {
-      console.error('Redis cache set error:', error);
+      console.error('Redis cache set error:', error instanceof Error ? error.message : String(error));
     }
   }
 
   async get<T>(key: string): Promise<T | null> {
-    if (!this.connected) {
+    if (this.redisDisabled) return null;
+
+    try {
+      if (!this.connected) await this.connect();
+    } catch {
       return null;
     }
+
+    if (!this.connected || !this.client) return null;
 
     try {
       const cached = await this.client.get(`cache:${key}`);
@@ -267,29 +323,41 @@ class RedisCache {
       const parsed = JSON.parse(cached);
       return parsed.value as T;
     } catch (error) {
-      console.error('Redis cache get error:', error);
+      console.error('Redis cache get error:', error instanceof Error ? error.message : String(error));
       return null;
     }
   }
 
   async delete(key: string): Promise<boolean> {
-    if (!this.connected) {
+    if (this.redisDisabled) return false;
+
+    try {
+      if (!this.connected) await this.connect();
+    } catch {
       return false;
     }
+
+    if (!this.connected || !this.client) return false;
 
     try {
       const result = await this.client.del(`cache:${key}`);
       return result > 0;
     } catch (error) {
-      console.error('Redis cache delete error:', error);
+      console.error('Redis cache delete error:', error instanceof Error ? error.message : String(error));
       return false;
     }
   }
 
   async clear(): Promise<void> {
-    if (!this.connected) {
+    if (this.redisDisabled) return;
+
+    try {
+      if (!this.connected) await this.connect();
+    } catch {
       return;
     }
+
+    if (!this.connected || !this.client) return;
 
     try {
       const keys = await this.client.keys('cache:*');
@@ -297,14 +365,20 @@ class RedisCache {
         await this.client.del(keys);
       }
     } catch (error) {
-      console.error('Redis cache clear error:', error);
+      console.error('Redis cache clear error:', error instanceof Error ? error.message : String(error));
     }
   }
 
   async invalidateByTag(tag: string): Promise<number> {
-    if (!this.connected) {
+    if (this.redisDisabled) return 0;
+
+    try {
+      if (!this.connected) await this.connect();
+    } catch {
       return 0;
     }
+
+    if (!this.connected || !this.client) return 0;
 
     try {
       const keys = await this.client.sMembers(`tag:${tag}`);
@@ -325,7 +399,7 @@ class RedisCache {
 
       return invalidated;
     } catch (error) {
-      console.error('Redis cache invalidation error:', error);
+      console.error('Redis cache invalidation error:', error instanceof Error ? error.message : String(error));
       return 0;
     }
   }
@@ -338,11 +412,11 @@ class RedisCache {
       clearTimeout(this.reconnectTimeout);
     }
 
-    if (this.connected) {
+    if (this.connected && this.client) {
       try {
         await this.client.disconnect();
       } catch (error) {
-        console.error('Redis disconnect error:', error);
+        console.error('Redis disconnect error:', error instanceof Error ? error.message : String(error));
       }
     }
   }

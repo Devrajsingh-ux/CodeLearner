@@ -89,26 +89,15 @@ export function Navbar() {
     "Python",
     "Next.js",
   ]);
-  const [notifications, setNotifications] = useState([
-    {
-      id: "n1",
-      title: "Daily streak is active",
-      description: "Complete one lesson today to keep your streak alive.",
-      unread: true,
-    },
-    {
-      id: "n2",
-      title: "New challenge available",
-      description: "Try today's algorithm problem in the Problems arena.",
-      unread: true,
-    },
-    {
-      id: "n3",
-      title: "React track updated",
-      description: "Two new lessons were added to Frontend Fundamentals.",
-      unread: false,
-    },
-  ]);
+  const [notifications, setNotifications] = useState<Array<{
+    id: string;
+    title: string;
+    description: string;
+    unread: boolean;
+    link?: string | null;
+    createdAt?: string | null;
+  }>>([]);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
 
   const mobilePanelRef = useRef<HTMLDivElement | null>(null);
   const desktopMenusRef = useRef<HTMLDivElement | null>(null);
@@ -116,6 +105,24 @@ export function Navbar() {
   const searchInputRef = useRef<HTMLInputElement | null>(null);
 
   const unreadCount = notifications.filter((item) => item.unread).length;
+
+  async function fetchNotifications() {
+    if (!user) return;
+    setNotificationsLoading(true);
+    try {
+      const res = await fetch("/api/notifications", { credentials: "same-origin" });
+      if (res.ok) {
+        const data = await res.json();
+        setNotifications(Array.isArray(data.notifications) ? data.notifications : []);
+      } else {
+        console.error("Failed to load notifications", await res.text());
+      }
+    } catch (err) {
+      console.error("Failed to fetch notifications", err);
+    } finally {
+      setNotificationsLoading(false);
+    }
+  }
 
   const searchSuggestions = useMemo(() => {
     const pool = [
@@ -163,6 +170,26 @@ export function Navbar() {
     setNotificationsOpen(false);
     setUserMenuOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (notificationsOpen) {
+      fetchNotifications();
+    }
+  }, [notificationsOpen]);
+
+  // Poll for new notifications in background when user is present
+  useEffect(() => {
+    if (!user) return;
+
+    // initial fetch
+    fetchNotifications();
+
+    const id = window.setInterval(() => {
+      fetchNotifications();
+    }, 30_000);
+
+    return () => clearInterval(id);
+  }, [user]);
 
   useEffect(() => {
     function onPointerDown(event: MouseEvent) {
@@ -284,9 +311,42 @@ export function Navbar() {
   }
 
   function markAllRead() {
-    setNotifications((prev) =>
-      prev.map((item) => ({ ...item, unread: false })),
-    );
+    // Optimistic update
+    setNotifications((prev) => prev.map((item) => ({ ...item, unread: false })));
+    fetch("/api/notifications/mark-all", { method: "POST", credentials: "same-origin" }).catch((err) => {
+      console.error("Failed to mark all read:", err);
+      // Re-fetch to restore accurate state
+      fetchNotifications();
+    });
+  }
+
+  async function handleNotificationClick(item: { id: string; unread: boolean; link?: string | null }) {
+    // Mark read if unread
+    if (item.unread) {
+      // Optimistic UI
+      setNotifications((prev) => prev.map((n) => (n.id === item.id ? { ...n, unread: false } : n)));
+      try {
+        await fetch(`/api/notifications/${item.id}`, {
+          method: "PATCH",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ unread: false }),
+        });
+      } catch (err) {
+        console.error("Failed to mark notification read:", err);
+        fetchNotifications();
+      }
+    }
+
+    // Navigate if link provided
+    if (item.link) {
+      try {
+        router.push(item.link);
+      } catch {
+        // ignore
+      }
+    }
+    setNotificationsOpen(false);
   }
 
   return (
@@ -523,7 +583,9 @@ export function Navbar() {
                 >
                   <Bell className="h-4 w-4" />
                   {unreadCount > 0 ? (
-                    <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-amber-400" />
+                    <span className="absolute -right-1.5 -top-1.5 flex items-center justify-center rounded-full bg-amber-400 px-1.5 py-0.5 text-[10px] font-semibold text-zinc-900">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
                   ) : null}
                 </button>
 
@@ -556,34 +618,36 @@ export function Navbar() {
                       </div>
 
                       <div className="max-h-72 space-y-1 overflow-y-auto pr-1">
-                        {notifications.map((item) => (
-                          <button
-                            type="button"
-                            key={item.id}
-                            onClick={() =>
-                              setNotifications((prev) =>
-                                prev.map((n) =>
-                                  n.id === item.id
-                                    ? { ...n, unread: false }
-                                    : n,
-                                ),
-                              )
-                            }
-                            className="w-full rounded-xl border border-white/6 bg-white/3 px-3 py-2 text-left transition hover:border-violet-400/40 hover:bg-violet-500/8"
-                          >
-                            <div className="mb-1 flex items-start justify-between gap-2">
-                              <p className="text-sm font-semibold text-zinc-100">
-                                {item.title}
+                        {notificationsLoading ? (
+                          <div className="space-y-2">
+                            <div className="h-10 w-full animate-pulse rounded-lg bg-white/6" />
+                            <div className="h-10 w-full animate-pulse rounded-lg bg-white/6" />
+                            <div className="h-10 w-full animate-pulse rounded-lg bg-white/6" />
+                          </div>
+                        ) : notifications.length === 0 ? (
+                          <p className="text-sm text-zinc-500">No notifications</p>
+                        ) : (
+                          notifications.map((item) => (
+                            <button
+                              type="button"
+                              key={item.id}
+                              onClick={() => handleNotificationClick(item)}
+                              className="w-full rounded-xl border border-white/6 bg-white/3 px-3 py-2 text-left transition hover:border-violet-400/40 hover:bg-violet-500/8"
+                            >
+                              <div className="mb-1 flex items-start justify-between gap-2">
+                                <p className="text-sm font-semibold text-zinc-100">
+                                  {item.title}
+                                </p>
+                                {item.unread ? (
+                                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-amber-400" />
+                                ) : null}
+                              </div>
+                              <p className="text-xs text-zinc-400">
+                                {item.description}
                               </p>
-                              {item.unread ? (
-                                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-amber-400" />
-                              ) : null}
-                            </div>
-                            <p className="text-xs text-zinc-400">
-                              {item.description}
-                            </p>
-                          </button>
-                        ))}
+                            </button>
+                          ))
+                        )}
                       </div>
                     </motion.div>
                   ) : null}

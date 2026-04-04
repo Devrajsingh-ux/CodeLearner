@@ -109,7 +109,7 @@ export function RegisterForm() {
       <Input
         label="Full name"
         type="text"
-        placeholder="Jane Smith"
+        placeholder="Name"
         value={name}
         onChange={(e) => setName(e.target.value)}
         autoComplete="name"

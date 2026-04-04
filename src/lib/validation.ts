@@ -13,10 +13,7 @@ const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format 
 
 // Activity API schemas
 export const activityPostSchema = z.object({
-  type: z.enum(['lesson', 'problem', 'quest'], {
-    required_error: 'Activity type is required',
-    invalid_type_error: 'Invalid activity type',
-  }),
+  type: z.enum(['lesson', 'problem', 'quest'] as const),
   xpEarned: z.number().min(0).max(1000).default(0),
   minutesStudied: z.number().min(0).max(1440).default(0), // Max 24 hours
   problemId: z.string().max(100).optional().nullable(),
@@ -37,7 +34,7 @@ export const enrollmentPostSchema = z.object({
 // Quests API schemas
 export const questPostSchema = z.object({
   questId: z.string().min(1).max(100),
-  type: z.enum(['complete_lessons', 'study_time', 'earn_xp']),
+  type: z.enum(['complete_lessons', 'study_time', 'earn_xp'] as const),
   targetValue: z.number().min(1).max(10000),
   currentValue: z.number().min(0).max(10000).default(0),
 });
@@ -54,7 +51,7 @@ export const progressPostSchema = z.object({
 
 // Code compilation schemas
 export const compileSchema = z.object({
-  language: z.enum(['javascript', 'typescript', 'python', 'cpp', 'java', 'go', 'rust']),
+  language: z.enum(['javascript', 'typescript', 'python', 'cpp', 'java', 'go', 'rust'] as const),
   code: z.string().min(1).max(50000), // Max 50KB of code
   input: z.string().max(10000).default(''), // Max 10KB of input
   timeout: z.number().min(1).max(30).default(10), // Max 30 seconds
@@ -63,8 +60,8 @@ export const compileSchema = z.object({
 // Admin API schemas
 export const adminUserUpdateSchema = z.object({
   userId: userIdSchema,
-  role: z.enum(['user', 'instructor', 'admin']).optional(),
-  status: z.enum(['active', 'suspended', 'banned']).optional(),
+  role: z.enum(['user', 'instructor', 'admin'] as const).optional(),
+  status: z.enum(['active', 'suspended', 'banned'] as const).optional(),
   name: z.string().min(1).max(100).optional(),
 });
 
@@ -72,7 +69,7 @@ export const adminCourseSchema = z.object({
   title: z.string().min(1).max(500),
   description: z.string().max(2000),
   category: z.string().min(1).max(100),
-  difficulty: z.enum(['beginner', 'intermediate', 'advanced']),
+  difficulty: z.enum(['beginner', 'intermediate', 'advanced'] as const),
   estimatedTime: z.number().min(1).max(1000), // Hours
   language: z.string().min(1).max(50),
   tags: z.array(z.string().max(50)).max(20),
@@ -140,8 +137,8 @@ export function validateInput<T>(schema: z.ZodSchema<T>, data: unknown): {
       return { success: true, data: result.data };
     }
 
-    const errors = result.error.errors.map(err =>
-      `${err.path.join('.')}: ${err.message}`
+    const errors = result.error.issues.map((issue) =>
+      `${issue.path.join('.')}: ${issue.message}`
     );
 
     return { success: false, errors };

@@ -30,7 +30,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { courseId, courseSlug, courseTitle } = validation.data;
+    // `validateInput` returned success above, but TypeScript doesn't narrow `validation.data`.
+    // Assert it's non-null before destructuring.
+    const postData = validation.data as NonNullable<typeof validation.data>;
+    const { courseId, courseSlug, courseTitle } = postData;
     const totalLessons = typeof body.totalLessons === 'number' ? Math.max(0, body.totalLessons) : 0;
 
     try {
