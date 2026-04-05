@@ -214,29 +214,8 @@ export function LessonClient({
           </span>
         </div>
 
-        {/* Centre: tab switcher */}
-        <div className="flex shrink-0 items-center rounded-xl border border-white/8 bg-white/4 p-0.5">
-          {(["content", "editor"] as Tab[]).map((t) => (
-            <button
-              key={t}
-              type="button"
-              onClick={() => setTab(t)}
-              className={cn(
-                "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium capitalize transition-all",
-                tab === t
-                  ? "bg-violet-600 text-white shadow"
-                  : "text-zinc-400 hover:text-white",
-              )}
-            >
-              {t === "content" ? (
-                <BookOpen className="h-3.5 w-3.5" />
-              ) : (
-                <Code2 className="h-3.5 w-3.5" />
-              )}
-              {t}
-            </button>
-          ))}
-        </div>
+        {/* Centre: (removed tab switcher) */}
+        <div className="hidden md:block" />
 
         {/* Right: nav + curriculum toggle */}
         <div className="flex shrink-0 items-center gap-1.5">
@@ -281,119 +260,89 @@ export function LessonClient({
 
       {/* ── Layout: content/editor + optional sidebar ────────────── */}
       <div className="relative flex min-h-0 flex-1 overflow-hidden">
-        {/* Main pane */}
-        <div className="flex min-h-0 flex-1 flex-col">
-          {/* Content tab */}
-          {tab === "content" && (
-            <div className="flex-1 overflow-y-auto">
-              <div className="mx-auto max-w-3xl px-6 py-8">
-                {/* Lesson meta */}
-                <div className="mb-6 flex flex-wrap items-center gap-2.5">
-                  <LessonTypeIcon
-                    type={lesson.type}
-                    className={cn(
-                      "h-4 w-4",
-                      lesson.type === "exercise"
-                        ? "text-violet-400"
-                        : lesson.type === "quiz"
-                          ? "text-amber-400"
-                          : "text-sky-400",
-                    )}
-                  />
-                  <span className="text-xs font-medium capitalize text-zinc-500">
-                    {lesson.type}
-                  </span>
-                  <span className="text-zinc-700">·</span>
-                  <Clock className="h-3.5 w-3.5 text-zinc-600" />
-                  <span className="text-xs text-zinc-500">
-                    {lesson.duration}
-                  </span>
-                  <span className="text-zinc-700">·</span>
-                  <Zap className="h-3.5 w-3.5 text-violet-400" />
-                  <span className="text-xs text-zinc-500">
-                    {lesson.xp} XP on completion
-                  </span>
-                </div>
-
-                <h1 className="mb-6 text-2xl font-bold text-white sm:text-3xl">
-                  {lesson.title}
-                </h1>
-
-                {/* Learning objectives */}
-                <div className="mb-8 rounded-2xl border border-violet-500/20 bg-violet-500/5 p-5">
-                  <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-violet-400">
-                    What you'll learn
-                  </p>
-                  <ul className="space-y-2">
-                    {lesson.objectives.map((obj) => (
-                      <li
-                        key={obj}
-                        className="flex items-start gap-2.5 text-sm text-zinc-300"
-                      >
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
-                        {obj}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Lesson content */}
-                <div className="prose-custom">
-                  {renderMarkdown(lesson.content)}
-                </div>
-
-                {/* CTA: switch to editor */}
-                {lesson.type === "exercise" && (
-                  <div className="mt-10 rounded-2xl border border-white/6 bg-white/2 p-5 text-center">
-                    <Code2 className="mx-auto mb-3 h-8 w-8 text-violet-400" />
-                    <p className="mb-4 text-sm text-zinc-400">
-                      Ready to practice? Switch to the{" "}
-                      <strong className="text-white">Editor</strong> tab to
-                      complete the exercise.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => setTab("editor")}
-                      className="inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-violet-600 to-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-violet-500/20 transition-all hover:from-violet-500 hover:to-indigo-500"
-                    >
-                      <Code2 className="h-4 w-4" /> Open Editor
-                    </button>
-                  </div>
-                )}
-
-                {/* Mark complete & next lesson */}
-                <div className="mt-8 flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    onClick={handleMarkComplete}
-                    disabled={isMarkingComplete}
-                    className={cn(
-                      "flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all disabled:opacity-70 disabled:cursor-not-allowed",
-                      completed
-                        ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                        : "bg-linear-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/20 hover:from-violet-500 hover:to-indigo-500",
-                    )}
-                  >
-                    <CheckCircle2 className="h-4 w-4" />
-                    {isMarkingComplete ? "Saving..." : completed ? "Completed! 🎉" : "Mark as Complete"}
-                  </button>
-
-                  {nextSlug && !completed && (
-                    <Link
-                      href={`/learn/${trackSlug}/${nextSlug}`}
-                      className="flex items-center gap-2 rounded-xl border border-white/8 bg-white/4 px-5 py-2.5 text-sm text-zinc-300 transition-colors hover:bg-white/8"
-                    >
-                      Next Lesson <ArrowRight className="h-4 w-4" />
-                    </Link>
+        {/* Main pane: content (left) and editor (right) */}
+        <div className="flex min-h-0 flex-1 md:flex-row flex-col">
+          {/* Left: lesson content */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="mx-auto max-w-3xl md:max-w-none md:w-1/2 px-6 py-8">
+              {/* Lesson meta */}
+              <div className="mb-6 flex flex-wrap items-center gap-2.5">
+                <LessonTypeIcon
+                  type={lesson.type}
+                  className={cn(
+                    "h-4 w-4",
+                    lesson.type === "exercise"
+                      ? "text-violet-400"
+                      : lesson.type === "quiz"
+                        ? "text-amber-400"
+                        : "text-sky-400",
                   )}
-                </div>
+                />
+                <span className="text-xs font-medium capitalize text-zinc-500">
+                  {lesson.type}
+                </span>
+                <span className="text-zinc-700">·</span>
+                <Clock className="h-3.5 w-3.5 text-zinc-600" />
+                <span className="text-xs text-zinc-500">{lesson.duration}</span>
+                <span className="text-zinc-700">·</span>
+                <Zap className="h-3.5 w-3.5 text-violet-400" />
+                <span className="text-xs text-zinc-500">{lesson.xp} XP on completion</span>
+              </div>
+
+              <h1 className="mb-6 text-2xl font-bold text-white sm:text-3xl">
+                {lesson.title}
+              </h1>
+
+              {/* Learning objectives */}
+              <div className="mb-8 rounded-2xl border border-violet-500/20 bg-violet-500/5 p-5">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-violet-400">
+                  What you'll learn
+                </p>
+                <ul className="space-y-2">
+                  {lesson.objectives.map((obj) => (
+                    <li key={obj} className="flex items-start gap-2.5 text-sm text-zinc-300">
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+                      {obj}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Lesson content */}
+              <div className="prose-custom">{renderMarkdown(lesson.content)}</div>
+
+              {/* Mark complete & next lesson */}
+              <div className="mt-8 flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={handleMarkComplete}
+                  disabled={isMarkingComplete}
+                  className={cn(
+                    "flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all disabled:opacity-70 disabled:cursor-not-allowed",
+                    completed
+                      ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                      : "bg-linear-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/20 hover:from-violet-500 hover:to-indigo-500",
+                  )}
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  {isMarkingComplete ? "Saving..." : completed ? "Completed! 🎉" : "Mark as Complete"}
+                </button>
+
+                {nextSlug && !completed && (
+                  <Link
+                    href={`/learn/${trackSlug}/${nextSlug}`}
+                    className="flex items-center gap-2 rounded-xl border border-white/8 bg-white/4 px-5 py-2.5 text-sm text-zinc-300 transition-colors hover:bg-white/8"
+                  >
+                    Next Lesson <ArrowRight className="h-4 w-4" />
+                  </Link>
+                )}
               </div>
             </div>
-          )}
+          </div>
 
-          {/* Editor tab */}
-          {tab === "editor" && (
-            <div className="flex-1 overflow-hidden">
+          {/* Right: editor */}
+          <div className="w-full md:w-1/2 border-l border-white/6 overflow-hidden">
+            <div className="h-full">
               <CodeEditor
                 initialCode={lesson.code}
                 language={lesson.language}
@@ -401,7 +350,7 @@ export function LessonClient({
                 className="h-full"
               />
             </div>
-          )}
+          </div>
         </div>
 
         {/* ── Curriculum sidebar ───────────────────────────────── */}
