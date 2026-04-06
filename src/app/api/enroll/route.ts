@@ -73,7 +73,6 @@ export async function POST(request: NextRequest) {
           courseTitle: sanitizeString(courseTitle, 500),
           enrolledAt: now,
           lastAccessedAt: now,
-          status: "active",
           completedLessons: 0,
           totalLessons,
           percentComplete: 0,
@@ -98,7 +97,6 @@ export async function POST(request: NextRequest) {
             courseTitle,
             enrolledAt: now,
             lastAccessedAt: now,
-            status: "active",
             completedLessons: 0,
             totalLessons,
             percentComplete: 0,
@@ -152,7 +150,6 @@ export async function GET(request: NextRequest) {
           percentComplete: doc.percentComplete || 0,
           timeSpent: doc.timeSpent || 0,
           lastLessonId: doc.lastLessonId || null,
-          status: doc.status || "active",
         }))
       });
 

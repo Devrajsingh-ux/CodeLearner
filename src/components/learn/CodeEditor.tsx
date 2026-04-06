@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import Editor from "@monaco-editor/react";
-import { Check, Copy, Loader2, Play, RotateCcw, Terminal } from "lucide-react";
+import { Check, Copy, Loader2, Play, RotateCcw, Terminal, X } from "lucide-react";
 import type { editor } from "monaco-editor";
 import { useCallback, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -68,14 +68,18 @@ export function CodeEditor({
   const [showOutput, setShowOutput] = useState(false);
 
   function handleEditorMount(ed: editor.IStandaloneCodeEditor) {
-    editorRef.current = ed;
-    // Ctrl/Cmd + Enter to run
-    ed.addCommand(
-      // Monaco KeyMod / KeyCode loaded lazily
-      // 2048 = CtrlCmd, 3 = Enter in Monaco key codes
-      2048 | 3, // eslint-disable-line no-bitwise
-      () => handleRun(),
-    );
+    try {
+      editorRef.current = ed;
+      // Ctrl/Cmd + Enter to run
+      ed.addCommand(
+        // Monaco KeyMod / KeyCode loaded lazily
+        // 2048 = CtrlCmd, 3 = Enter in Monaco key codes
+        2048 | 3, // eslint-disable-line no-bitwise
+        () => handleRun(),
+      );
+    } catch (error) {
+      console.error("Monaco initialization error:", error);
+    }
   }
 
   const handleRun = useCallback(() => {
@@ -113,24 +117,24 @@ export function CodeEditor({
   }
 
   return (
-    <div className={cn("flex h-full flex-col bg-[#0d0d0d]", className)}>
+    <div className={cn("flex h-full flex-col bg-gradient-to-br from-[#0d0d0d] to-[#1a1a1a]", className)}>
       {/* ── Title bar ────────────────────────────────────────────── */}
-      <div className="flex shrink-0 items-center justify-between border-b border-white/6 px-4 py-2.5">
+      <div className="flex shrink-0 items-center justify-between border-b border-white/10 bg-zinc-900/50 backdrop-blur-sm px-4 py-3">
         {/* macOS-style traffic lights */}
         <div className="flex items-center gap-1.5">
-          <span className="h-3 w-3 rounded-full bg-red-500/70" />
-          <span className="h-3 w-3 rounded-full bg-amber-500/70" />
-          <span className="h-3 w-3 rounded-full bg-emerald-500/70" />
+          <span className="h-3 w-3 rounded-full bg-red-500/80 hover:bg-red-500 transition-colors cursor-pointer" />
+          <span className="h-3 w-3 rounded-full bg-amber-500/80 hover:bg-amber-500 transition-colors cursor-pointer" />
+          <span className="h-3 w-3 rounded-full bg-emerald-500/80 hover:bg-emerald-500 transition-colors cursor-pointer" />
         </div>
 
-        <span className="font-mono text-[11px] text-zinc-500">{filename}</span>
+        <span className="font-mono text-[11px] text-zinc-400 font-medium">{filename}</span>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           {/* Copy */}
           <button
             type="button"
             onClick={handleCopy}
-            className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-white/8 hover:text-zinc-300"
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-500 transition-all hover:bg-white/10 hover:text-zinc-300"
             title="Copy code"
             aria-label="Copy code"
           >
@@ -144,7 +148,7 @@ export function CodeEditor({
           <button
             type="button"
             onClick={handleReset}
-            className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-white/8 hover:text-zinc-300"
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-500 transition-all hover:bg-white/10 hover:text-zinc-300"
             title="Reset code"
             aria-label="Reset code"
           >
@@ -178,6 +182,7 @@ export function CodeEditor({
           }}
           onMount={handleEditorMount}
           onChange={(v) => setCode(v ?? "")}
+          onValidate={() => {}}
           loading={
             <div className="flex h-full items-center justify-center">
               <Loader2 className="h-6 w-6 animate-spin text-violet-500" />
@@ -188,32 +193,39 @@ export function CodeEditor({
 
       {/* ── Output panel ──────────────────────────────────────────── */}
       {showOutput && (
-        <div className="shrink-0 border-t border-white/6">
-          <div className="flex items-center justify-between px-4 py-2 bg-zinc-900/60">
-            <div className="flex items-center gap-2">
-              <Terminal className="h-3.5 w-3.5 text-zinc-500" />
-              <span className="text-[11px] font-medium text-zinc-400">
-                Output
+        <div className="shrink-0 border-t border-white/10">
+          <div className="flex items-center justify-between px-4 py-2.5 bg-zinc-900/80 backdrop-blur-sm">
+            <div className="flex items-center gap-2.5">
+              <Terminal className="h-4 w-4 text-zinc-400" />
+              <span className="text-xs font-semibold text-zinc-300">
+                Console Output
               </span>
               {status === "success" && (
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                <div className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[10px] text-emerald-400 font-medium">Success</span>
+                </div>
               )}
               {status === "error" && (
-                <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                <div className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                  <span className="text-[10px] text-red-400 font-medium">Error</span>
+                </div>
               )}
             </div>
             <button
               type="button"
               onClick={() => setShowOutput(false)}
-              className="text-[10px] text-zinc-600 hover:text-zinc-400 transition-colors"
+              className="flex h-6 w-6 items-center justify-center rounded-md text-zinc-500 hover:bg-white/10 hover:text-zinc-300 transition-all"
+              aria-label="Close output"
             >
-              ✕
+              <X className="h-3.5 w-3.5" />
             </button>
           </div>
           <pre
             className={cn(
-              "max-h-36 overflow-auto px-4 py-3 font-mono text-xs leading-relaxed",
-              status === "error" ? "text-red-400" : "text-emerald-300",
+              "max-h-40 overflow-auto px-4 py-3 font-mono text-xs leading-relaxed bg-black/30",
+              status === "error" ? "text-red-300" : "text-emerald-300",
             )}
           >
             {output || " "}
@@ -222,26 +234,28 @@ export function CodeEditor({
       )}
 
       {/* ── Run button ────────────────────────────────────────────── */}
-      <div className="shrink-0 border-t border-white/6 p-3">
+      <div className="shrink-0 border-t border-white/10 p-3 bg-zinc-900/30 backdrop-blur-sm">
         <button
           type="button"
           onClick={handleRun}
           disabled={status === "running"}
           className={cn(
-            "flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all duration-200",
-            "bg-linear-to-r from-violet-600 to-indigo-600 text-white",
-            "hover:from-violet-500 hover:to-indigo-500 shadow-lg shadow-violet-500/20",
-            "disabled:opacity-60 disabled:cursor-not-allowed",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500",
+            "flex w-full items-center justify-center gap-2.5 rounded-xl py-3 text-sm font-bold transition-all duration-200",
+            "bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white",
+            "hover:from-violet-500 hover:via-purple-500 hover:to-indigo-500",
+            "shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50",
+            "disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900",
+            "active:scale-[0.98]",
           )}
         >
           {status === "running" ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            <Play className="h-4 w-4" />
+            <Play className="h-4 w-4 fill-current" />
           )}
-          {status === "running" ? "Running…" : "Run Code"}
-          <span className="ml-auto text-[10px] font-normal text-white/40 hidden sm:block">
+          {status === "running" ? "Running Code..." : "Run Code"}
+          <span className="ml-auto text-[10px] font-normal text-white/50 hidden sm:block">
             ⌘ Enter
           </span>
         </button>
