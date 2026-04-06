@@ -152,6 +152,8 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
     "img-src 'self' data: https: blob:",
     "font-src 'self' https: data:",
     "connect-src 'self' https://cloud.appwrite.io https://sgp.cloud.appwrite.io https://judge0-ce.p.rapidapi.com wss:",
+    "worker-src 'self' blob:", // Monaco Editor workers
+    "child-src 'self' blob:", // Monaco Editor workers
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",

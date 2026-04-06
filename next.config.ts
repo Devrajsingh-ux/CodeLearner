@@ -57,8 +57,21 @@ const nextConfig: NextConfig = {
         path: false,
         crypto: false,
       };
+      
+      // Monaco Editor configuration
+      config.module = config.module || {};
+      config.module.rules = config.module.rules || [];
+      config.module.rules.push({
+        test: /\.ttf$/,
+        type: 'asset/resource',
+      });
     }
     return config;
+  },
+  
+  // Environment variables for Monaco
+  env: {
+    MONACO_EDITOR_VERSION: '0.45.0',
   },
 };
 

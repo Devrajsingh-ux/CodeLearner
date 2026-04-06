@@ -3,8 +3,9 @@
 import Editor from "@monaco-editor/react";
 import { Check, Copy, Loader2, Play, RotateCcw, Terminal, X } from "lucide-react";
 import type { editor } from "monaco-editor";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { configureMonaco } from "@/lib/monacoConfig";
 
 interface CodeEditorProps {
   initialCode: string;
@@ -66,10 +67,34 @@ export function CodeEditor({
   const [status, setStatus] = useState<RunStatus>("idle");
   const [copied, setCopied] = useState(false);
   const [showOutput, setShowOutput] = useState(false);
+  const [monacoError, setMonacoError] = useState<string | null>(null);
+
+  // Configure Monaco on mount
+  useEffect(() => {
+    configureMonaco();
+  }, []);
+
+  function handleEditorWillMount(monaco: any) {
+    try {
+      // Configure Monaco environment before it mounts
+      monaco.editor.defineTheme('custom-dark', {
+        base: 'vs-dark',
+        inherit: true,
+        rules: [],
+        colors: {
+          'editor.background': '#0d0d0d',
+        },
+      });
+    } catch (error) {
+      console.warn('Monaco theme configuration warning:', error);
+    }
+  }
 
   function handleEditorMount(ed: editor.IStandaloneCodeEditor) {
     try {
       editorRef.current = ed;
+      setMonacoError(null);
+      
       // Ctrl/Cmd + Enter to run
       ed.addCommand(
         // Monaco KeyMod / KeyCode loaded lazily
@@ -78,8 +103,15 @@ export function CodeEditor({
         () => handleRun(),
       );
     } catch (error) {
-      console.error("Monaco initialization error:", error);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      setMonacoError(errorMsg);
+      console.error("Monaco initialization error:", errorMsg);
     }
+  }
+
+  function handleEditorValidation(markers: any[]) {
+    // Suppress validation errors to prevent unhandled rejections
+    return;
   }
 
   const handleRun = useCallback(() => {
@@ -159,36 +191,60 @@ export function CodeEditor({
 
       {/* ── Monaco editor ─────────────────────────────────────────── */}
       <div className="min-h-0 flex-1">
-        <Editor
-          defaultValue={initialCode}
-          language={language}
-          theme="vs-dark"
-          options={{
-            fontSize: 13.5,
-            fontFamily:
-              '"JetBrains Mono", "Fira Code", "Cascadia Code", monospace',
-            fontLigatures: true,
-            lineNumbers: "on",
-            minimap: { enabled: false },
-            scrollBeyondLastLine: false,
-            wordWrap: "on",
-            tabSize: 2,
-            renderLineHighlight: "all",
-            padding: { top: 16, bottom: 16 },
-            smoothScrolling: true,
-            cursorBlinking: "smooth",
-            readOnly,
-            automaticLayout: true,
-          }}
-          onMount={handleEditorMount}
-          onChange={(v) => setCode(v ?? "")}
-          onValidate={() => {}}
-          loading={
-            <div className="flex h-full items-center justify-center">
-              <Loader2 className="h-6 w-6 animate-spin text-violet-500" />
+        {monacoError ? (
+          <div className="flex h-full items-center justify-center bg-zinc-900 p-6">
+            <div className="text-center max-w-md">
+              <div className="mb-4 text-red-400 text-sm">
+                ⚠️ Editor failed to load
+              </div>
+              <div className="text-xs text-zinc-500">
+                {monacoError}
+              </div>
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="mt-4 px-4 py-2 text-xs bg-violet-600 text-white rounded-lg hover:bg-violet-500 transition-colors"
+              >
+                Reload Page
+              </button>
             </div>
-          }
-        />
+          </div>
+        ) : (
+          <Editor
+            defaultValue={initialCode}
+            language={language}
+            theme="custom-dark"
+            beforeMount={handleEditorWillMount}
+            onMount={handleEditorMount}
+            onChange={(v) => setCode(v ?? "")}
+            onValidate={handleEditorValidation}
+            options={{
+              fontSize: 13.5,
+              fontFamily:
+                '"JetBrains Mono", "Fira Code", "Cascadia Code", monospace',
+              fontLigatures: true,
+              lineNumbers: "on",
+              minimap: { enabled: false },
+              scrollBeyondLastLine: false,
+              wordWrap: "on",
+              tabSize: 2,
+              renderLineHighlight: "all",
+              padding: { top: 16, bottom: 16 },
+              smoothScrolling: true,
+              cursorBlinking: "smooth",
+              readOnly,
+              automaticLayout: true,
+            }}
+            loading={
+              <div className="flex h-full items-center justify-center bg-[#0d0d0d]">
+                <div className="flex flex-col items-center gap-3">
+                  <Loader2 className="h-6 w-6 animate-spin text-violet-500" />
+                  <p className="text-xs text-zinc-500">Loading editor…</p>
+                </div>
+              </div>
+            }
+          />
+        )}
       </div>
 
       {/* ── Output panel ──────────────────────────────────────────── */}
