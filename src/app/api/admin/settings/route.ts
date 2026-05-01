@@ -10,8 +10,8 @@ import {
   DB_ID,
   COL_SETTINGS,
   SETTINGS_DOC,
-  requireAdminCookie,
 } from "@/lib/appwriteServer";
+import { requireAdminAuth } from "@/security/auth";
 import type { PlatformSettings } from "@/data/admin";
 
 // Empty baseline used only when the Appwrite document doesn't exist yet.
@@ -31,7 +31,7 @@ const EMPTY_SETTINGS: PlatformSettings = {
 };
 
 export async function GET(request: NextRequest) {
-  if (!requireAdminCookie(request))
+  if (!(await requireAdminAuth(request)))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   try {
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  if (!requireAdminCookie(request))
+  if (!(await requireAdminAuth(request)))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   try {

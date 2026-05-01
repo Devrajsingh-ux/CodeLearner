@@ -12,8 +12,8 @@ import {
   DB_ID,
   COL_ACTIVITY,
 } from "@/lib/appwriteServer";
-import { getUserFromSession } from "@/lib/auth";
-import { validateInput, questPostSchema } from "@/lib/validation";
+import { requireApiUser, validateApiBody } from "@/security/api-guard";
+import { questPostSchema } from "@/security/validation";
 
 // Helper to format date as YYYY-MM-DD
 function formatDate(date: Date): string {
@@ -48,10 +48,11 @@ const DAILY_QUESTS = [
 // GET - Get today's quests and completion status
 export async function GET(request: NextRequest) {
   try {
-    const user = await getUserFromSession(request);
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const auth = await requireApiUser(request);
+    if (!auth.ok) {
+      return auth.response;
     }
+    const user = auth.user;
 
     const today = formatDate(new Date());
 
@@ -162,33 +163,23 @@ export async function GET(request: NextRequest) {
 // POST - Manual quest toggle (admin/testing only)
 export async function POST(request: NextRequest) {
   try {
-    const user = await getUserFromSession(request);
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const auth = await requireApiUser(request, {
+      requireAdmin: true,
+      enforceCsrf: true,
+    });
+    if (!auth.ok) {
+      return auth.response;
     }
-
-    // Only allow admins to manually complete quests
-    if (user.role !== 'admin') {
-      return NextResponse.json(
-        { error: "Forbidden - quests are completed automatically based on activity" },
-        { status: 403 }
-      );
-    }
+    const user = auth.user;
 
     const body = await request.json();
 
-    // Validate input
-    const validation = validateInput(questPostSchema, body);
-    if (!validation.success) {
-      return NextResponse.json(
-        { error: "Invalid input", details: validation.errors },
-        { status: 400 }
-      );
+    const parsed = validateApiBody(questPostSchema, body);
+    if (!parsed.ok) {
+      return parsed.response;
     }
 
-    // `validateInput` returned success above, but TypeScript doesn't narrow `validation.data`.
-    // Assert it's non-null before destructuring.
-    const postData = validation.data as NonNullable<typeof validation.data>;
+    const postData = parsed.data;
     const { questId } = postData;
 
     // In production, quests are auto-completed by activity tracking

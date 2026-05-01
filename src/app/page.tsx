@@ -1,10 +1,10 @@
 ﻿import type { Metadata } from "next";
-import { CoursesSection } from "@/components/home/CoursesSection";
-import { CTA } from "@/components/home/CTA";
-import { Features } from "@/components/home/Features";
-import { Hero } from "@/components/home/Hero";
-import { Stats } from "@/components/home/Stats";
-import { Testimonials } from "@/components/home/Testimonials";
+import { CoursesSection } from "@/app/marketing/CoursesSection";
+import { CTA } from "@/app/marketing/CTA";
+import { Features } from "@/app/marketing/Features";
+import { Hero } from "@/app/marketing/Hero";
+import { Stats } from "@/app/marketing/Stats";
+import { Testimonials } from "@/app/marketing/Testimonials";
 
 export const metadata: Metadata = {
   title: "Zentax — Master Coding. Build the Future.",

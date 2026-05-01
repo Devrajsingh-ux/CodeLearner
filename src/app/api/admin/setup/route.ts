@@ -5,7 +5,8 @@
  * Must be called once after deploying before using the admin panel.
  */
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient, DB_ID, COL_COURSES, COL_LESSONS, COL_SETTINGS, SETTINGS_DOC, requireAdminCookie } from "@/lib/appwriteServer";
+import { createAdminClient, DB_ID, COL_COURSES, COL_LESSONS, COL_SETTINGS, SETTINGS_DOC } from "@/lib/appwriteServer";
+import { requireAdminAuth } from "@/security/auth";
 import { ID } from "node-appwrite";
 import type { PlatformSettings } from "@/data/admin";
 
@@ -26,7 +27,7 @@ async function tryCreate(label: string, fn: () => Promise<unknown>) {
 }
 
 export async function GET(request: NextRequest) {
-  if (!requireAdminCookie(request)) {
+  if (!(await requireAdminAuth(request))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

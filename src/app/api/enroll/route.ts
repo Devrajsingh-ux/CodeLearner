@@ -8,31 +8,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ID, Query } from "node-appwrite";
 import { createAdminClient, DB_ID, COL_ENROLLMENTS } from "@/lib/appwriteServer";
-import { getUserFromSession } from "@/lib/auth";
-import { validateInput, enrollmentPostSchema, sanitizeString } from "@/lib/validation";
+import { requireApiUser, validateApiBody } from "@/security/api-guard";
+import { enrollmentPostSchema, sanitizeString } from "@/security/validation";
 
 // POST - Enroll in a course
 export async function POST(request: NextRequest) {
   try {
-    const user = await getUserFromSession(request);
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const auth = await requireApiUser(request, { enforceCsrf: true });
+    if (!auth.ok) {
+      return auth.response;
     }
+    const user = auth.user;
 
     const body = await request.json();
 
-    // Validate input
-    const validation = validateInput(enrollmentPostSchema, body);
-    if (!validation.success) {
-      return NextResponse.json(
-        { error: "Invalid input", details: validation.errors },
-        { status: 400 }
-      );
+    const parsed = validateApiBody(enrollmentPostSchema, body);
+    if (!parsed.ok) {
+      return parsed.response;
     }
 
-    // `validateInput` returned success above, but TypeScript doesn't narrow `validation.data`.
-    // Assert it's non-null before destructuring.
-    const postData = validation.data as NonNullable<typeof validation.data>;
+    const postData = parsed.data;
     const { courseId, courseSlug, courseTitle } = postData;
     const totalLessons = typeof body.totalLessons === 'number' ? Math.max(0, body.totalLessons) : 0;
 
@@ -121,10 +116,11 @@ export async function POST(request: NextRequest) {
 // GET - Get user's enrollments
 export async function GET(request: NextRequest) {
   try {
-    const user = await getUserFromSession(request);
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const auth = await requireApiUser(request);
+    if (!auth.ok) {
+      return auth.response;
     }
+    const user = auth.user;
 
     try {
       const { databases } = createAdminClient();

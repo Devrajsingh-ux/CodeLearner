@@ -1,0 +1,125 @@
+import type { Track, Testimonial } from "@/types";
+
+export const MOCK_ACTIVE_LEARNERS = 12345;
+
+export const MOCK_PLATFORM_STATS = {
+  activeLearners: 12345,
+  courseTracks: 9,
+  completionRate: 87,
+  jobPlacements: 1200,
+};
+
+export const MOCK_COURSES: Track[] = [
+  {
+    id: "1",
+    slug: "react",
+    title: "React",
+    description: "Build modern web apps with React.",
+    icon: "react",
+    color: "#61DAFB",
+    gradient: "from-cyan-400 to-blue-500",
+    difficulty: "Beginner",
+    lessonsCount: 45,
+    duration: "20",
+    enrolledCount: 5678,
+    rating: 4.8,
+    tags: ["React", "Frontend", "JavaScript"],
+    category: "Frontend",
+    isFeatured: true,
+    isNew: true,
+  },
+  {
+    id: "2",
+    slug: "nodejs",
+    title: "Node.js",
+    description: "Build scalable backend services with Node.js.",
+    icon: "nodejs",
+    color: "#339933",
+    gradient: "from-green-400 to-lime-500",
+    difficulty: "Intermediate",
+    lessonsCount: 55,
+    duration: "25",
+    enrolledCount: 4321,
+    rating: 4.7,
+    tags: ["Node.js", "Backend", "JavaScript"],
+    category: "Backend",
+    isFeatured: true,
+  },
+  {
+    id: "3",
+    slug: "python",
+    title: "Python for Data Science",
+    description: "Master Python for data analysis and visualization.",
+    icon: "python",
+    color: "#3776AB",
+    gradient: "from-blue-400 to-indigo-500",
+    difficulty: "Beginner",
+    lessonsCount: 60,
+    duration: "30",
+    enrolledCount: 7890,
+    rating: 4.9,
+    tags: ["Python", "Data Science", "Pandas"],
+    category: "Data & AI",
+    isFeatured: true,
+  },
+  {
+    id: "4",
+    slug: "typescript",
+    title: "TypeScript",
+    description: "Add static typing to your JavaScript projects.",
+    icon: "typescript",
+    color: "#3178C6",
+    gradient: "from-blue-500 to-cyan-400",
+    difficulty: "Intermediate",
+    lessonsCount: 30,
+    duration: "15",
+    enrolledCount: 3456,
+    rating: 4.8,
+    tags: ["TypeScript", "JavaScript", "Frontend"],
+    category: "Languages",
+    isFeatured: true,
+  },
+];
+
+export const MOCK_TESTIMONIALS: Testimonial[] = [
+  {
+    id: "1",
+    name: "Sarah Johnson",
+    role: "Frontend Developer @ Google",
+    avatar: "SJ",
+    content:
+      "The React course was a game-changer for me. The project-based approach helped me solidify my understanding and build a great portfolio piece.",
+    rating: 5,
+    course: "React",
+  },
+  {
+    id: "2",
+    name: "Michael Chen",
+    role: "Backend Engineer @ Meta",
+    avatar: "MC",
+    content:
+      "I've taken many Node.js courses, but this one was by far the most comprehensive and practical. Highly recommended!",
+    rating: 5,
+    course: "Node.js",
+  },
+  {
+    id: "3",
+    name: "Emily Rodriguez",
+    role: "Data Scientist @ Netflix",
+    avatar: "ER",
+    content:
+      "The Python for Data Science track is perfect for beginners. The lessons are clear, concise, and the exercises are very helpful.",
+    rating: 5,
+    course: "Python for Data Science",
+  },
+  {
+    id: "4",
+    name: "David Lee",
+    role: "Full-Stack Developer",
+    avatar: "DL",
+    content:
+      "I love the variety of courses available. I was able to learn both frontend and backend technologies in one place.",
+    rating: 5,
+    course: "Full-Stack Track",
+  },
+];

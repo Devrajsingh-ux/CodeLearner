@@ -11,6 +11,7 @@
     "lint": "biome check",
     "format": "biome format --write",
     "type-check": "tsc --noEmit",
+    "test": "vitest run",
     "create-admin": "node scripts/create-admin.mjs",
     "setup:db": "node scripts/setup-database.js",
     "setup:all": "npm run setup:db && echo '✅ Setup complete! You can now run: npm run dev'",
@@ -43,6 +44,7 @@
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^2.1.9"
   }
 }

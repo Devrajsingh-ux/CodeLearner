@@ -7,13 +7,14 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient, DB_ID, COL_NOTIFICATIONS } from "@/lib/appwriteServer";
-import { getUserFromSession } from "@/lib/auth";
-import { handleDatabaseError, serverErrorResponse, unauthorizedResponse, withErrorHandling } from "@/lib/utils";
+import { requireApiUser } from "@/security/api-guard";
+import { handleDatabaseError, serverErrorResponse, withErrorHandling } from "@/lib/utils";
 
 export async function PATCH(request: NextRequest, context: any) {
   return withErrorHandling(async () => {
-    const user = await getUserFromSession(request);
-    if (!user) return unauthorizedResponse();
+    const auth = await requireApiUser(request, { enforceCsrf: true });
+    if (!auth.ok) return auth.response;
+    const user = auth.user;
 
     const params = await (context?.params || {});
     const id = params?.id;
@@ -30,7 +31,9 @@ export async function PATCH(request: NextRequest, context: any) {
       const doc = await databases.getDocument(DB_ID, COL_NOTIFICATIONS, id);
 
       // Only recipient or admin can modify
-      if (doc.recipientId !== user.id && user.role !== "admin") return unauthorizedResponse();
+      if (doc.recipientId !== user.id && user.role !== "admin") {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
 
       const updated = await databases.updateDocument(DB_ID, COL_NOTIFICATIONS, id, {
         unread: body.unread,
@@ -48,8 +51,9 @@ export async function PATCH(request: NextRequest, context: any) {
 
 export async function DELETE(request: NextRequest, context: any) {
   return withErrorHandling(async () => {
-    const user = await getUserFromSession(request);
-    if (!user) return unauthorizedResponse();
+    const auth = await requireApiUser(request, { enforceCsrf: true });
+    if (!auth.ok) return auth.response;
+    const user = auth.user;
 
     const params = await (context?.params || {});
     const id = params?.id;
@@ -59,7 +63,9 @@ export async function DELETE(request: NextRequest, context: any) {
 
     try {
       const doc = await databases.getDocument(DB_ID, COL_NOTIFICATIONS, id);
-      if (doc.recipientId !== user.id && user.role !== "admin") return unauthorizedResponse();
+      if (doc.recipientId !== user.id && user.role !== "admin") {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
 
       await databases.deleteDocument(DB_ID, COL_NOTIFICATIONS, id);
       return NextResponse.json({ success: true });

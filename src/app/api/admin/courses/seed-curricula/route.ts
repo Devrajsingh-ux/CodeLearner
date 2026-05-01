@@ -12,15 +12,15 @@ import {
   DB_ID,
   COL_COURSES,
   COL_LESSONS,
-  requireAdminCookie,
 } from "@/lib/appwriteServer";
+import { requireAdminAuth } from "@/security/auth";
 import { getAllCourseSlugs, getCurriculum } from "@/data/courses/index";
 import type { Curriculum, Level, Chapter } from "@/data/courses/types";
 
 export async function POST(req: NextRequest) {
   try {
     // Require admin authentication
-    const adminSession = await requireAdminCookie(req);
+    const adminSession = await requireAdminAuth(req);
     if (!adminSession) {
       return NextResponse.json(
         { error: "Unauthorized. Admin login required." },

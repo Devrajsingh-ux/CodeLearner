@@ -6,9 +6,15 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { account } from "@/lib/appwrite";
+import {
+  checkServerLockout,
+  recordServerFailedAttempt,
+} from "@/security/server-lockout";
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "unknown";
+
     const { userId, secret, password, confirmPassword } = (await req.json()) as {
       userId?: string;
       secret?: string;
@@ -16,8 +22,18 @@ export async function POST(req: NextRequest) {
       confirmPassword?: string;
     };
 
+    const lockKey = `reset-password:${userId || ip}`;
+    const lock = await checkServerLockout(lockKey);
+    if (lock.blocked) {
+      return NextResponse.json(
+        { error: "Too many attempts. Please try again later." },
+        { status: 429 },
+      );
+    }
+
     // Validate required fields
     if (!userId || !secret || !password || !confirmPassword) {
+      await recordServerFailedAttempt(lockKey);
       return NextResponse.json(
         { error: "Missing required fields." },
         { status: 400 }
@@ -26,6 +42,7 @@ export async function POST(req: NextRequest) {
 
     // Validate passwords match
     if (password !== confirmPassword) {
+      await recordServerFailedAttempt(lockKey);
       return NextResponse.json(
         { error: "Passwords do not match." },
         { status: 400 }
@@ -34,6 +51,7 @@ export async function POST(req: NextRequest) {
 
     // Validate password strength (defense in depth)
     if (password.length < 12) {
+      await recordServerFailedAttempt(lockKey);
       return NextResponse.json(
         { error: "Password must be at least 12 characters long." },
         { status: 400 }
@@ -41,6 +59,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!/[A-Z]/.test(password)) {
+      await recordServerFailedAttempt(lockKey);
       return NextResponse.json(
         { error: "Password must contain at least one uppercase letter." },
         { status: 400 }
@@ -48,6 +67,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!/[a-z]/.test(password)) {
+      await recordServerFailedAttempt(lockKey);
       return NextResponse.json(
         { error: "Password must contain at least one lowercase letter." },
         { status: 400 }
@@ -55,6 +75,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!/[0-9]/.test(password)) {
+      await recordServerFailedAttempt(lockKey);
       return NextResponse.json(
         { error: "Password must contain at least one number." },
         { status: 400 }
@@ -62,6 +83,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!/[^A-Za-z0-9]/.test(password)) {
+      await recordServerFailedAttempt(lockKey);
       return NextResponse.json(
         { error: "Password must contain at least one special character." },
         { status: 400 }
@@ -81,6 +103,7 @@ export async function POST(req: NextRequest) {
       const errorMessage = error?.message || error?.toString() || "";
 
       if (errorMessage.includes("expired") || errorMessage.includes("invalid")) {
+        await recordServerFailedAttempt(lockKey);
         return NextResponse.json(
           { error: "Reset link has expired or is invalid. Please request a new one." },
           { status: 400 }

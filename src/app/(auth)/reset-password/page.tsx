@@ -12,8 +12,8 @@ import {
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Button } from "@/ui/components/Button";
+import { Input } from "@/ui/components/Input";
 
 function PasswordStrength({ password }: { password: string }) {
   const checks = [

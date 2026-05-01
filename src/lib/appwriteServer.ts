@@ -4,8 +4,6 @@
  * Uses APPWRITE_API_KEY which bypasses permission checks.
  */
 import { Client, Users, Databases } from "node-appwrite";
-import type { NextRequest } from "next/server";
-import { verifyToken, type TokenPayload } from "@/lib/auth";
 
 /**
  * Validates that required environment variables are set.
@@ -67,95 +65,3 @@ export const COL_PROBLEMS_SOLVED = "problems_solved";
 export const SETTINGS_DOC     = "platform";
 export const COL_NOTIFICATIONS = "notifications";
 
-// ── Secure Admin auth guard (uses JWT verification) ──────────────────────────
-
-/**
- * Verifies admin authentication using JWT tokens.
- * This is secure - tokens are cryptographically signed and verified.
- *
- * @param request - The NextRequest object
- * @returns Promise<boolean> - true if user is authenticated admin, false otherwise
- */
-export async function requireAdminAuth(request: NextRequest): Promise<TokenPayload | null> {
-  try {
-    const accessToken = request.cookies.get("cl_access_token")?.value;
-
-    if (!accessToken) {
-      return null;
-    }
-
-    const payload = await verifyToken(accessToken);
-
-    if (!payload || payload.type !== 'access') {
-      return null;
-    }
-
-    if (payload.role !== "admin") {
-      return null;
-    }
-
-    return payload;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Gets user data from JWT token for API routes.
- * Returns null if not authenticated.
- */
-export async function getAuthenticatedUser(request: NextRequest): Promise<TokenPayload | null> {
-  try {
-    const accessToken = request.cookies.get("cl_access_token")?.value;
-
-    if (!accessToken) {
-      // Fallback to legacy cookie during migration
-      const legacyCookie = request.cookies.get("cl_session")?.value;
-      if (legacyCookie) {
-        try {
-          const parsed = JSON.parse(legacyCookie) as { id?: string; role?: string };
-          if (parsed.id) {
-            return {
-              id: parsed.id,
-              role: parsed.role || 'user',
-              type: 'access',
-              iat: Date.now() / 1000,
-              exp: (Date.now() / 1000) + 3600,
-            } as TokenPayload;
-          }
-        } catch {
-          // Invalid legacy cookie
-        }
-      }
-      return null;
-    }
-
-    const payload = await verifyToken(accessToken);
-
-    if (!payload || payload.type !== 'access') {
-      return null;
-    }
-
-    return payload;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * @deprecated Use requireAdminAuth instead - this uses unsigned cookies and is insecure
- * Kept only for backwards compatibility during migration
- */
-export function requireAdminCookie(request: NextRequest): boolean {
-  if (process.env.NODE_ENV === 'production') {
-    console.warn("SECURITY WARNING: requireAdminCookie is deprecated. Use requireAdminAuth instead.");
-  }
-  try {
-    const raw = request.cookies.get("cl_session")?.value;
-    if (!raw) return false;
-    const session = JSON.parse(raw) as { role?: string };
-    return session.role === "admin";
-  } catch {
-    return false;
-  }
-}

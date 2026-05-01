@@ -8,12 +8,8 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { ID, Query } from "node-appwrite";
-import {
-  createAdminClient,
-  DB_ID,
-  COL_COURSES,
-  requireAdminCookie,
-} from "@/lib/appwriteServer";
+import { createAdminClient, DB_ID, COL_COURSES } from "@/lib/appwriteServer";
+import { requireAdminAuth } from "@/security/auth";
 import type { AdminCourse } from "@/data/admin";
 
 function parseTags(raw: unknown): string[] {
@@ -48,7 +44,7 @@ function mapCourse(doc: any): AdminCourse {
 }
 
 export async function GET(request: NextRequest) {
-  if (!requireAdminCookie(request))
+  if (!(await requireAdminAuth(request)))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   try {
@@ -87,7 +83,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  if (!requireAdminCookie(request))
+  if (!(await requireAdminAuth(request)))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   try {
@@ -117,7 +113,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  if (!requireAdminCookie(request))
+  if (!(await requireAdminAuth(request)))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   try {
@@ -131,7 +127,7 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  if (!requireAdminCookie(request))
+  if (!(await requireAdminAuth(request)))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   try {

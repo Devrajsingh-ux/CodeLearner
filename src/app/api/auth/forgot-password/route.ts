@@ -7,13 +7,28 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { account } from "@/lib/appwrite";
+import {
+  checkServerLockout,
+  recordServerFailedAttempt,
+} from "@/security/server-lockout";
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "unknown";
+    const lockKey = `forgot-password:${ip}`;
+    const lock = await checkServerLockout(lockKey);
+    if (lock.blocked) {
+      return NextResponse.json(
+        { error: "Too many attempts. Please try again later." },
+        { status: 429 },
+      );
+    }
+
     const { email } = (await req.json()) as { email?: string };
 
     // Validate email format
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      await recordServerFailedAttempt(lockKey);
       return NextResponse.json(
         { error: "Please provide a valid email address." },
         { status: 400 }

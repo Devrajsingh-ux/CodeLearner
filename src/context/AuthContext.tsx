@@ -14,7 +14,7 @@ import {
   checkRateLimit,
   clearAttempts,
   recordFailedAttempt,
-} from "@/lib/rateLimit";
+} from "@/security/lockout";
 
 interface AuthContextValue {
   user: AuthUser | null;

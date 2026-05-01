@@ -13,13 +13,11 @@ import {
   COL_PROGRESS,
   COL_ENROLLMENTS,
 } from "@/lib/appwriteServer";
-import { getUserFromSession, generateAccessToken, generateRefreshToken, setAuthCookies } from "@/lib/auth";
-import { validateInput, progressPostSchema, sanitizeString } from "@/lib/validation";
+import { getUserFromSession, generateAccessToken, generateRefreshToken, setAuthCookies } from "@/security/auth";
+import { requireApiUser, validateApiBody } from "@/security/api-guard";
+import { progressPostSchema, sanitizeString } from "@/security/validation";
 import {
-  formatDateISO,
   calculateLevel,
-  unauthorizedResponse,
-  validationErrorResponse,
   handleDatabaseError,
   withErrorHandling
 } from "@/lib/utils";
@@ -27,22 +25,20 @@ import {
 // POST - Record lesson completion
 export async function POST(request: NextRequest) {
   return withErrorHandling(async () => {
-    const user = await getUserFromSession(request);
-    if (!user) {
-      return unauthorizedResponse();
-    }
+    const auth = await requireApiUser(request, { enforceCsrf: true });
+    if (!auth.ok) return auth.response;
+    const user = auth.user;
 
     const body = await request.json();
 
-    // Validate input
-    const validation = validateInput(progressPostSchema, body);
-    if (!validation.success) {
-      return validationErrorResponse(validation.errors || []);
+    const parsed = validateApiBody(progressPostSchema, body);
+    if (!parsed.ok) {
+      return parsed.response;
     }
 
     // `validateInput` returned success above, but TypeScript doesn't narrow `validation.data`.
     // Assert it's non-null before destructuring.
-    const postData = validation.data as NonNullable<typeof validation.data>;
+    const postData = parsed.data;
     const {
       courseId,
       courseSlug,
@@ -211,10 +207,9 @@ export async function POST(request: NextRequest) {
 // GET - Get user's progress across all courses
 export async function GET(request: NextRequest) {
   return withErrorHandling(async () => {
-    const user = await getUserFromSession(request);
-    if (!user) {
-      return unauthorizedResponse();
-    }
+    const auth = await requireApiUser(request);
+    if (!auth.ok) return auth.response;
+    const user = auth.user;
 
     const { databases } = createAdminClient();
 

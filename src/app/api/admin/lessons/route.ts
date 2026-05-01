@@ -12,8 +12,8 @@ import {
   createAdminClient,
   DB_ID,
   COL_LESSONS,
-  requireAdminCookie,
 } from "@/lib/appwriteServer";
+import { requireAdminAuth } from "@/security/auth";
 import type { AdminLesson } from "@/data/admin";
 
 function mapLesson(doc: any): AdminLesson {
@@ -36,7 +36,7 @@ function mapLesson(doc: any): AdminLesson {
 }
 
 export async function GET(request: NextRequest) {
-  if (!requireAdminCookie(request))
+  if (!(await requireAdminAuth(request)))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   try {
@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  if (!requireAdminCookie(request))
+  if (!(await requireAdminAuth(request)))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   try {
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  if (!requireAdminCookie(request))
+  if (!(await requireAdminAuth(request)))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   try {
@@ -97,7 +97,7 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  if (!requireAdminCookie(request))
+  if (!(await requireAdminAuth(request)))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   try {

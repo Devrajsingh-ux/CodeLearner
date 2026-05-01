@@ -7,13 +7,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Query } from "node-appwrite";
 import { createAdminClient, DB_ID, COL_NOTIFICATIONS } from "@/lib/appwriteServer";
-import { getUserFromSession } from "@/lib/auth";
-import { handleDatabaseError, serverErrorResponse, unauthorizedResponse, withErrorHandling } from "@/lib/utils";
+import { requireApiUser } from "@/security/api-guard";
+import { handleDatabaseError, serverErrorResponse, withErrorHandling } from "@/lib/utils";
 
 export async function POST(request: NextRequest) {
   return withErrorHandling(async () => {
-    const user = await getUserFromSession(request);
-    if (!user) return unauthorizedResponse();
+    const auth = await requireApiUser(request, { enforceCsrf: true });
+    if (!auth.ok) return auth.response;
+    const user = auth.user;
 
     const { databases } = createAdminClient();
 

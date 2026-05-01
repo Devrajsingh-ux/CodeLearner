@@ -13,13 +13,11 @@ import {
   COL_ACTIVITY,
   COL_STREAKS,
 } from "@/lib/appwriteServer";
-import { getUserFromSession } from "@/lib/auth";
-import { validateInput, activityPostSchema, activityGetSchema, sanitizeString } from "@/lib/validation";
+import { requireApiUser, validateApiBody } from "@/security/api-guard";
+import { activityPostSchema, activityGetSchema, sanitizeString, validateInput } from "@/security/validation";
 import {
   formatDateISO,
   daysBetween,
-  unauthorizedResponse,
-  validationErrorResponse,
   handleDatabaseError,
   withErrorHandling
 } from "@/lib/utils";
@@ -27,23 +25,21 @@ import {
 // POST - Record activity and update streak
 export async function POST(request: NextRequest) {
   return withErrorHandling(async () => {
-    const user = await getUserFromSession(request);
-    if (!user) {
-      return unauthorizedResponse();
-    }
+    const auth = await requireApiUser(request, { enforceCsrf: true });
+    if (!auth.ok) return auth.response;
+    const user = auth.user;
 
     const body = await request.json();
 
-    // Validate input
-    const validation = validateInput(activityPostSchema, body);
-    if (!validation.success) {
-      return validationErrorResponse(validation.errors || []);
+    const parsed = validateApiBody(activityPostSchema, body);
+    if (!parsed.ok) {
+      return parsed.response;
     }
 
     // `validateInput` ensures `validation.success` is true and `validation.data` is present,
     // but TypeScript doesn't narrow the type here. Assert `validation.data` is non-null
     // before destructuring to satisfy the compiler.
-    const data = validation.data as NonNullable<typeof validation.data>;
+    const data = parsed.data;
     const {
       type,
       xpEarned = 0,
@@ -226,10 +222,9 @@ export async function POST(request: NextRequest) {
 // GET - Get user's activity history
 export async function GET(request: NextRequest) {
   return withErrorHandling(async () => {
-    const user = await getUserFromSession(request);
-    if (!user) {
-      return unauthorizedResponse();
-    }
+    const auth = await requireApiUser(request);
+    if (!auth.ok) return auth.response;
+    const user = auth.user;
 
     const { searchParams } = new URL(request.url);
 

@@ -12,8 +12,8 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Button } from "@/ui/components/Button";
+import { Input } from "@/ui/components/Input";
 import { useAuth } from "@/context/AuthContext";
 
 function PasswordStrength({ password }: { password: string }) {

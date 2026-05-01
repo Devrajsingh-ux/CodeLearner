@@ -3,11 +3,11 @@
 import { AlertCircle, ArrowRight, Eye, EyeOff, Lock, Mail, Shield } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Button } from "@/ui/components/Button";
+import { Input } from "@/ui/components/Input";
 import { account } from "@/lib/appwrite";
 import { useAuth } from "@/context/AuthContext";
-import { checkRateLimit, clearAttempts, recordFailedAttempt } from "@/lib/rateLimit";
+import { checkRateLimit, clearAttempts, recordFailedAttempt } from "@/security/lockout";
 
 export function AdminLoginForm() {
   const router = useRouter();

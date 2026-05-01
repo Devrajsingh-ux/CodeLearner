@@ -4,9 +4,9 @@ import { AlertCircle, ArrowRight, CheckCircle2, Mail } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { useState } from "react";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { checkRateLimit, recordFailedAttempt, clearAttempts } from "@/lib/rateLimit";
+import { Button } from "@/ui/components/Button";
+import { Input } from "@/ui/components/Input";
+import { checkRateLimit, recordFailedAttempt, clearAttempts } from "@/security/lockout";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");

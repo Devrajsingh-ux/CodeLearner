@@ -24,8 +24,8 @@ import {
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Avatar } from "@/components/ui/Avatar";
-import { Button } from "@/components/ui/Button";
+import { Avatar } from "@/ui/components/Avatar";
+import { Button } from "@/ui/components/Button";
 import { useAuth } from "@/context/AuthContext";
 import { CATEGORIES } from "@/data/courses";
 import { cn } from "@/lib/utils";

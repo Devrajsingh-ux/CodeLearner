@@ -11,6 +11,11 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import type { AuthUser } from "@/types";
+import {
+  checkServerLockout,
+  clearServerAttempts,
+  recordServerFailedAttempt,
+} from "@/security/server-lockout";
 
 const COOKIE_NAME = "cl_session";
 const MAX_AGE     = 7 * 24 * 60 * 60; // 7 days in seconds
@@ -37,10 +42,23 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "unknown";
+    const lockKey = `auth-session:${ip}`;
+    const lock = await checkServerLockout(lockKey);
+    if (lock.blocked) {
+      return NextResponse.json(
+        { error: "Too many attempts. Please try again later." },
+        { status: 429 },
+      );
+    }
+
     const { user } = (await req.json()) as { user?: AuthUser };
     if (!user?.id) {
+      await recordServerFailedAttempt(lockKey);
       return NextResponse.json({ error: "Invalid session data" }, { status: 400 });
     }
+
+    await clearServerAttempts(lockKey);
     const res = NextResponse.json({ ok: true });
     res.cookies.set(COOKIE_NAME, JSON.stringify(user), cookieOpts);
     return res;

@@ -17,7 +17,7 @@ import {
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useState } from "react";
-import { Badge } from "@/components/ui/Badge";
+import { Badge } from "@/ui/components/Badge";
 import type { LessonContent, TrackCurriculum } from "@/lib/lessons";
 import { cn } from "@/lib/utils";
 

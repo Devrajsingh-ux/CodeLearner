@@ -27,8 +27,8 @@ import {
   DB_ID,
   COL_COURSES,
   COL_LESSONS,
-  requireAdminCookie,
 } from "@/lib/appwriteServer";
+import { requireAdminAuth } from "@/security/auth";
 
 // ── Helper types ────────────────────────────────────────────────────────────
 
@@ -449,7 +449,7 @@ function mapCourse(doc: any) {
 // ── POST handler ─────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
-  if (!requireAdminCookie(request))
+  if (!(await requireAdminAuth(request)))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   // ── Parse multipart form ───────────────────────────────────────────────

@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { OAuthProvider } from "appwrite";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Button } from "@/ui/components/Button";
+import { Input } from "@/ui/components/Input";
 import { useAuth } from "@/context/AuthContext";
 import { account } from "@/lib/appwrite";
 

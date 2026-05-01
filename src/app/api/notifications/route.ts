@@ -8,14 +8,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ID, Query } from "node-appwrite";
 import { createAdminClient, DB_ID, COL_NOTIFICATIONS } from "@/lib/appwriteServer";
-import { getUserFromSession } from "@/lib/auth";
-import { sanitizeString } from "@/lib/validation";
-import { unauthorizedResponse, handleDatabaseError, serverErrorResponse, withErrorHandling } from "@/lib/utils";
+import { requireApiUser } from "@/security/api-guard";
+import { sanitizeString } from "@/security/validation";
+import { handleDatabaseError, serverErrorResponse, withErrorHandling } from "@/lib/utils";
 
 export async function GET(request: NextRequest) {
   return withErrorHandling(async () => {
-    const user = await getUserFromSession(request);
-    if (!user) return unauthorizedResponse();
+    const auth = await requireApiUser(request);
+    if (!auth.ok) return auth.response;
+    const user = auth.user;
 
     const { databases } = createAdminClient();
 
@@ -46,8 +47,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   return withErrorHandling(async () => {
-    const user = await getUserFromSession(request);
-    if (!user || user.role !== "admin") return unauthorizedResponse();
+    const auth = await requireApiUser(request, {
+      requireAdmin: true,
+      enforceCsrf: true,
+    });
+    if (!auth.ok) return auth.response;
 
     const body = await request.json();
     const recipientId = typeof body.recipientId === "string" ? body.recipientId.trim() : "";

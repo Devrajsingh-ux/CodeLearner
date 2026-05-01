@@ -1,12 +1,7 @@
 import { NextRequest } from "next/server";
 import { ID } from "node-appwrite";
-import {
-  createAdminClient,
-  DB_ID,
-  COL_COURSES,
-  COL_LESSONS,
-  requireAdminCookie,
-} from "@/lib/appwriteServer";
+import { createAdminClient, DB_ID, COL_COURSES, COL_LESSONS } from "@/lib/appwriteServer";
+import { requireAdminAuth } from "@/security/auth";
 
 /**
  * /api/admin/courses/generate
@@ -71,7 +66,7 @@ function mapCourseForResponse(doc: any) {
 }
 
 export async function POST(request: NextRequest) {
-  if (!requireAdminCookie(request)) {
+  if (!(await requireAdminAuth(request))) {
     return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { "Content-Type": "application/json" } });
   }
 

@@ -4,16 +4,11 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { Query } from "node-appwrite";
-import {
-  createAdminClient,
-  DB_ID,
-  COL_COURSES,
-  COL_LESSONS,
-  requireAdminCookie,
-} from "@/lib/appwriteServer";
+import { createAdminClient, DB_ID, COL_COURSES, COL_LESSONS } from "@/lib/appwriteServer";
+import { requireAdminAuth } from "@/security/auth";
 
 export async function GET(request: NextRequest) {
-  if (!requireAdminCookie(request))
+  if (!(await requireAdminAuth(request)))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { users, databases } = createAdminClient();

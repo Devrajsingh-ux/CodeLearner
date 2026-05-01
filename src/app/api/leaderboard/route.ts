@@ -8,7 +8,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Query } from "node-appwrite";
 import { createAdminClient } from "@/lib/appwriteServer";
-import { getUserFromSession } from "@/lib/auth";
+import { requireApiUser } from "@/security/api-guard";
 import { cacheGet, cacheSet } from "@/lib/cache";
 
 const LEADERBOARD_CACHE_KEY = "leaderboard:top10";
@@ -190,10 +190,9 @@ async function getCurrentUserRank(userId: string): Promise<LeaderboardEntry | nu
 
 export async function GET(request: NextRequest) {
   try {
-    const currentUser = await getUserFromSession(request);
-    if (!currentUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireApiUser(request);
+    if (!auth.ok) return auth.response;
+    const currentUser = auth.user;
 
     // Get top leaderboard and current user rank concurrently
     const [leaderboardData, currentUserRank] = await Promise.all([
