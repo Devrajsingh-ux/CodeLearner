@@ -17,6 +17,16 @@ import {
   TrendingUp,
   Trophy,
   Zap,
+  LayoutDashboard,
+  BookOpen,
+  Code2,
+  Users,
+  Settings,
+  Bell,
+  Search,
+  LogOut,
+  Menu,
+  X
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -75,7 +85,7 @@ function QuestRing({ completed, total }: { completed: number; total: number }) {
   return (
     <svg
       viewBox="0 0 56 56"
-      className="h-14 w-14"
+      className="h-14 w-14 drop-shadow-[0_0_8px_rgba(139,92,246,0.5)]"
       role="img"
       aria-label={`Daily goals ${Math.round(ratio * 100)} percent completed`}
     >
@@ -83,14 +93,14 @@ function QuestRing({ completed, total }: { completed: number; total: number }) {
         cx="28"
         cy="28"
         r={radius}
-        className="fill-none stroke-white/10"
+        className="fill-none stroke-white/5"
         strokeWidth="6"
       />
       <circle
         cx="28"
         cy="28"
         r={radius}
-        className="fill-none stroke-violet-500 transition-all duration-500"
+        className="fill-none stroke-violet-500 transition-all duration-700 ease-out"
         strokeWidth="6"
         strokeLinecap="round"
         strokeDasharray={`${filled} ${circumference - filled}`}
@@ -100,7 +110,7 @@ function QuestRing({ completed, total }: { completed: number; total: number }) {
         x="28"
         y="31"
         textAnchor="middle"
-        className="fill-white text-[10px] font-semibold"
+        className="fill-white text-[10px] font-bold tracking-tighter"
       >
         {Math.round(ratio * 100)}%
       </text>
@@ -109,7 +119,7 @@ function QuestRing({ completed, total }: { completed: number; total: number }) {
 }
 
 export default function DashboardPage() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -130,6 +140,8 @@ export default function DashboardPage() {
     stats: { completed: number; total: number; xpEarned: number; date: string };
   } | null>(null);
   const [questsLoading, setQuestsLoading] = useState(true);
+  
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !user) router.replace("/");
@@ -281,17 +293,13 @@ export default function DashboardPage() {
       streak: 0,
     } as const);
 
-  // Left-side dashboard navigation removed per UI request
-
   const continueTracks = useMemo(() => {
     if (catalog.length === 0 || enrollments.length === 0) return [];
 
-    // Get enrolled courses from catalog
     const enrolled = catalog.filter(course =>
       enrollments.some(e => e.courseId === course.id || e.courseSlug === course.slug)
     );
 
-    // Sort by last accessed date (most recent first)
     return enrolled.sort((a, b) => {
       const enrollA = enrollments.find(e => e.courseId === a.id || e.courseSlug === a.slug);
       const enrollB = enrollments.find(e => e.courseId === b.id || e.courseSlug === b.slug);
@@ -317,7 +325,6 @@ export default function DashboardPage() {
     const map = new Map<string, number>();
 
     enrollments.forEach((enrollment) => {
-      // Set progress for both courseId and courseSlug to handle different lookup keys
       map.set(enrollment.courseId, enrollment.percentComplete || 0);
       if (enrollment.courseSlug) {
         map.set(enrollment.courseSlug, enrollment.percentComplete || 0);
@@ -331,7 +338,6 @@ export default function DashboardPage() {
     (track) => (progressByCourse.get(track.id) ?? 0) >= 90,
   ).length;
 
-  // Use real activity data instead of fake calculations
   const problemsSolved = useMemo(() => {
     if (!activityData) return 0;
     return activityData.activities.reduce((sum, activity) => sum + (activity.problemsSolved || 0), 0);
@@ -346,65 +352,63 @@ export default function DashboardPage() {
 
   const minutesToday = activityData?.stats.minutesToday || 0;
 
-  // Use real quest data instead of mock questState
   const dailyQuest = questData ? {
     completed: questData.stats.completed,
     total: questData.stats.total,
     xp: questData.stats.xpEarned,
   } : {
     completed: 0,
-    total: 3, // Default to 3 quests if no data
+    total: 3, 
     xp: 0,
   };
 
   const firstName = profile.name.split(" ")[0] || "Coder";
-  const xpToNext = profile.level * 100; // Simplified: 100 XP per level
+  const xpToNext = profile.level * 100;
 
-  // Use real streak from activity data if available
   const realStreak = activityData?.streak?.currentStreak ?? profile.streak;
 
   const statCards = [
     {
       icon: Flame,
-      label: "Streak",
+      label: "Streak Days",
       value: realStreak,
-      suffix: "days",
+      suffix: "",
       accent: "#f59e0b",
+      bg: "bg-amber-500/10",
+      border: "border-amber-500/20",
     },
     {
       icon: Trophy,
       label: "Total XP",
       value: profile.xp,
-      suffix: "xp",
+      suffix: "",
       accent: "#8b5cf6",
+      bg: "bg-violet-500/10",
+      border: "border-violet-500/20",
     },
     {
       icon: Zap,
-      label: "Level",
+      label: "Current Level",
       value: profile.level,
       suffix: "",
       accent: "#06b6d4",
-    },
-    {
-      icon: Award,
-      label: "Courses Completed",
-      value: completedCourses,
-      suffix: "",
-      accent: "#10b981",
+      bg: "bg-cyan-500/10",
+      border: "border-cyan-500/20",
     },
     {
       icon: Brain,
       label: "Problems Solved",
       value: problemsSolved,
       suffix: "",
-      accent: "#38bdf8",
+      accent: "#10b981",
+      bg: "bg-emerald-500/10",
+      border: "border-emerald-500/20",
     },
   ];
 
-  // Create heatmap from real activity data
   const heatmapValues = useMemo(() => {
     if (!activityData) {
-      return WEEK_DAYS.map(() => 0); // All empty if no data
+      return WEEK_DAYS.map(() => 0);
     }
 
     const today = new Date();
@@ -412,19 +416,18 @@ export default function DashboardPage() {
 
     return WEEK_DAYS.map((_, i) => {
       const date = new Date(today);
-      date.setDate(today.getDate() - (6 - i)); // Go back to get the date for this day
+      date.setDate(today.getDate() - (6 - i));
       const dateString = date.toISOString().split('T')[0];
 
       const dayActivity = activities.find(activity => activity.date === dateString);
       if (!dayActivity) return 0;
 
-      // Calculate intensity based on XP earned that day
       const xp = dayActivity.xpEarned || 0;
-      if (xp >= 60) return 6; // Very active
-      if (xp >= 40) return 4; // Active
-      if (xp >= 20) return 2; // Somewhat active
-      if (xp > 0) return 1; // Minimal activity
-      return 0; // No activity
+      if (xp >= 60) return 4;
+      if (xp >= 40) return 3;
+      if (xp >= 20) return 2;
+      if (xp > 0) return 1;
+      return 0;
     });
   }, [activityData]);
 
@@ -448,590 +451,487 @@ export default function DashboardPage() {
     earned: item.isEarned(achievementContext),
   }));
   const recentBadges = achievements.filter((a) => a.earned).slice(0, 3);
-  const lockedBadges = achievements.filter((a) => !a.earned).slice(0, 4);
+
+  const NAVIGATION = [
+    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Learning Paths", href: "/learn", icon: BookOpen },
+    { name: "Practice", href: "/problems", icon: Code2 },
+    { name: "Community", href: "/community", icon: Users },
+  ];
 
   if (isLoading || !user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-950">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-violet-500 border-t-transparent" />
-          <p className="text-sm text-zinc-500">Loading your dashboard...</p>
+      <div className="flex min-h-screen items-center justify-center bg-[#09090b]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative flex h-12 w-12 items-center justify-center">
+            <div className="absolute inset-0 rounded-full border-t-2 border-violet-500 animate-spin" />
+            <Sparkles className="h-5 w-5 text-violet-400 animate-pulse" />
+          </div>
+          <p className="text-sm font-medium text-zinc-400 tracking-wide">Initializing Workspace...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      <div
-        className="pointer-events-none fixed inset-0 overflow-hidden"
-        aria-hidden
-      >
-        <div className="absolute -top-32 left-20 h-[26rem] w-[26rem] rounded-full bg-violet-500/12 blur-3xl" />
-        <div className="absolute top-1/3 right-0 h-80 w-80 rounded-full bg-cyan-500/10 blur-3xl" />
-        <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-amber-500/8 blur-3xl" />
+    <div className="flex min-h-screen bg-[#09090b] text-zinc-100 font-sans selection:bg-violet-500/30">
+      {/* Background Ambient Effects */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden>
+        <div className="absolute top-[-10%] left-[-10%] h-[40vw] w-[40vw] rounded-full bg-violet-600/10 blur-[120px]" />
+        <div className="absolute top-[40%] right-[-5%] h-[30vw] w-[30vw] rounded-full bg-cyan-600/10 blur-[100px]" />
+        <div className="absolute bottom-[-10%] left-[20%] h-[35vw] w-[35vw] rounded-full bg-amber-600/5 blur-[120px]" />
       </div>
 
-      <main className="relative mx-auto max-w-[1500px] px-4 pb-20 pt-24 sm:px-6 lg:px-8">
-        {/* Left navigation removed — no mobile nav button */}
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:flex w-72 flex-col border-r border-white/5 bg-black/20 backdrop-blur-xl z-20">
+        <div className="flex h-20 items-center px-8">
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-violet-500 to-indigo-600 shadow-lg shadow-violet-500/20 transition-transform group-hover:scale-105">
+              <Code2 className="h-5 w-5 text-white" />
+            </div>
+            <span className="text-xl font-bold tracking-tight text-white">CodeLearner</span>
+          </Link>
+        </div>
 
-        <div className="grid gap-6 lg:grid-cols-12">
-          {/* Left navigation removed — main content expands to full width on large screens */}
+        <div className="flex-1 px-4 py-8 space-y-1">
+          <p className="px-4 text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-4">Menu</p>
+          {NAVIGATION.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200",
+                  isActive
+                    ? "bg-violet-500/10 text-violet-300 relative"
+                    : "text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
+                )}
+              >
+                {isActive && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-violet-500 rounded-r-full" />
+                )}
+                <item.icon className={cn("h-5 w-5", isActive ? "text-violet-400" : "text-zinc-500")} />
+                {item.name}
+              </Link>
+            );
+          })}
+        </div>
 
-          {/* Mobile nav removed */}
+        <div className="p-4 border-t border-white/5">
+          <button 
+            onClick={() => logout()}
+            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-zinc-400 transition-all hover:bg-red-500/10 hover:text-red-400"
+          >
+            <LogOut className="h-5 w-5" />
+            Sign Out
+          </button>
+        </div>
+      </aside>
 
-          <div className="space-y-6 lg:col-span-12 xl:col-span-12">
-            <section
-              className={cn(
-                "rounded-3xl border border-violet-500/20 bg-linear-to-br from-white/7 to-white/3 p-5 backdrop-blur-xl sm:p-6",
-                "transition-all duration-700",
-                isHydrated
-                  ? "translate-y-0 opacity-100"
-                  : "translate-y-2 opacity-0",
-              )}
-            >
-              <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="relative">
-                    <div className="absolute inset-0 rounded-full bg-violet-500/40 blur-lg" />
-                    <Avatar
-                      initials={
-                        user.avatar ?? user.name.slice(0, 2).toUpperCase()
-                      }
-                      size="xl"
-                      className="relative ring-violet-400/40"
-                    />
-                  </div>
+      {/* Mobile Header & Nav */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 border-b border-white/5 bg-black/40 backdrop-blur-xl z-50 flex items-center justify-between px-4">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-violet-500 to-indigo-600">
+            <Code2 className="h-4 w-4 text-white" />
+          </div>
+          <span className="font-bold text-white">CodeLearner</span>
+        </Link>
+        <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 text-zinc-400 hover:text-white">
+          {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
+      </div>
 
-                  <div>
-                    <p className="text-sm text-zinc-400">
-                      Welcome back, keep the streak alive
-                    </p>
-                    <h1 className="text-2xl font-bold sm:text-3xl">
-                      Hey {firstName}
-                    </h1>
-                    <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/25 bg-amber-500/12 px-2.5 py-1 text-xs font-semibold text-amber-300 animate-[pulse_2.4s_ease-in-out_infinite]">
-                        <Flame className="h-3.5 w-3.5" /> {realStreak}-day
-                        streak
-                      </span>
-                      <span className="inline-flex items-center gap-1 rounded-full border border-violet-500/25 bg-violet-500/12 px-2.5 py-1 text-xs font-semibold text-violet-300">
-                        <Medal className="h-3.5 w-3.5" /> Tier{" "}
-                        {Math.max(1, Math.ceil(user.level / 3))}
-                      </span>
-                    </div>
-                  </div>
+      {mobileMenuOpen && (
+        <div className="lg:hidden fixed inset-0 top-16 bg-black/95 z-40 p-4">
+          <div className="flex flex-col gap-2">
+            {NAVIGATION.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={cn(
+                  "flex items-center gap-3 rounded-xl px-4 py-3 font-medium",
+                  pathname === item.href ? "bg-violet-500/10 text-violet-300" : "text-zinc-400"
+                )}
+              >
+                <item.icon className="h-5 w-5" />
+                {item.name}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Main Content */}
+      <main className="flex-1 relative w-full lg:max-w-[calc(100vw-18rem)] overflow-y-auto overflow-x-hidden pt-16 lg:pt-0">
+        
+        {/* Top Header */}
+        <header className="sticky top-0 z-30 hidden lg:flex h-20 items-center justify-between px-8 backdrop-blur-md bg-[#09090b]/60 border-b border-transparent transition-all">
+          <div className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-full px-4 py-2 w-96 focus-within:border-violet-500/50 focus-within:bg-white/10 transition-all">
+            <Search className="h-4 w-4 text-zinc-400" />
+            <input 
+              type="text" 
+              placeholder="Search courses, problems..." 
+              className="bg-transparent border-none outline-none text-sm w-full text-zinc-200 placeholder:text-zinc-500"
+            />
+          </div>
+          <div className="flex items-center gap-6">
+            <button className="relative text-zinc-400 hover:text-white transition-colors">
+              <Bell className="h-5 w-5" />
+              <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-violet-500 ring-2 ring-[#09090b]" />
+            </button>
+            <div className="flex items-center gap-3 pl-6 border-l border-white/10">
+              <div className="text-right hidden md:block">
+                <p className="text-sm font-semibold text-white">{user.name}</p>
+                <p className="text-xs text-zinc-400 capitalize">{user.role}</p>
+              </div>
+              <Avatar
+                initials={user.avatar ?? user.name.slice(0, 2).toUpperCase()}
+                size="md"
+                className="ring-2 ring-white/10 hover:ring-violet-500/50 transition-all cursor-pointer"
+              />
+            </div>
+          </div>
+        </header>
+
+        <div className="p-4 sm:p-8 space-y-8 max-w-7xl mx-auto pb-24">
+          
+          {/* Welcome Banner */}
+          <div className={cn(
+            "relative overflow-hidden rounded-3xl border border-white/10 bg-linear-to-br from-zinc-900/80 to-black/80 p-8 sm:p-10 shadow-2xl",
+            isHydrated ? "animate-fade-in" : "opacity-0"
+          )}>
+            <div className="absolute top-0 right-0 w-1/2 h-full bg-linear-to-l from-violet-600/20 to-transparent pointer-events-none" />
+            <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-cyan-500/20 blur-[80px] rounded-full pointer-events-none" />
+            
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+              <div className="max-w-2xl">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-zinc-300 mb-4">
+                  <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+                  Your workspace is ready
                 </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <Link
-                    href={
-                      continueTracks[0]
-                        ? `/learn/${continueTracks[0].slug}`
-                        : "/learn"
-                    }
-                  >
-                    <Button size="md" leftIcon={<Play className="h-4 w-4" />}>
-                      Continue
+                <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-white mb-3">
+                  Welcome back, <span className="text-transparent bg-clip-text bg-linear-to-r from-violet-400 to-cyan-400">{firstName}</span>
+                </h1>
+                <p className="text-lg text-zinc-400 mb-6 leading-relaxed">
+                  You're on a <strong className="text-amber-400">{realStreak}-day learning streak</strong>. Keep up the momentum and conquer your daily goals today!
+                </p>
+                <div className="flex flex-wrap gap-4">
+                  <Link href={continueTracks[0] ? `/learn/${continueTracks[0].slug}` : "/learn"}>
+                    <Button size="lg" className="bg-violet-600 hover:bg-violet-500 text-white shadow-[0_0_20px_rgba(124,58,237,0.3)] transition-all hover:shadow-[0_0_30px_rgba(124,58,237,0.5)]">
+                      <Play className="h-4 w-4 mr-2" /> Resume Learning
                     </Button>
                   </Link>
-                  <Link href="/learn">
-                    <Button
-                      size="md"
-                      variant="secondary"
-                      rightIcon={<ArrowRight className="h-4 w-4" />}
-                    >
-                      Explore
+                  <Link href="/problems">
+                    <Button size="lg" variant="secondary" className="bg-white/5 hover:bg-white/10 border border-white/10 text-white">
+                      <Code2 className="h-4 w-4 mr-2" /> Practice Problems
                     </Button>
                   </Link>
                 </div>
               </div>
+              
+              {/* Daily Quest Highlight in Banner */}
+              <div className="hidden lg:flex flex-col items-center justify-center bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl p-6 min-w-[200px]">
+                <h3 className="text-sm font-semibold text-zinc-300 mb-4 uppercase tracking-wider">Daily Quest</h3>
+                <QuestRing completed={dailyQuest.completed} total={dailyQuest.total} />
+                <p className="mt-4 text-sm text-zinc-400 text-center">
+                  <span className="text-white font-bold">{dailyQuest.completed}/{dailyQuest.total}</span> completed
+                </p>
+                <p className="text-xs text-amber-400 mt-1">+{dailyQuest.xp} XP Earned</p>
+              </div>
+            </div>
+          </div>
 
-              <div className="mt-5 grid gap-3 md:grid-cols-3">
-                <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                  <p className="mb-1 text-xs uppercase tracking-wide text-zinc-500">
-                    Level progress
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {statCards.map((stat, idx) => (
+              <div 
+                key={stat.label}
+                className={cn(
+                  "group relative overflow-hidden rounded-2xl border bg-black/20 p-5 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1",
+                  stat.border,
+                  isHydrated ? "animate-fade-in" : "opacity-0"
+                )}
+                style={{ animationDelay: `${idx * 100}ms` }}
+              >
+                <div className="absolute inset-0 bg-linear-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="relative z-10">
+                  <div className={cn("inline-flex h-10 w-10 items-center justify-center rounded-xl mb-4", stat.bg)}>
+                    <stat.icon className="h-5 w-5" style={{ color: stat.accent }} />
+                  </div>
+                  <p className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-1">
+                    <AnimatedNumber value={stat.value} compact />
                   </p>
-                  <p className="mb-2 text-lg font-semibold">
-                    <AnimatedNumber value={user.xp} compact /> /{" "}
-                    {formatNumber(xpToNext)} XP
-                  </p>
-                  <ProgressBar value={user.xp} max={xpToNext} color="violet" />
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                  <p className="mb-1 text-xs uppercase tracking-wide text-zinc-500">
-                    XP today
-                  </p>
-                  <p className="text-lg font-semibold text-cyan-300">
-                    +{formatNumber(realXpToday)} XP
-                  </p>
-                  <p className="mt-2 text-xs text-zinc-500">
-                    Weekly gain: {formatNumber(realXpThisWeek)} XP
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                  <p className="mb-1 text-xs uppercase tracking-wide text-zinc-500">
-                    Daily quests
-                  </p>
-                  <p className="text-lg font-semibold text-amber-300">
-                    {dailyQuest.completed}/{dailyQuest.total} done
-                  </p>
-                  <p className="mt-2 text-xs text-zinc-500">
-                    Earned today: +{dailyQuest.xp} XP
-                  </p>
+                  <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider">{stat.label}</p>
                 </div>
               </div>
-            </section>
+            ))}
+          </div>
 
-            <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-              {statCards.map(
-                ({ icon: Icon, label, value, suffix, accent }, idx) => (
-                  <div
-                    key={label}
-                    className={cn(
-                      "group relative overflow-hidden rounded-2xl border border-white/8 bg-white/4 p-4 backdrop-blur-sm",
-                      "transition-all duration-300 hover:-translate-y-0.5 hover:border-white/15",
-                      isHydrated
-                        ? "translate-y-0 opacity-100"
-                        : "translate-y-2 opacity-0",
-                    )}
-                    style={{ transitionDelay: `${80 + idx * 70}ms` }}
-                  >
-                    <div
-                      className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                      style={{
-                        background: `radial-gradient(circle at 0% 0%, ${accent}20 0%, transparent 60%)`,
-                      }}
-                    />
+          {/* Main Content Grid (2 Columns) */}
+          <div className="grid lg:grid-cols-3 gap-8">
+            
+            {/* Left Column (Wider) */}
+            <div className="lg:col-span-2 space-y-8">
+              
+              {/* Continue Learning */}
+              <section>
+                <div className="flex items-center justify-between mb-5">
+                  <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                    <BookOpen className="h-5 w-5 text-violet-400" /> Continue Learning
+                  </h2>
+                  <Link href="/learn" className="text-sm font-medium text-zinc-400 hover:text-violet-400 transition-colors flex items-center gap-1">
+                    View all <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
 
-                    <div className="relative">
-                      <div
-                        className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl"
-                        style={{ background: `${accent}1f` }}
-                      >
-                        <Icon className="h-5 w-5" style={{ color: accent }} />
-                      </div>
-                      <p className="text-xl font-bold tabular-nums text-white">
-                        <AnimatedNumber value={value} compact />
-                        <span className="ml-1 text-sm text-zinc-400">
-                          {suffix}
-                        </span>
-                      </p>
-                      <p className="text-xs text-zinc-500">{label}</p>
-                    </div>
+                {coursesLoading || enrollmentsLoading ? (
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {[1, 2].map((i) => (
+                      <div key={i} className="h-36 rounded-2xl bg-white/5 border border-white/10 animate-pulse" />
+                    ))}
                   </div>
-                ),
-              )}
-            </section>
-
-            <div className="grid gap-6 lg:grid-cols-3">
-              <div className="space-y-6 lg:col-span-2">
-                <section className="rounded-3xl border border-white/10 bg-white/4 p-5 sm:p-6">
-                  <div className="mb-4 flex items-center justify-between gap-3">
-                    <h2 className="text-lg font-semibold">Continue Learning</h2>
-                    <Link
-                      href="/learn"
-                      className="inline-flex items-center gap-1 text-xs text-zinc-400 hover:text-violet-300"
-                    >
-                      View all <ChevronRight className="h-3.5 w-3.5" />
+                ) : continueTracks.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 p-8 text-center flex flex-col items-center">
+                    <div className="h-12 w-12 rounded-full bg-violet-500/20 flex items-center justify-center mb-4">
+                      <Target className="h-6 w-6 text-violet-400" />
+                    </div>
+                    <p className="text-lg font-semibold text-white mb-2">No active courses</p>
+                    <p className="text-zinc-400 mb-6 max-w-sm">Start your journey by enrolling in a new learning track today.</p>
+                    <Link href="/learn">
+                      <Button className="bg-white text-black hover:bg-zinc-200">Browse Catalog</Button>
                     </Link>
                   </div>
-
-                  {coursesLoading || enrollmentsLoading ? (
-                    <div className="space-y-3">
-                      {["a", "b", "c"].map((skeletonId) => (
-                        <div
-                          key={skeletonId}
-                          className="h-24 animate-pulse rounded-2xl border border-white/8 bg-white/5"
-                        />
-                      ))}
-                    </div>
-                  ) : continueTracks.length === 0 ? (
-                    <div className="rounded-2xl border border-dashed border-violet-500/30 bg-violet-500/8 p-6 text-center">
-                      <Sparkles className="mx-auto mb-3 h-8 w-8 text-violet-300" />
-                      <p className="text-base font-semibold">
-                        Start your learning journey
-                      </p>
-                      <p className="mt-1 text-sm text-zinc-400">
-                        Pick your first track and unlock your personalized
-                        dashboard.
-                      </p>
-                      <Link
-                        href="/learn"
-                        className="mt-4 inline-flex items-center gap-2 rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-500"
-                      >
-                        Explore courses <ArrowRight className="h-4 w-4" />
-                      </Link>
-                    </div>
-                  ) : (
-                    <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-1 sm:flex-col sm:overflow-visible">
-                      {continueTracks.map((track, idx) => {
-                        // Try to get progress by course ID first, then by course slug
-                        const pct = progressByCourse.get(track.id) ?? progressByCourse.get(track.slug) ?? 0;
-
-                        // Get the actual enrollment to get real lesson completion data
-                        const enrollment = enrollments.find(e =>
-                          e.courseId === track.id || e.courseSlug === track.slug
-                        );
-
-                        const lessonsDone = enrollment?.completedLessons ?? Math.round((pct / 100) * track.lessonsCount);
-                        const accent = getTechColor(track.slug);
-
-                        return (
-                          <Link
-                            key={track.id}
-                            href={`/learn/${track.slug}`}
-                            className="group block min-w-[18.5rem] sm:min-w-0"
-                          >
-                            <div className="rounded-2xl border border-white/10 bg-zinc-900/35 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-400/35 hover:shadow-lg hover:shadow-violet-500/10">
-                              <div className="mb-3 flex items-center gap-3">
-                                <div
-                                  className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-zinc-900"
-                                  style={{
-                                    boxShadow: `0 0 16px 0 ${accent}30`,
-                                  }}
-                                >
-                                  <TechIcon slug={track.slug} size={22} />
+                ) : (
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {continueTracks.slice(0, 4).map((track, idx) => {
+                      const pct = progressByCourse.get(track.id) ?? progressByCourse.get(track.slug) ?? 0;
+                      const enrollment = enrollments.find(e => e.courseId === track.id || e.courseSlug === track.slug);
+                      const lessonsDone = enrollment?.completedLessons ?? Math.round((pct / 100) * track.lessonsCount);
+                      
+                      return (
+                        <Link key={track.id} href={`/learn/${track.slug}`} className="group block">
+                          <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 p-5 transition-all duration-300 hover:border-violet-500/50 hover:bg-black/60 hover:shadow-lg hover:shadow-violet-500/10">
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="flex items-center gap-3">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-900 border border-white/10 group-hover:border-violet-500/30 transition-colors">
+                                  <TechIcon slug={track.slug} size={24} />
                                 </div>
-                                <div className="min-w-0 flex-1">
-                                  <p className="truncate text-sm font-semibold">
-                                    {track.title}
-                                  </p>
-                                  <p className="text-xs text-zinc-500">
-                                    {lessonsDone}/{track.lessonsCount} lessons
+                                <div>
+                                  <h3 className="font-semibold text-white line-clamp-1">{track.title}</h3>
+                                  <p className="text-xs text-zinc-400 mt-1 flex items-center gap-1.5">
+                                    <Clock className="h-3 w-3" /> {track.duration}
                                   </p>
                                 </div>
-                                <div className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-zinc-300 transition-all group-hover:border-violet-400/40 group-hover:bg-violet-500/20 group-hover:text-violet-200">
-                                  <Play className="h-3.5 w-3.5 translate-x-px" />
-                                </div>
                               </div>
-
-                              <ProgressBar
-                                value={pct}
-                                color={idx % 2 === 0 ? "violet" : "cyan"}
-                                size="sm"
-                              />
-                              <div className="mt-1 flex items-center justify-between text-xs text-zinc-500">
-                                <span className="inline-flex items-center gap-1">
-                                  <Clock className="h-3 w-3" />
-                                  {track.duration}
-                                </span>
-                                <span>{pct}% complete</span>
+                              <div className="h-8 w-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 group-hover:bg-violet-500 group-hover:text-white transition-all">
+                                <Play className="h-4 w-4 translate-x-0.5" />
                               </div>
                             </div>
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  )}
-                </section>
-
-                <section className="rounded-3xl border border-white/10 bg-white/4 p-5 sm:p-6">
-                  <div className="mb-4 flex items-center justify-between">
-                    <h2 className="inline-flex items-center gap-2 text-lg font-semibold">
-                      <Target className="h-4.5 w-4.5 text-cyan-300" /> Daily
-                      Goals
-                    </h2>
-                    <QuestRing
-                      completed={dailyQuest.completed}
-                      total={dailyQuest.total}
-                    />
-                  </div>
-
-                  <div className="space-y-2.5">
-                    {questsLoading ? (
-                      // Loading state
-                      Array.from({ length: 3 }).map((_, i) => (
-                        <div
-                          key={i}
-                          className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-zinc-900/35 px-3 py-2.5"
-                        >
-                          <div className="flex items-center gap-2">
-                            <div className="h-4.5 w-4.5 rounded-full bg-zinc-600 animate-pulse" />
-                            <div className="h-4 w-32 bg-zinc-600 rounded animate-pulse" />
-                          </div>
-                          <div className="h-6 w-16 bg-zinc-600 rounded animate-pulse" />
-                        </div>
-                      ))
-                    ) : questData?.quests && questData.quests.length > 0 ? (
-                      questData.quests.map((quest) => (
-                        <div
-                          key={quest.id}
-                          className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-zinc-900/35 px-3 py-2.5"
-                        >
-                          <span className="flex items-center gap-2 text-sm">
-                            {quest.completed ? (
-                              <CheckCircle2 className="h-4.5 w-4.5 text-emerald-400" />
-                            ) : (
-                              <span className="inline-block h-4.5 w-4.5 rounded-full border border-zinc-600" />
-                            )}
-                            <span
-                              className={
-                                quest.completed
-                                  ? "text-zinc-300 line-through"
-                                  : "text-zinc-100"
-                              }
-                            >
-                              {quest.label}
-                            </span>
-                          </span>
-                          <span className="rounded-full border border-violet-500/25 bg-violet-500/12 px-2 py-0.5 text-xs font-semibold text-violet-300">
-                            +{quest.xp} XP
-                          </span>
-                        </div>
-                      ))
-                    ) : (
-                      // No quest data available
-                      <div className="text-center text-zinc-400 text-sm py-4">
-                        No daily quests available
-                      </div>
-                    )}
-                  </div>
-                </section>
-
-                <section className="rounded-3xl border border-white/10 bg-white/4 p-5 sm:p-6">
-                  <div className="mb-4 flex items-center justify-between">
-                    <h2 className="inline-flex items-center gap-2 text-lg font-semibold">
-                      <TrendingUp className="h-4.5 w-4.5 text-cyan-300" />{" "}
-                      Recommended Courses
-                    </h2>
-                    <Link
-                      href="/learn"
-                      className="text-xs text-zinc-400 hover:text-violet-300"
-                    >
-                      See all
-                    </Link>
-                  </div>
-
-                  <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-1">
-                    {recommendedTracks.length === 0 ? (
-                      <div className="w-full rounded-2xl border border-dashed border-white/15 bg-zinc-900/30 p-5 text-sm text-zinc-500">
-                        Recommendations will appear after exploring a few
-                        tracks.
-                      </div>
-                    ) : (
-                      recommendedTracks.map((track) => (
-                        <Link
-                          key={track.id}
-                          href={`/learn/${track.slug}`}
-                          className="block min-w-[15.5rem]"
-                        >
-                          <div className="rounded-2xl border border-white/10 bg-zinc-900/35 p-3.5 transition hover:border-white/20">
-                            <div className="mb-2 flex items-center gap-2">
-                              <TechIcon slug={track.slug} size={18} />
-                              <p className="truncate text-sm font-medium">
-                                {track.title}
-                              </p>
-                            </div>
-                            <div className="mb-2 flex items-center gap-1.5 text-[11px]">
-                              <span
-                                className={cn(
-                                  "rounded-full px-2 py-0.5",
-                                  track.difficulty === "Beginner"
-                                    ? "bg-emerald-500/15 text-emerald-300"
-                                    : track.difficulty === "Advanced"
-                                      ? "bg-amber-500/15 text-amber-300"
-                                      : "bg-cyan-500/15 text-cyan-300",
-                                )}
-                              >
-                                {track.difficulty}
-                              </span>
-                              <span className="text-zinc-500">
-                                {track.duration}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1 text-xs text-amber-300">
-                              <Star className="h-3.5 w-3.5 fill-current" />{" "}
-                              {track.rating || 4.8}
+                            
+                            <div>
+                              <div className="flex justify-between text-xs mb-2">
+                                <span className="text-zinc-400">{lessonsDone} / {track.lessonsCount} lessons</span>
+                                <span className="font-medium text-violet-300">{pct}%</span>
+                              </div>
+                              <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                                <div 
+                                  className="h-full bg-linear-to-r from-violet-500 to-cyan-400 rounded-full transition-all duration-1000 ease-out" 
+                                  style={{ width: `${pct}%` }} 
+                                />
+                              </div>
                             </div>
                           </div>
                         </Link>
-                      ))
-                    )}
+                      );
+                    })}
                   </div>
-                </section>
-              </div>
+                )}
+              </section>
 
-              <div className="space-y-6">
-                <section className="rounded-3xl border border-violet-500/20 bg-linear-to-br from-violet-900/20 to-cyan-900/10 p-5">
-                  <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-300">
-                    XP and Level
-                  </h3>
-                  <div className="mb-3 flex items-end gap-2">
-                    <span className="text-3xl font-bold tabular-nums text-white">
-                      {formatNumber(user.xp)}
-                    </span>
-                    <span className="mb-1 text-sm text-zinc-400">
-                      / {formatNumber(xpToNext)} XP
-                    </span>
-                  </div>
-                  <ProgressBar
-                    value={user.xp}
-                    max={xpToNext}
-                    color="violet"
-                    size="md"
-                  />
-                  <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
-                    <div className="rounded-xl border border-white/10 bg-black/20 px-2 py-1.5">
-                      <p className="text-zinc-500">Today</p>
-                      <p className="font-semibold text-cyan-300">+{realXpToday}</p>
-                    </div>
-                    <div className="rounded-xl border border-white/10 bg-black/20 px-2 py-1.5">
-                      <p className="text-zinc-500">Week</p>
-                      <p className="font-semibold text-violet-300">+{realXpThisWeek}</p>
-                    </div>
-                    <div className="rounded-xl border border-white/10 bg-black/20 px-2 py-1.5">
-                      <p className="text-zinc-500">To next</p>
-                      <p className="font-semibold text-amber-300">
-                        {Math.max(0, xpToNext - user.xp)}
-                      </p>
-                    </div>
-                  </div>
-                </section>
-
-                <section className="rounded-3xl border border-white/10 bg-white/4 p-5">
-                  <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-300">
-                    Weekly Activity
-                  </h3>
-                  <div className="grid grid-cols-7 gap-1.5">
+              {/* Activity Heatmap & Recent Activity */}
+              <section className="grid sm:grid-cols-2 gap-4">
+                {/* Heatmap */}
+                <div className="rounded-2xl border border-white/10 bg-black/20 p-6">
+                  <h2 className="text-sm font-semibold text-white uppercase tracking-wider mb-6 flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4 text-emerald-400" /> Activity Heatmap
+                  </h2>
+                  <div className="flex justify-between items-end gap-2 h-32 mb-4">
                     {WEEK_DAYS.map((day, i) => {
                       const intensity = heatmapValues[i];
-                      const blockClass =
-                        intensity >= 6
-                          ? "bg-violet-500"
-                          : intensity >= 4
-                            ? "bg-violet-500/75"
-                            : intensity >= 2
-                              ? "bg-violet-500/45"
-                              : intensity > 0
-                                ? "bg-violet-500/25"
-                                : "bg-white/6";
-
+                      const heightMap = ['h-2', 'h-8', 'h-16', 'h-24', 'h-32'];
+                      const colorMap = [
+                        'bg-white/5', 
+                        'bg-emerald-500/20 hover:bg-emerald-500/30', 
+                        'bg-emerald-500/50 hover:bg-emerald-500/60', 
+                        'bg-emerald-500/80 hover:bg-emerald-500/90', 
+                        'bg-emerald-400 hover:bg-emerald-300'
+                      ];
+                      
                       return (
-                        <div key={day} className="text-center">
-                          <div
-                            className={cn(
-                              "h-8 rounded-lg transition hover:scale-105",
-                              blockClass,
-                            )}
-                          />
-                          <p className="mt-1 text-[10px] text-zinc-500">
-                            {day}
-                          </p>
+                        <div key={day} className="flex flex-col items-center flex-1 group">
+                          <div className="w-full px-1 mb-2 relative flex justify-center">
+                            {/* Tooltip */}
+                            <div className="absolute -top-8 bg-black border border-white/10 text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                              {intensity === 0 ? 'No activity' : 'Active'}
+                            </div>
+                            <div className={cn(
+                              "w-full rounded-t-sm transition-all duration-300 ease-out", 
+                              heightMap[intensity], 
+                              colorMap[intensity]
+                            )} />
+                          </div>
+                          <span className="text-[10px] text-zinc-500 font-medium uppercase">{day}</span>
                         </div>
                       );
                     })}
                   </div>
-                  <p className="mt-3 text-xs text-zinc-500">
-                    Today: {minutesToday} mins learned
-                  </p>
-                </section>
-
-                <section className="rounded-3xl border border-white/10 bg-white/4 p-5">
-                  <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-300">
-                    Achievements
-                  </h3>
-
-                  <div className="mb-3 space-y-2">
-                    {recentBadges.length === 0 ? (
-                      <p className="text-xs text-zinc-500">
-                        No badges yet. Complete quests to unlock your first one.
-                      </p>
-                    ) : (
-                      recentBadges.map((badge) => {
-                        const Icon = badge.icon;
-                        return (
-                          <div
-                            key={badge.id}
-                            className="flex items-center gap-2 rounded-xl border border-white/10 bg-zinc-900/35 px-2.5 py-2"
-                          >
-                            <div
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg"
-                              style={{
-                                background: `${badge.color}22`,
-                                boxShadow: `0 0 20px 0 ${badge.color}2f`,
-                              }}
-                            >
-                              <Icon
-                                className="h-4 w-4"
-                                style={{ color: badge.color }}
-                              />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="truncate text-xs font-semibold text-zinc-100">
-                                {badge.title}
-                              </p>
-                              <p className="text-[11px] text-zinc-500">
-                                +{badge.xpReward} XP
-                              </p>
-                            </div>
-                          </div>
-                        );
-                      })
-                    )}
+                  <div className="flex items-center justify-between mt-6 pt-4 border-t border-white/5">
+                    <p className="text-xs text-zinc-400">Current Week</p>
+                    <p className="text-sm font-medium text-emerald-400">+{realXpThisWeek} XP gained</p>
                   </div>
+                </div>
 
-                  <div className="grid grid-cols-4 gap-2">
-                    {lockedBadges.map((badge) => {
+                {/* Level Progress */}
+                <div className="rounded-2xl border border-white/10 bg-black/20 p-6 flex flex-col justify-between">
+                  <div>
+                    <h2 className="text-sm font-semibold text-white uppercase tracking-wider mb-6 flex items-center gap-2">
+                      <Medal className="h-4 w-4 text-amber-400" /> Level Progress
+                    </h2>
+                    <div className="flex items-center justify-center mb-6">
+                      <div className="relative h-24 w-24 flex items-center justify-center rounded-full bg-linear-to-b from-amber-500/20 to-transparent border border-amber-500/30">
+                        <span className="text-3xl font-black text-amber-400">{profile.level}</span>
+                        <div className="absolute -bottom-2 px-2 py-0.5 rounded-full bg-amber-500 text-black text-[10px] font-bold uppercase tracking-wider">
+                          Level
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div className="flex justify-between text-xs mb-2">
+                      <span className="text-zinc-400">XP Progress</span>
+                      <span className="font-medium text-white">{formatNumber(user.xp)} / {formatNumber(xpToNext)} XP</span>
+                    </div>
+                    <ProgressBar value={user.xp} max={xpToNext} color="amber" size="md" />
+                    <p className="text-xs text-center text-zinc-500 mt-4">
+                      Earn <strong className="text-zinc-300">{Math.max(0, xpToNext - user.xp)} XP</strong> more to reach Level {profile.level + 1}
+                    </p>
+                  </div>
+                </div>
+              </section>
+
+            </div>
+
+            {/* Right Column (Sidebar-ish) */}
+            <div className="space-y-6">
+              
+              {/* Daily Quests */}
+              <div className="rounded-2xl border border-white/10 bg-zinc-900/50 p-6">
+                <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <Target className="h-4 w-4 text-violet-400" /> Today's Quests
+                </h3>
+                
+                <div className="space-y-3">
+                  {questsLoading ? (
+                    [1, 2, 3].map(i => (
+                      <div key={i} className="h-12 bg-white/5 rounded-xl border border-white/5 animate-pulse" />
+                    ))
+                  ) : questData?.quests && questData.quests.length > 0 ? (
+                    questData.quests.map((quest) => (
+                      <div key={quest.id} className="flex items-center justify-between p-3 rounded-xl bg-black/40 border border-white/5 hover:border-white/10 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className={cn(
+                            "h-5 w-5 rounded-full flex items-center justify-center border",
+                            quest.completed ? "bg-emerald-500/20 border-emerald-500 text-emerald-400" : "border-zinc-600"
+                          )}>
+                            {quest.completed && <CheckCircle2 className="h-3.5 w-3.5" />}
+                          </div>
+                          <span className={cn("text-sm", quest.completed ? "text-zinc-400 line-through" : "text-zinc-200")}>
+                            {quest.label}
+                          </span>
+                        </div>
+                        <span className="text-xs font-bold text-violet-400 bg-violet-500/10 px-2 py-1 rounded-md">
+                          +{quest.xp}
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-zinc-500 text-center py-4">No quests available today.</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Leaderboard Snippet */}
+              <div className="rounded-2xl border border-white/10 bg-zinc-900/50 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-semibold text-white uppercase tracking-wider flex items-center gap-2">
+                    <Radar className="h-4 w-4 text-cyan-400" /> Leaderboard
+                  </h3>
+                  <Link href="/community" className="text-xs text-violet-400 hover:text-violet-300">Full Ranking</Link>
+                </div>
+                
+                <div className="space-y-2">
+                  {leaderboardLoading ? (
+                    [1, 2, 3, 4, 5].map(i => (
+                      <div key={i} className="h-10 bg-white/5 rounded-lg animate-pulse" />
+                    ))
+                  ) : leaderboard.length === 0 ? (
+                    <p className="text-sm text-zinc-500 text-center py-4">No rankings yet.</p>
+                  ) : (
+                    leaderboard.slice(0, 5).map((entry, idx) => (
+                      <div key={entry.rank} className="flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <span className={cn(
+                            "w-5 text-center text-xs font-bold",
+                            idx === 0 ? "text-amber-400" : idx === 1 ? "text-zinc-300" : idx === 2 ? "text-amber-600" : "text-zinc-600"
+                          )}>
+                            {entry.rank}
+                          </span>
+                          <Avatar size="sm" initials={entry.name.slice(0, 2).toUpperCase()} className="h-6 w-6 text-[10px]" />
+                          <span className={cn("text-sm font-medium", entry.name === profile.name ? "text-violet-400" : "text-zinc-200")}>
+                            {entry.name}
+                          </span>
+                        </div>
+                        <span className="text-xs font-semibold text-zinc-400">{formatNumber(entry.xp)} XP</span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* Achievements */}
+              <div className="rounded-2xl border border-white/10 bg-zinc-900/50 p-6">
+                <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <Award className="h-4 w-4 text-pink-400" /> Recent Badges
+                </h3>
+                
+                <div className="grid grid-cols-3 gap-3">
+                  {recentBadges.length > 0 ? (
+                    recentBadges.map((badge) => {
                       const Icon = badge.icon;
                       return (
-                        <div
-                          key={badge.id}
-                          className="flex flex-col items-center rounded-xl border border-white/8 bg-zinc-900/20 px-2 py-2.5 opacity-50"
-                        >
-                          <Icon className="h-4 w-4 text-zinc-500" />
-                          <p className="mt-1 text-center text-[10px] text-zinc-500">
+                        <div key={badge.id} className="flex flex-col items-center gap-2 p-3 rounded-xl bg-black/40 border border-white/5 hover:bg-white/5 transition-colors group cursor-pointer relative">
+                          <div className="absolute inset-0 rounded-xl bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                          <div className="h-10 w-10 rounded-full flex items-center justify-center relative" style={{ backgroundColor: `${badge.color}20` }}>
+                            <div className="absolute inset-0 rounded-full blur-sm" style={{ backgroundColor: `${badge.color}40` }} />
+                            <Icon className="h-5 w-5 relative z-10" style={{ color: badge.color }} />
+                          </div>
+                          <span className="text-[10px] text-center font-medium text-zinc-300 leading-tight">
                             {badge.title}
-                          </p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </section>
-
-                <section className="rounded-3xl border border-white/10 bg-white/4 p-5">
-                  <h3 className="mb-3 inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-zinc-300">
-                    <Radar className="h-4 w-4 text-cyan-300" /> Leaderboard
-                  </h3>
-                  <div className="space-y-2">
-                    {leaderboardLoading ? (
-                      <>
-                        {[1, 2, 3, 4].map((i) => (
-                          <div
-                            key={i}
-                            className="h-10 animate-pulse rounded-xl border border-white/8 bg-white/5"
-                          />
-                        ))}
-                      </>
-                    ) : leaderboard.length === 0 ? (
-                      <p className="text-xs text-zinc-500 text-center py-4">
-                        No leaderboard data available yet.
-                      </p>
-                    ) : (
-                      leaderboard.map((entry) => (
-                        <div
-                          key={entry.rank}
-                          className="flex items-center justify-between rounded-xl border border-white/8 bg-zinc-900/30 px-3 py-2 text-sm"
-                        >
-                          <span
-                            className={cn(
-                              "font-medium",
-                              entry.name === profile.name
-                                ? "text-violet-300"
-                                : "text-zinc-300",
-                            )}
-                          >
-                            #{entry.rank} {entry.name}
-                          </span>
-                          <span className="text-xs text-zinc-500">
-                            {formatNumber(entry.xp)} XP
                           </span>
                         </div>
-                      ))
-                    )}
-                  </div>
-                </section>
+                      )
+                    })
+                  ) : (
+                    <div className="col-span-3 text-center py-4">
+                      <p className="text-sm text-zinc-500">No badges earned yet.</p>
+                    </div>
+                  )}
+                </div>
               </div>
+
             </div>
           </div>
         </div>

@@ -14,6 +14,8 @@ import { Navbar } from "./Navbar";
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() ?? "";
   const isAdmin = pathname.startsWith("/admin");
+  const isDashboard = pathname.startsWith("/dashboard");
+  const hideNavAndFooter = isAdmin || isDashboard;
   // Hide footer on auth pages (login / register)
   const hideFooterOnAuth = pathname.startsWith("/login") || pathname.startsWith("/register");
 
@@ -24,9 +26,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      {!isAdmin && <Navbar />}
+      {!hideNavAndFooter && <Navbar />}
       <div id="main-content">{children}</div>
-      {!isAdmin && !hideFooterOnAuth && <Footer />}
+      {!hideNavAndFooter && !hideFooterOnAuth && <Footer />}
     </>
   );
 }
