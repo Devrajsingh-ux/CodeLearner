@@ -3,7 +3,8 @@ import { createClient, type RedisClientType } from "redis";
 const MAX_ATTEMPTS = 6;
 const WINDOW_SECONDS = 15 * 60;
 const LOCKOUT_SECONDS = 15 * 60;
-const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
+const REDIS_URL = process.env.REDIS_URL;
+const RATE_LIMIT_ENABLED = process.env.RATE_LIMIT_ENABLED !== "false";
 
 type AttemptState = {
   count: number;
@@ -17,12 +18,19 @@ let redisAttempts = 0;
 const localStore = new Map<string, AttemptState>();
 
 async function getRedis(): Promise<RedisClientType | null> {
+  if (!RATE_LIMIT_ENABLED || !REDIS_URL) return null;
   if (redisReady && redis) return redis;
   if (redisAttempts >= 2) return null;
 
   redisAttempts += 1;
   try {
-    redis = createClient({ url: REDIS_URL }) as RedisClientType;
+    redis = createClient({
+      url: REDIS_URL,
+      socket: {
+        connectTimeout: 500,
+        reconnectStrategy: () => new Error("redis reconnect disabled"),
+      },
+    }) as RedisClientType;
     redis.on("error", () => {
       redisReady = false;
     });

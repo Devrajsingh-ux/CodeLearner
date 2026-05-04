@@ -68,7 +68,7 @@ function PasswordStrength({ password }: { password: string }) {
 }
 
 export function RegisterForm() {
-  const { register } = useAuth();
+  const { register, reloadUser } = useAuth();
   const router = useRouter();
 
   const [name, setName] = useState("");
@@ -100,7 +100,12 @@ export function RegisterForm() {
       setError("");
       setVerificationSent(true);
     } else {
-      router.push("/dashboard");
+      const refreshed = await reloadUser();
+      if (!refreshed) {
+        setError("Account created but session could not be loaded.");
+        return;
+      }
+      router.replace("/dashboard");
     }
   }
 

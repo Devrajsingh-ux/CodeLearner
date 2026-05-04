@@ -46,7 +46,7 @@ function GoogleIcon() {
 }
 
 export function LoginForm() {
-  const { login, user } = useAuth();
+  const { login, reloadUser } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect");
@@ -73,10 +73,15 @@ export function LoginForm() {
     if (result.error) {
       setError(result.error);
     } else {
+      const refreshed = await reloadUser();
+      if (!refreshed) {
+        setError("Login succeeded but session could not be loaded.");
+        return;
+      }
       // After login, user state updates asynchronously.
       // Redirect to explicit ?redirect param, otherwise always go to /dashboard.
       // The dashboard handles further role-based routing (admin → /admin/dashboard).
-      router.push(redirectTo ?? "/dashboard");
+      router.replace(redirectTo ?? "/dashboard");
     }
   }
 

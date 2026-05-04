@@ -32,6 +32,11 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+const appwriteConfigured = Boolean(
+  process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT &&
+    process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID,
+);
+
 // ─── Map Appwrite account → AuthUser ─────────────────────────────────────────
 
 function mapAuthUser(
@@ -65,7 +70,10 @@ function mapAuthUser(
 
 async function fetchSession(): Promise<AuthUser | null> {
   try {
-    const res = await fetch("/api/auth/session", { credentials: "same-origin" });
+    const res = await fetch("/api/auth/session", {
+      credentials: "same-origin",
+      cache: "no-store",
+    });
     const data = await res.json();
     return data?.user ?? null;
   } catch {
@@ -78,6 +86,7 @@ async function saveSession(u: AuthUser): Promise<void> {
     await fetch("/api/auth/session", {
       method: "POST",
       credentials: "same-origin",
+      cache: "no-store",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ user: u }),
     });
@@ -89,6 +98,7 @@ async function clearSession(): Promise<void> {
     await fetch("/api/auth/session", {
       method: "DELETE",
       credentials: "same-origin",
+      cache: "no-store",
     });
   } catch {}
 }
@@ -98,27 +108,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+
     // Restore session from HttpOnly cookie (no localStorage)
     (async () => {
+      let cached: AuthUser | null = null;
       try {
         // Try cookie session first (fast, no Appwrite round-trip)
-        const cached = await fetchSession();
-        if (cached) setUser(cached);
+        cached = await fetchSession();
+        if (cached && !cancelled) setUser(cached);
+
+        // Skip Appwrite verification if client config is missing
+        if (!appwriteConfigured) return;
 
         // Verify with Appwrite and refresh (read prefs.role too)
         const acct = await account.get();
         const prefs = (acct as any).prefs ?? {};
         const mapped = mapAuthUser(acct, prefs);
-        setUser(mapped);
+        if (!cancelled) setUser(mapped);
         await saveSession(mapped);
       } catch {
-        // No active Appwrite session — clear stale cookie
-        await clearSession();
-        setUser(null);
+        // If we had no cached session, clear any stale cookie
+        if (!cached) {
+          await clearSession();
+          if (!cancelled) setUser(null);
+        }
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const persist = useCallback(async (u: AuthUser | null) => {
@@ -129,6 +151,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(
     async (email: string, password: string) => {
+      if (!appwriteConfigured) {
+        return {
+          error:
+            "Auth service is not configured. Set NEXT_PUBLIC_APPWRITE_ENDPOINT and NEXT_PUBLIC_APPWRITE_PROJECT_ID.",
+        };
+      }
       // ── Rate limit / lockout check ──────────────────────────────────────
       const rl = checkRateLimit(email);
       if (rl.blocked) return { error: rl.message ?? "Account temporarily locked." };
@@ -146,6 +174,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const mapped = mapAuthUser(acct, prefs);
         clearAttempts(email); // success — reset counter
         await persist(mapped);
+        const cookieUser = await fetchSession();
+        if (!cookieUser) {
+          await persist(null);
+          return { error: "Login succeeded but session cookie was not saved." };
+        }
         return {};
       } catch (err: any) {
         const result = recordFailedAttempt(email);
@@ -162,6 +195,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = useCallback(
     async (name: string, email: string, password: string) => {
+      if (!appwriteConfigured) {
+        return {
+          error:
+            "Auth service is not configured. Set NEXT_PUBLIC_APPWRITE_ENDPOINT and NEXT_PUBLIC_APPWRITE_PROJECT_ID.",
+        };
+      }
       if (!name.trim() || name.trim().length < 2)
         return { error: "Name must be at least 2 characters." };
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
@@ -236,6 +275,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             streak: 0,
           };
           await persist(mapped);
+          const cookieUser = await fetchSession();
+          if (!cookieUser) {
+            await persist(null);
+            return { error: "Account created but session cookie was not saved." };
+          }
           return { needsVerification: true };
         }
 
@@ -245,6 +289,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const mapped = mapAuthUser(acct, prefs, { name, email, role: "student", username: derivedUsername });
         clearAttempts(email);
         await persist(mapped);
+        const cookieUser = await fetchSession();
+        if (!cookieUser) {
+          await persist(null);
+          return { error: "Account created but session cookie was not saved." };
+        }
         return {};
       } catch (err: any) {
         const msg = err?.message || "Registration failed";
@@ -256,6 +305,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const reloadUser = useCallback(async (): Promise<AuthUser | null> => {
     try {
+      if (!appwriteConfigured) {
+        const cached = await fetchSession();
+        setUser(cached);
+        return cached;
+      }
       const acct = await account.get();
       const prefs = (acct as any).prefs ?? {};
       const mapped = mapAuthUser(acct, prefs);

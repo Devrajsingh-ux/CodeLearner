@@ -111,14 +111,18 @@ export function Navbar() {
     setNotificationsLoading(true);
     try {
       const res = await fetch("/api/notifications", { credentials: "same-origin" });
+      if (res.status === 401) {
+        setNotifications([]);
+        return;
+      }
       if (res.ok) {
         const data = await res.json();
         setNotifications(Array.isArray(data.notifications) ? data.notifications : []);
       } else {
-        console.error("Failed to load notifications", await res.text());
+        console.warn("Failed to load notifications", await res.text());
       }
     } catch (err) {
-      console.error("Failed to fetch notifications", err);
+      console.warn("Failed to fetch notifications", err);
     } finally {
       setNotificationsLoading(false);
     }
