@@ -171,7 +171,7 @@ export function LessonClient({
         // Navigate to next lesson after showing success
         if (nextSlug) {
           setTimeout(() => {
-            window.location.href = `/learn/${trackSlug}/${nextSlug}`;
+            window.location.href = `/screens/learn/${trackSlug}/${nextSlug}`;
           }, 500);
         }
       } else {
@@ -196,7 +196,7 @@ export function LessonClient({
         {/* Left: back + breadcrumb */}
         <div className="flex items-center gap-2 min-w-0">
           <Link
-            href={`/learn/${trackSlug}`}
+            href={`/screens/learn/${trackSlug}`}
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-white/8 hover:text-white"
             aria-label="Back to course"
           >
@@ -221,7 +221,7 @@ export function LessonClient({
         <div className="flex shrink-0 items-center gap-1.5">
           {prevSlug && (
             <Link
-              href={`/learn/${trackSlug}/${prevSlug}`}
+              href={`/screens/learn/${trackSlug}/${prevSlug}`}
               className="flex h-8 items-center gap-1 rounded-lg border border-white/8 px-2.5 text-xs text-zinc-400 transition-colors hover:text-white"
             >
               <ArrowLeft className="h-3.5 w-3.5" /> Prev
@@ -229,7 +229,7 @@ export function LessonClient({
           )}
           {nextSlug && (
             <Link
-              href={`/learn/${trackSlug}/${nextSlug}`}
+              href={`/screens/learn/${trackSlug}/${nextSlug}`}
               className="flex h-8 items-center gap-1 rounded-lg bg-linear-to-r from-violet-600 to-indigo-600 px-2.5 text-xs font-medium text-white shadow-sm shadow-violet-500/30 transition-all hover:from-violet-500 hover:to-indigo-500"
             >
               Next <ArrowRight className="h-3.5 w-3.5" />
@@ -330,7 +330,7 @@ export function LessonClient({
 
                 {nextSlug && !completed && (
                   <Link
-                    href={`/learn/${trackSlug}/${nextSlug}`}
+                    href={`/screens/learn/${trackSlug}/${nextSlug}`}
                     className="flex items-center gap-2 rounded-xl border border-white/8 bg-white/4 px-5 py-2.5 text-sm text-zinc-300 transition-colors hover:bg-white/8"
                   >
                     Next Lesson <ArrowRight className="h-4 w-4" />
@@ -380,7 +380,7 @@ export function LessonClient({
                               href={
                                 sl.isLocked
                                   ? "#"
-                                  : `/learn/${trackSlug}/${sl.slug}`
+                                  : `/screens/learn/${trackSlug}/${sl.slug}`
                               }
                               className={cn(
                                 "flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs transition-all",

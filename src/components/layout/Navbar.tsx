@@ -31,8 +31,8 @@ import { CATEGORIES } from "@/data/courses";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
-  { href: "/learn", label: "Courses" },
-  { href: "/problems", label: "Problems" },
+  { href: "/screens/learn", label: "Courses" },
+  { href: "/screens/problems", label: "Problems" },
   { href: "/#features", label: "Features" },
   { href: "/#testimonials", label: "Reviews" },
 ] as const;
@@ -297,7 +297,7 @@ export function Navbar() {
   function runSearch(value: string) {
     const normalized = value.trim();
     if (!normalized) {
-      router.push("/learn");
+      router.push("/screens/learn");
       return;
     }
 
@@ -310,7 +310,7 @@ export function Navbar() {
       ].slice(0, 5),
     );
 
-    router.push(`/learn?q=${encodeURIComponent(normalized)}`);
+    router.push(`/screens/learn?q=${encodeURIComponent(normalized)}`);
     setSearchOpen(false);
   }
 
@@ -430,7 +430,7 @@ export function Navbar() {
                       Browse Categories
                     </p>
                     <Link
-                      href="/learn"
+                      href="/screens/learn"
                       className="text-xs font-semibold text-cyan-300 hover:text-cyan-200"
                       onClick={() => setCoursesMenuOpen(false)}
                     >
@@ -441,7 +441,7 @@ export function Navbar() {
                     {CATEGORIES.map((category) => (
                       <Link
                         key={category}
-                        href={`/learn?category=${encodeURIComponent(category)}`}
+                        href={`/screens/learn?category=${encodeURIComponent(category)}`}
                         className="rounded-xl border border-white/6 bg-white/3 px-3 py-2 text-sm font-medium text-zinc-200 transition hover:border-violet-400/50 hover:bg-violet-500/10"
                         onClick={() => setCoursesMenuOpen(false)}
                       >
@@ -741,12 +741,12 @@ export function Navbar() {
 
                       {[
                         {
-                          href: "/dashboard",
+                          href: "/screens/dashboard",
                           icon: LayoutDashboard,
                           label: "Dashboard",
                         },
                         {
-                          href: "/learn",
+                          href: "/screens/learn",
                           icon: GraduationCap,
                           label: "My Courses",
                         },
@@ -951,13 +951,13 @@ export function Navbar() {
                   </div>
 
                   <Link
-                    href="/dashboard"
+                    href="/screens/dashboard"
                     className="flex min-h-11 items-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm font-semibold text-zinc-200"
                   >
                     <Gauge className="h-4 w-4 text-violet-300" /> Dashboard
                   </Link>
                   <Link
-                    href="/learn"
+                    href="/screens/learn"
                     className="flex min-h-11 items-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm font-semibold text-zinc-200"
                   >
                     <BookOpen className="h-4 w-4 text-cyan-300" /> My Courses

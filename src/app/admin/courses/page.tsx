@@ -267,7 +267,7 @@ function AddCourseModal({
                 className={cn(inputCls, errors.slug && "border-red-500")}
               />
               <p className="text-[11px] text-zinc-600">
-                URL: /learn/<span className="text-zinc-400">{form.slug || "\u2026"}</span>
+                URL: /screens/learn/<span className="text-zinc-400">{form.slug || "\u2026"}</span>
               </p>
             </Field>
 

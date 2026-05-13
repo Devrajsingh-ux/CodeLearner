@@ -27,7 +27,7 @@ export function CourseCard({ track, index = 0 }: CourseCardProps) {
       className="group relative h-full w-full outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 block"
     >
       <Link
-        href={`/learn/${track.slug}`}
+        href={`/screens/learn/${track.slug}`}
         className="relative flex h-full flex-col overflow-hidden rounded-[24px] border border-white/10 bg-zinc-900/40 shadow-2xl backdrop-blur-xl transition-all duration-500 hover:-translate-y-2 hover:bg-zinc-800/60 hover:border-white/20 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] z-10"
       >
         {/* Top Gradient Banner */}

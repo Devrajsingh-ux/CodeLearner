@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 
 function getCspDirectives(pathname?: string): string[] {
   const isCodeEditorRoute =
-    pathname?.startsWith("/learn") ||
-    pathname?.startsWith("/problems") ||
+    pathname?.startsWith("/screens/learn") ||
+    pathname?.startsWith("/screens/problems") ||
     pathname?.startsWith("/api/compile");
   const isAdminRoute = pathname?.startsWith("/admin") || pathname?.startsWith("/api/admin");
   const isDevelopment = process.env.NODE_ENV !== "production";

@@ -120,7 +120,7 @@ export default async function TrackPage({ params }: Props) {
       <section className="relative pt-24 pb-16 border-b border-white/6">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <Link
-            href="/learn"
+            href="/screens/learn"
             className="mb-8 inline-flex items-center gap-1.5 text-sm text-zinc-500 transition-colors hover:text-white"
           >
             <ArrowLeft className="h-4 w-4" /> All courses
@@ -342,7 +342,7 @@ export default async function TrackPage({ params }: Props) {
                             <Lock className="h-4 w-4 text-zinc-700" />
                           ) : (
                             <Link
-                              href={`/learn/${slug}/${lesson.slug}`}
+                              href={`/screens/learn/${slug}/${lesson.slug}`}
                               className="flex items-center gap-1 rounded-lg border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-xs font-medium text-violet-400 transition-all hover:bg-violet-500/20"
                             >
                               {isFirst ? "Start" : "Open"}

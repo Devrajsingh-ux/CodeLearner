@@ -91,7 +91,7 @@ export function CoursesSection() {
               </span>
             </h2>
           </div>
-          <Link href="/learn" className="shrink-0">
+          <Link href="/screens/learn" className="shrink-0">
             <Button
               variant="outline"
               size="sm"
@@ -204,7 +204,7 @@ export function CoursesSection() {
             <p className="text-sm text-zinc-500">
               Showing {visible.length} of {allTracks.length} available courses
             </p>
-            <Link href="/learn">
+            <Link href="/screens/learn">
               <Button size="lg" rightIcon={<ArrowRight className="h-5 w-5" />}>
                 Explore all {allTracks.length} courses
               </Button>

@@ -318,7 +318,7 @@ export default async function AboutPage() {
               Get started for free
             </a>
             <a
-              href="/learn"
+              href="/screens/learn"
               className="inline-flex h-12 items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-7 text-sm font-semibold text-white transition-all hover:bg-white/10"
             >
               <Code2 className="h-4 w-4" />

@@ -64,7 +64,7 @@ export function CTA() {
                     Create free account
                   </Button>
                 </Link>
-                <Link href="/learn" className="w-full sm:w-auto">
+                <Link href="/screens/learn" className="w-full sm:w-auto">
                   <Button
                     variant="secondary"
                     size="lg"

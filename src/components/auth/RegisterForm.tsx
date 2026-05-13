@@ -105,7 +105,7 @@ export function RegisterForm() {
         setError("Account created but session could not be loaded.");
         return;
       }
-      router.replace("/dashboard");
+      router.replace("/screens/dashboard");
     }
   }
 

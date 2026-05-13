@@ -497,7 +497,7 @@ export default function ProfilePage() {
                   <Copy className="h-4 w-4" /> Share Profile
                 </button>
                 <Link
-                  href="/learn"
+                  href="/screens/learn"
                   className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-violet-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-violet-500"
                 >
                   <Sparkles className="h-4 w-4" /> Continue Learning
@@ -750,7 +750,7 @@ export default function ProfilePage() {
                 {enrolledTracks.slice(0, 3).map((t, idx) => (
                   <Link
                     key={t.id}
-                    href={`/learn/${t.slug}`}
+                    href={`/screens/learn/${t.slug}`}
                     className="block rounded-xl border border-white/10 bg-zinc-900/35 p-3 hover:border-violet-500/30"
                   >
                     <div className="flex items-center justify-between gap-2">

@@ -62,7 +62,7 @@ export function Hero() {
                 Start learning free
               </Button>
             </Link>
-            <Link href="/learn" className="sm:w-auto">
+            <Link href="/screens/learn" className="sm:w-auto">
               <Button
                 variant="secondary"
                 size="lg"

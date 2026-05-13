@@ -79,7 +79,7 @@ function OAuthCallbackContent() {
         }
 
         // Redirect to dashboard
-        router.push("/dashboard");
+        router.push("/screens/dashboard");
       } catch (err) {
         console.error("OAuth callback error:", err);
         setError("Failed to complete OAuth login. Please try again.");

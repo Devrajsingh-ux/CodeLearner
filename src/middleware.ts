@@ -33,13 +33,31 @@ export async function middleware(request: NextRequest) {
   ];
 
   if (hasAuthCookie && authPages.includes(path)) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL("/screens/dashboard", request.url));
+  }
+
+  if (path === "/dashboard") {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/screens/dashboard";
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  if (path === "/problems") {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/screens/problems";
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  if (path === "/learn" || path.startsWith("/learn/")) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = path.replace(/^\/learn/, "/screens/learn");
+    return NextResponse.redirect(redirectUrl);
   }
 
   // Handle protected page redirects for unauthenticated users
-  const protectedPaths = ["/dashboard", "/profile", "/problems"];
+  const protectedPaths = ["/screens/dashboard", "/profile", "/screens/problems"];
   const isProtectedPath = protectedPaths.some((p) => path.startsWith(p));
-  const isLessonPage = path.match(/^\/learn\/[^\/]+\/[^\/]+/);
+  const isLessonPage = path.match(/^\/screens\/learn\/[^\/]+\/[^\/]+/);
 
   if (!hasAuthCookie && isLessonPage) {
     const loginUrl = new URL("/login", request.url);
@@ -52,6 +70,7 @@ export async function middleware(request: NextRequest) {
     loginUrl.searchParams.set("redirect", path);
     return NextResponse.redirect(loginUrl);
   }
+
 
   // Handle admin route protections
   if (path.startsWith("/admin")) {

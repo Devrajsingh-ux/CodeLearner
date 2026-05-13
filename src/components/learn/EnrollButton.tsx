@@ -38,11 +38,11 @@ export function EnrollButton({
 
       // Navigate to first lesson regardless of enrollment API response
       // (enrollment might already exist, which is fine)
-      router.push(`/learn/${courseSlug}/lesson-1`);
+      router.push(`/screens/learn/${courseSlug}/lesson-1`);
     } catch (error) {
       console.error("Enrollment error:", error);
       // Navigate anyway - don't block the user
-      router.push(`/learn/${courseSlug}/lesson-1`);
+      router.push(`/screens/learn/${courseSlug}/lesson-1`);
     }
   }
 

@@ -227,7 +227,7 @@ export function ProfileTab({
               Your active tracks will appear here with progress.
             </p>
             <Link
-              href="/learn"
+              href="/screens/learn"
               className="mt-3 inline-flex rounded-xl bg-violet-600 px-3 py-2 text-sm font-semibold text-white hover:bg-violet-500"
             >
               Browse Courses

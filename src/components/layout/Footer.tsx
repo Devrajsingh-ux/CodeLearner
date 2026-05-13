@@ -3,11 +3,11 @@ import Link from "next/link";
 
 const footerLinks = {
   Learn: [
-    { label: "All Courses", href: "/learn" },
-    { label: "JavaScript", href: "/learn/javascript" },
-    { label: "React & Next.js", href: "/learn/react" },
-    { label: "TypeScript", href: "/learn/typescript" },
-    { label: "Python", href: "/learn/python" },
+    { label: "All Courses", href: "/screens/learn" },
+    { label: "JavaScript", href: "/screens/learn/javascript" },
+    { label: "React & Next.js", href: "/screens/learn/react" },
+    { label: "TypeScript", href: "/screens/learn/typescript" },
+    { label: "Python", href: "/screens/learn/python" },
   ],
   Company: [
     { label: "About", href: "/about" },

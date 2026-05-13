@@ -55,7 +55,7 @@ function VerifyContent() {
       return () => clearTimeout(timer);
     }
     if (status === "success" && countdown === 0) {
-      router.push("/dashboard");
+      router.push("/screens/dashboard");
     }
   }, [status, countdown, router]);
 
@@ -155,12 +155,12 @@ function VerifyContent() {
           </>
         )}
         {status === "success" && (
-          <Link
-            href="/dashboard"
-            className="font-semibold text-violet-400 hover:text-violet-300 transition-colors"
-          >
-            Go to dashboard now →
-          </Link>
+            <Link
+              href="/screens/dashboard"
+              className="font-semibold text-violet-400 hover:text-violet-300 transition-colors"
+            >
+              Go to dashboard now →
+            </Link>
         )}
       </div>
     </div>

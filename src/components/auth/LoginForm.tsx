@@ -79,9 +79,9 @@ export function LoginForm() {
         return;
       }
       // After login, user state updates asynchronously.
-      // Redirect to explicit ?redirect param, otherwise always go to /dashboard.
+      // Redirect to explicit ?redirect param, otherwise always go to /screens/dashboard.
       // The dashboard handles further role-based routing (admin → /admin/dashboard).
-      router.replace(redirectTo ?? "/dashboard");
+      router.replace(redirectTo ?? "/screens/dashboard");
     }
   }
 
